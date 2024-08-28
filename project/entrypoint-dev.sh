@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cd ft_transcendence/frontend && npm run dev & python manage.py runserver 0.0.0.0:8000

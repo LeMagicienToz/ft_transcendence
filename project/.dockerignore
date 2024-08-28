@@ -1,0 +1,37 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore the development environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Ignore version control directories
+.git
+.gitignore
+
+# Ignore Dockerfile and docker-compose files (optional)
+Dockerfile
+docker-compose.yml
+docker-compose-dev.yml
+
+# Ignore node modules
+node_modules/
+
+# Ignore build outputs
+/static/build/
+
+# Ignore local and debug files
+*.log
+*.md
+*.tar
+*.zip
+
+# Ignore VS Code and macOS specific files
+.vscode/
+.DS_Store
