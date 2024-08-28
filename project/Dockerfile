@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Node.js and npm
 RUN apt-get update && \
-    apt-get upgrade && \
+    apt-get upgrade -y && \
     curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh | bash - && \
     apt-get install -y nodejs && \
     apt-get install -y npm
