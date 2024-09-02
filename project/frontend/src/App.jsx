@@ -2,35 +2,47 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import Badge from 'react-bootstrap/Badge';
+import Button from 'react-bootstrap/Button';
+import { motion } from "framer-motion";
+import { useTime } from "framer-motion"
 
-function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <h1>App.jsx</h1>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function show_menu() {
+	const time = useTime()
+	const rotate = useTransform(
+	time,
+	[0, 4000], // For every 4 seconds...
+	[0, 360], // ...rotate 360deg
+	{ clamp: false }
+)
 }
 
-export default App
+
+function mot_button() {
+	return(
+		<motion.button whileTap={{ scale: 0.85 }}>
+			Get Started !
+		</motion.button>
+
+	)
+}
+
+
+function App() {
+	return (
+		<>
+		<view className='bg'>
+			<div>
+					<h1>
+						{/* {show_menu()} */}
+						{mot_button()}
+						
+					</h1>
+			</div>
+		</view>
+		</>
+	)
+}
+
+export default App 
