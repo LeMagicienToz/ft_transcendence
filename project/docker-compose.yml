@@ -1,35 +1,39 @@
 version: '3.8'
-
 services:
-  db_prod:
-    image: postgres:13
-    container_name: ft_transcendence_db_prod_1
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  web_prod:
-    container_name: ft_transcendence_web_prod_1
+  db:
+    container_name: db
     build:
-      context: .
-      target: production
+      context: ./db
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - 5432:5432
+    env_file:
+      - .env
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
     depends_on:
-      - db_prod
-    environment:
-      - DATABASE_NAME=mydatabase
-      - DATABASE_USER=myuser
-      - DATABASE_PASSWORD=mypassword
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
+      - db
+    env_file:
+      - ./backend/.env
     volumes:
-      - .:/usr/src/app
-
-volumes:
-  postgres_data:
+      - /ft_transcendence/backend
+      - ./backend:/backend
+    ports:
+      - 8000:8000
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - 5173:5173
