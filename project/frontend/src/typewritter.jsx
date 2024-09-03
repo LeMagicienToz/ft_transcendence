@@ -1,39 +1,31 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 
 const Typewriter = () => {
-    // The text we want to animate
-    const text = "FT_Transcendence";
+  // The text we want to animate
+  const text = "Ft_Transcendence";
+
+  return (
+    <div style={{ display: 'flex', fontSize: '2em', fontFamily: 'monospace' }}>
+      {text.split("").map((letter, index) => (
+        <motion.span
+          key={index}
+          initial={{ opacity: 0, y: 80 }} // Start below the baseline and hidden
+          animate={{ opacity: 1, y: 0 }} // Animate to final position
+          transition={{
+            delay: index * 0.2, // Delay each letter by 0.2s multiplied by its index
+            duration: 1, // Animation duration for each letter
+            type: "spring", // Smooth spring effect
+          }}
+        >
+          {letter}
+        </motion.span>
+      ))}
+    </div>
+  );
+};
+
+export default Typewriter;
+
   
-    // Animation variants for each letter
-    const letterAnimation = {
-      hidden: { opacity: 0, y: 20 }, // Start with the letter below the baseline
-      visible: {
-        opacity: 1,
-        y: 0, // Move letter to its final position
-        transition: {
-          duration: 8, // Duration for each letter animation
-          type: "spring", // Smooth spring effect
-        },
-      },
-    };
-  
-    return (
-      <div style={{ display: 'flex', fontSize: '2em', fontFamily: 'monospace' }}>
-        {text.split("").map((letter, index) => (
-          <motion.span
-            key={index}
-            variants={letterAnimation}
-            initial="hidden"
-            animate="visible"
-            custom={index}
-            transition={{ delay: index * 8 }} // Delay each letter by 0.1s
-          >
-            {letter}
-          </motion.span>
-        ))}
-      </div>
-    );
-  };
-  
-  export default Typewriter;
