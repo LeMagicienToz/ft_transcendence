@@ -13,16 +13,25 @@ body {
     background-color: white;
     border-radius: 50%;
     opacity: 0.8;
-    animation: twinkling 2s infinite ease-in-out alternate;
+    animation: moveStar linear infinite;
 }
 
-.shooting_star {
-    width: 2px;
-    height: 100px;
-    background: linear-gradient(white, rgba(255,255,255,0));
+@keyframes moveStar {
+    0% {
+      transform: translateX(-100vw); /* Start from the left edge */
+    }
+    100% {
+      transform: translateX(100vw); /* Move to the right edge */
+    }
+  }
+
+.shooting-star {
     position: absolute;
-    top: -200px;
-    animation: shooting 5s linear infinite;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    transform: rotate(45deg);
+    animation: shooting 2s linear infinite;
 }
 
 @keyframes twinkling {

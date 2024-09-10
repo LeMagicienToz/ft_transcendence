@@ -1,22 +1,28 @@
 import React from 'react';
 import './SpaceBackground.css';
 
-const generateStars = (numberOfStars) => {
-    const stars = [];
-  
-    for (let i = 0; i < numberOfStars; i++) {
-      const starStyle = {
-        top: `${Math.random() * 100}vh`,  // Random position for vertical axis
-        left: `${Math.random() * 100}vw`, // Random position for horizontal axis
-        position: 'absolute',  // Ensure the stars are positioned absolutely
-      };
-  
-      stars.push(<div key={i} className="star" style={starStyle}></div>);
-    }
-  
-    return stars;
+
+const generateStarStyles = () => {
+  return Array.from({ length: 400 }, () => ({
+    top: `${Math.random() * 100}vh`,
+    left: `${Math.random() * 100}vw`,
+    animationDuration: `${Math.random() * 10 + 5}s`,
+  }));
 };
-  
+
+const generateStars = () => {
+  const starStyles = generateStarStyles();
+
+  return starStyles.map((style, index) => (
+    <div
+      key={index}
+      className="star"
+      style={style}
+    ></div>
+  ));
+};
+
+
   const SpaceBackground = () => {
     return (
       <div className="space-background">

@@ -1,0 +1,26 @@
+/* src/Typewriter.css */
+
+.typewriter-container {
+    display: flex;
+    font-size: 2em;
+    font-family: monospace;
+  }
+  
+  .typewriter-letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(80px);
+    animation: fadeInUp 1s forwards;
+  }
+  
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(80px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

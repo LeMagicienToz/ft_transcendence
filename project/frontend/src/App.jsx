@@ -5,19 +5,10 @@ import React from 'react';
 import './App.css'
 // import Badge from 'react-bootstrap/Badge';
 // import Button from 'react-bootstrap/Button';
-import { motion } from "framer-motion";
 // import { useTime } from "framer-motion";
 import SpaceBackground from './spacebg';
+import MyButton from './MyButton';
 import Typewriter from './typewritter';
-
-function mot_button() {
-	return(
-		<motion.button whileTap={{ scale: 0.85 }}>
-			Get Started !
-		</motion.button>
-
-	);
-}
 
 function App() {
 	return (
@@ -29,7 +20,8 @@ function App() {
 						{/* {show_menu()} */}
 						
 					</h1>
-						{mot_button()}
+					<MyButton to="Connection.jsx" text="Get Started!" />
+						{/* {MyButton()} */}
 			</div>
 		</>
 	);
