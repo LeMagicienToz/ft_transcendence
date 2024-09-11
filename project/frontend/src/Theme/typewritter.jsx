@@ -3,12 +3,11 @@
 import React from 'react';
 import './Typewriter.css'; // We'll create this CSS file next
 
-const Typewriter = () => {
-  const text = "Ft_Transcendence";
+const Typewriter = ({ text , csscontext}) => {
 
   return (
-    <div className="typewriter-container">
-      {text.split("").map((letter, index) => (
+    <div className={csscontext}> 
+    {text.split("").map((letter, index) => (
         <span
           key={index}
           className="typewriter-letter"

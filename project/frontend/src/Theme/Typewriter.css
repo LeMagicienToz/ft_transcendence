@@ -13,6 +13,12 @@
     animation: fadeInUp 1s forwards;
   }
   
+  .typewriter-main {
+    display: flex;
+    font-size: 2em;
+    font-family: monospace;
+  }
+
   @keyframes fadeInUp {
     0% {
       opacity: 0;

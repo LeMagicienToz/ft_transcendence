@@ -1,14 +1,8 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import React from 'react';
 import './App.css'
-// import Badge from 'react-bootstrap/Badge';
-// import Button from 'react-bootstrap/Button';
-// import { useTime } from "framer-motion";
-import SpaceBackground from './spacebg';
-import MyButton from './MyButton';
-import Typewriter from './typewritter';
+import SpaceBackground from './Theme/spacebg';
+import MyButton from './Theme/MyButton';
+import Typewriter from './Theme/typewritter';
 
 function App() {
 	return (
@@ -16,11 +10,11 @@ function App() {
 			<div>
 				<SpaceBackground />
 					<h1>
-						<Typewriter/>
+						<Typewriter text="Ft_Transcendence" csscontext="typewriter-container"/>
 						{/* {show_menu()} */}
 						
 					</h1>
-					<MyButton to="Connection.jsx" text="Get Started!" />
+					<MyButton to="ConnectionPage.jsx" text="Get Started!" />
 						{/* {MyButton()} */}
 			</div>
 		</>
