@@ -3,6 +3,7 @@ import './App.css'
 import SpaceBackground from './Theme/spacebg';
 import MyButton from './Theme/MyButton';
 import Typewriter from './Theme/typewritter';
+import { Link } from 'react-router-dom';  // Link component for navigation
 
 function App() {
 	return (
@@ -14,7 +15,7 @@ function App() {
 						{/* {show_menu()} */}
 						
 					</h1>
-					<MyButton to="ConnectionPage.jsx" text="Get Started!" />
+					<MyButton to="ConnectionPage" text="Get Started!" />
 						{/* {MyButton()} */}
 			</div>
 		</>
