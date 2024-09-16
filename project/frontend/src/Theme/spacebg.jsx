@@ -3,7 +3,7 @@ import './SpaceBackground.css';
 
 
 const generateStarStyles = () => {
-  return Array.from({ length: 200 }, () => ({
+  return Array.from({ length: 400 }, () => ({
     top: `${Math.random() * 100}vh`,
     left: `${Math.random() * 100}vw`,
     animationDuration: `${Math.random() * 10 + 5}s`,

@@ -3,6 +3,7 @@ import App from './App.jsx';
 import Home from './Home.jsx';
 import * as ReactDOM from "react-dom/client";
 import ConnectionPage from "./ConnectionPage.jsx";
+import Register from "./Register.jsx";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -19,7 +20,11 @@ const router = createBrowserRouter([
   },
   {
     path: "Home",
-    element: <Home />
+    element: <Home />,
+  },
+  {
+    path: "Register",
+    element: <Register />
   }
 ]);
 
