@@ -3,7 +3,7 @@ import './SpaceBackground.css';
 
 
 const generateStarStyles = () => {
-  return Array.from({ length: 400 }, () => ({
+  return Array.from({ length: 200 }, () => ({
     top: `${Math.random() * 100}vh`,
     left: `${Math.random() * 100}vw`,
     animationDuration: `${Math.random() * 10 + 5}s`,
@@ -27,7 +27,7 @@ const generateStars = () => {
     return (
       <div className="space-background">
         {/* Generate 200 stars */}
-        {generateStars(400)}
+        {generateStars()}
   
         {/* Other elements like shooting stars, planets, etc. */}
         <div className="shooting-star"></div>
