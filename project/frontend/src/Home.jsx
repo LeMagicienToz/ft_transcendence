@@ -3,16 +3,15 @@ import './App.css'
 import SpaceBackground from './Theme/spacebg';
 import MyButton from './Theme/MyButton';
 import Typewriter from './Theme/typewritter';
-import "./index.css";
 
-function App() {
+function Home() {
 	return (
 		<>
 			<div>
 				
 				<SpaceBackground />
 					<h1>
-						<Typewriter text="Ft_Transcendence" csscontext="typewriter-container"/>
+						<Typewriter text="Home" csscontext="typewriter-container"/>
 						{/* {show_menu()} */}
 						
 					</h1>
@@ -23,4 +22,4 @@ function App() {
 	);
 }
 
-export default App 
+export default Home 
