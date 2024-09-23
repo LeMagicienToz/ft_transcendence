@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login
 from .models import CustomUser
 from django.contrib.auth.models import User
+from .decorators import jwt_required
 
 
 def login_42(request):
