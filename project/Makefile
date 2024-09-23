@@ -29,7 +29,13 @@ help: ## Show this help
 prod-build: ## Build the production environment
 	$(DOCKER_COMPOSE_PROD) build
 
-prod-up: ## Start the production environment
+prod-up: ## Start the production environment (generate certificates if missing)
+	@if [ ! -f nginx/ssl/server.crt ] || [ ! -f nginx/ssl/server.key ]; then \
+		echo "Certificates missing, generating..."; \
+		$(DOCKER_COMPOSE_PROD) --profile generate-certificates run --rm certificates; \
+	else \
+		echo "Certificates already exist, skipping generation."; \
+	fi
 	$(DOCKER_COMPOSE_PROD) up --build -d
 
 prod-down: ## Stop the production environment
