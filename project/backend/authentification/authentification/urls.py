@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from myauth.views import login_42, callback_42
+from auth_app.views import login_42, callback_42
 
 urlpatterns = [
     path('admin/', admin.site.urls),
