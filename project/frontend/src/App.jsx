@@ -17,7 +17,7 @@ function App() {
 					</h1>
 					<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-242573ba154f7837cd46b6784ee0617f44e56f4721266aa5e981458c6ed0ac86&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2FHome&response_type=code" text="Login with 42" />
 						{/* {MyButton()} */}
-					<MyButton to="Register" text="Register" />
+					<MyButton to="Log" text="Register/Login" />
 						{/* {MyButton()} */}
 			</div>
 		</>

@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import SpaceBackground from './Theme/spacebg';
 import './Theme/RegisterForm.css';
 import { AuthService } from './services/AuthService';
+import MyButton from './Theme/MyButton';
+// import { switch_button } from "./log.jsx";
+
 
 function Register() {
 	const [username, setUserName] = useState('');
@@ -67,9 +70,7 @@ function Register() {
 								/>
 							</div>
 						</form>
-							<button type="submit" className="my-button">
-								Submit
-							</button>
+							<MyButton to="aaaa" text="aaa"/>
 					</div>
 		</>
 

@@ -4,6 +4,8 @@ import Home from './Home.jsx';
 import * as ReactDOM from "react-dom/client";
 import ConnectionPage from "./ConnectionPage.jsx";
 import Register from "./Register.jsx";
+import Switch_button from "./log.jsx";
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -23,8 +25,8 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: "Register",
-    element: <Register />
+    path: "Log",
+    element: <Switch_button />,
   }
 ]);
 
