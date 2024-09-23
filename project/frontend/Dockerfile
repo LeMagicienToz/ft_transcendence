@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm install && \
     npm install react-bootstrap bootstrap && \
     npm install react react-router-dom && \
-    npm install framer-motion
+    npm install three @react-three/fiber
 
 COPY . .
 
