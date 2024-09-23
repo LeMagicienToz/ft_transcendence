@@ -29,8 +29,6 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',')
 
-AUTH_USER_MODEL = 'auth_app.CustomUser'
-
 
 # Application definition
 
