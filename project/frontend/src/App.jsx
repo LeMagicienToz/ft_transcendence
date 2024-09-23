@@ -4,7 +4,6 @@ import SpaceBackground from './Theme/spacebg';
 import MyButton from './Theme/MyButton';
 import Typewriter from './Theme/typewritter';
 import "./index.css";
-import DisableButton from './Theme/DisableButton';
 function App() {
 	return (
 		<>
@@ -20,9 +19,6 @@ function App() {
 						{/* {MyButton()} */}
 					<MyButton to="Register" text="Register" />
 						{/* {MyButton()} */}
-			</div>
-			<div classname="custom-tag">
-					<DisableButton />
 			</div>
 		</>
 	);
