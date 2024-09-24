@@ -3,8 +3,8 @@ import App from './App.jsx';
 import Home from './Home.jsx';
 import * as ReactDOM from "react-dom/client";
 import ConnectionPage from "./ConnectionPage.jsx";
-import Register from "./Register.jsx";
 import Switch_button from "./log.jsx";
+import AstronautAvatar from "./avatar/AstronautAvatar.jsx"
 
 import {
   createBrowserRouter,
@@ -27,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "Log",
     element: <Switch_button />,
+  },
+  {
+    path: "Avatar",
+    element: <AstronautAvatar />,
   }
 ]);
 

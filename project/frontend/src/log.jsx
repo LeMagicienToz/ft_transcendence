@@ -91,7 +91,7 @@ function LoginForm() {
 								/>
 							</div>
 						</form>
-              <MyButton to="" text="Submit"/>
+              <MyButton to="Avatar" text="Submit"/>
 					</div>
 		</>
 
@@ -124,8 +124,8 @@ function RegisterForm() {
 	
 	return (
 		<>
-			<div className="white-box">
-						<h2 className="top-bg">Register</h2>
+				<div className="white-box">
+					<h2 className="top-bg">Register</h2>
 						<form onSubmit={handleSubmit}>
 							<div className="case">
 								<label htmlFor="exampleInputUsername1">UserName </label>
@@ -161,7 +161,7 @@ function RegisterForm() {
 								/>
 							</div>
 						</form>
-							<MyButton to="" text="Submit"/>
+							<MyButton to="Avatar" text="Submit"/>
 					</div>
 		</>
 

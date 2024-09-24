@@ -1,5 +1,6 @@
 
-.white-box { 
+.white-box {
+	margin-top: 20%;
 	height: 60vh;
 	display: flex;
     justify-content: space-between; 
@@ -28,12 +29,12 @@ form{
 	display: flex;
     justify-content: center; 
     align-items: center;
-	width: 50%;
+	width: 115%;
 	min-width: 100px;
 	height: 40px;
-	/* position: relative; */
+	position: fixed;
 	border-radius: 8px;
-	/* text-align: center; */
+	bottom: 95%;
 	background-color: rgb(107, 107, 107);
 }
 
