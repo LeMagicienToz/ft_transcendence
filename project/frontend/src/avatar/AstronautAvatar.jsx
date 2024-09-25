@@ -75,11 +75,6 @@ const AstronautAvatar = () => {
   return (
     <Canvas>
         <AstronautModel />
-      <ambientLight intensity={1} />
-      <directionalLight position={[0, 0, 0]} intensity={3} />
-      <Suspense fallback={null}>
-      </Suspense>
-      <OrbitControls />
     </Canvas>
   );
 };

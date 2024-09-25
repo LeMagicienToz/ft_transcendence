@@ -1,9 +1,0 @@
-.btm_left {
-    position: fixed; /* Fixe l'élément par rapport à la fenêtre du navigateur */
-    bottom: 0;       /* Positionne l'élément en bas */
-    left: 0;         /* Positionne l'élément à gauche */
-    padding: 10px;   /* Espacement interne */
-    background-color: #333; /* Couleur de fond */
-    color: white;    /* Couleur du texte */
-    border-radius: 5px; /* Coins arrondis */
-  }
