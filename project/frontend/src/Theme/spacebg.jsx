@@ -23,20 +23,26 @@ const generateStars = () => {
 };
 
 
-  const SpaceBackground = () => {
-    return (
-      <div className="space-background">
-        {/* Generate 200 stars */}
-        {generateStars()}
-  
-        {/* Other elements like shooting stars, planets, etc. */}
-        <div className="shooting-star"></div>
-        <div className="shooting-star" style={{ animationDelay: '2s', left: '50%' }}></div>
-        <div className="shooting-star" style={{ animationDelay: '4s', left: '75%' }}></div>
-        <div className="earth"></div>
-        {/* Add other elements here */}
+const SpaceBackground = ({ children }) => {
+  return (
+    <div className="space-background">
+      {/* Generate 400 stars */}
+      {generateStars()}
+
+      {/* Shooting stars */}
+      <div className="shooting-star"></div>
+      <div className="shooting-star" style={{ animationDelay: '2s', left: '50%' }}></div>
+      <div className="shooting-star" style={{ animationDelay: '4s', left: '75%' }}></div>
+
+      {/* Earth or other elements */}
+      <div className="earth"></div>
+
+      {/* Render children passed into the SpaceBackground */}
+      <div className="content">
+        {children}
       </div>
-    );
-};  
+    </div>
+  );
+};
 
 export default SpaceBackground;

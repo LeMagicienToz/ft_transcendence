@@ -5,6 +5,7 @@ import * as ReactDOM from "react-dom/client";
 import ConnectionPage from "./ConnectionPage.jsx";
 import Switch_button from "./log.jsx";
 import AstronautAvatar from "./avatar/AstronautAvatar.jsx"
+import SpaceBackground from './Theme/spacebg';
 
 import {
   createBrowserRouter,
@@ -35,7 +36,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
+  <SpaceBackground>
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>
+  </SpaceBackground>
 );
