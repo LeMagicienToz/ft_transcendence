@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
 import './Theme/RegisterForm.css';
-import { AuthService } from './services/AuthService';
-import MyButton from './Theme/MyButton';
+// import { AuthService } from './services/AuthService';
+// import MyButton from './Theme/MyButton';
 
 function Switch_button() {
   // State to toggle between login and registration form
@@ -15,7 +15,7 @@ function Switch_button() {
 
   return (
     <div>
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+    {/* <Container className="" style={{ minHeight: '100vh' }}> */}
       <Row>
         <Col>
           <Card>
@@ -31,39 +31,48 @@ function Switch_button() {
           </Card>
         </Col>
       </Row>
-    </Container>
+    {/* </Container> */}
     </div>
   );
 }
 
 // Login Form Component
-function LoginForm() {
-  const [id, setId] = useState('');
-	const [password, setPassword] = useState('');
-	const response = "";
+const LoginForm = () => {
+		const [id, setId] = useState('');
+		const [password, setPassword] = useState('');
+		const [userData, setUserData] = useState(null);
+		const [error, setError] = useState('');
 	
-	const authService = new AuthService();
-
-	const handleSubmit = (event) => {
-		event.preventDefault();
-
-		const data = { username, email, password };
-
-		// Envoie des donnees
-		authService.login(response);
-		if (response) {
-			console.log("good");
-		} else {
-			console.log("bad");
-		}
-	};
+		const handleLogin = async (e) => {
+			e.preventDefault();
+			
+			try {
+				const response = await fetch('http://localhost:8080/login/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ id, password }),
+				});
+	
+				if (response.ok) {
+					const data = await response.json();
+					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
+				} else {
+					const errorData = await response.json();
+					setError(errorData.error); // Gérer l'erreur
+				}
+			} catch (err) {
+				setError('Une erreur s\'est produite');
+			}
+		};	
 
 	
 	return (
 		<>
 			<div className="white-box">
 						<h2 className="top-bg">Login</h2>
-						<form onSubmit={handleSubmit}>
+						<form onSubmit={handleLogin}>
 							<div className="case">
 								<label htmlFor="exampleInputEmail1">Email or UserName </label>
 								<input
@@ -86,8 +95,8 @@ function LoginForm() {
 									onChange={(e) => setPassword(e.target.value)}
 								/>
 							</div>
+							<button type="submit">Se connecter</button>
 						</form>
-              <MyButton to="Avatar" text="Submit"/>
 					</div>
 		</>
 
@@ -95,34 +104,42 @@ function LoginForm() {
 }
 
 // Register Form Component
-function RegisterForm() {
-	const [username, setUserName] = useState('');
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const response = "";
+const RegisterForm = () => {
+		const [username, setUserName] = useState('');
+		const [password, setPassword] = useState('');
+		const [email, setEmail] = useState('');
+		const [userData, setUserData] = useState(null);
+		const [error, setError] = useState('');
 	
-	const authService = new AuthService();
-
-	const handleSubmit = (event) => {
-		event.preventDefault();
-
-		const data = { username, email, password };
-
-		// Envoie des donnees
-		authService.register(response);
-		if (response) {
-			console.log("good");
-		} else {
-			console.log("bad");
-		}
-	};
-
+		const handleRegister = async (e) => {
+			e.preventDefault();
+			
+			try {
+				const response = await fetch('http://localhost:8080/register/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ username, password }),
+				});
+	
+				if (response.ok) {
+					const data = await response.json();
+					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
+				} else {
+					const errorData = await response.json();
+					setError(errorData.error); // Gérer l'erreur
+				}
+			} catch (err) {
+				setError('Une erreur s\'est produite');
+			}
+		};	
 	
 	return (
 		<>
 				<div className="white-box">
 					<h2 className="top-bg">Register</h2>
-						<form onSubmit={handleSubmit}>
+						<form onSubmit={handleRegister}>
 							<div className="case">
 								<label htmlFor="exampleInputUsername1">UserName </label>
 								<input
@@ -156,8 +173,9 @@ function RegisterForm() {
 									onChange={(e) => setPassword(e.target.value)}
 								/>
 							</div>
+							<button type="submit">S´inscrire</button>
 						</form>
-							<MyButton to="Avatar" text="Submit"/>
+							{/* <MyButton to="Avatar" text="Submit"/> */}
 					</div>
 		</>
 

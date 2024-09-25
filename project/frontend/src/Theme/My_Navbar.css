@@ -1,0 +1,29 @@
+.custom-navbar {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+  
+  .custom-navbar .navbar-brand img {
+    max-height: 50px; /* Adjust logo height */
+  }
+  
+  .custom-navbar .nav-link {
+    color: #fff; /* White text */
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-left: 20px;
+    letter-spacing: 1px;
+  }
+  
+  .custom-navbar .nav-link:hover {
+    color: #1a8cff !important; /* Blue hover effect */
+  }
+  
+  @media (max-width: 992px) {
+    .custom-navbar .nav-link {
+      margin-left: 0;
+      margin-right: 15px;
+      text-align: center;
+    }
+  }

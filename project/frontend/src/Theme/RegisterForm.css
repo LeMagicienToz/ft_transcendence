@@ -1,18 +1,17 @@
 
 .white-box {
-	margin-top: 25%;
-	height: 60vh;
 	display: flex;
     justify-content: space-between; 
     align-items: center;
 	flex-direction: column;
+	height: 60vh;
+	/* margin-top: 25%; */
 	width: 30vw;
   	border-radius: 8px;
   	padding: 50px;
- 	 /* text-align: center; */
   	border: 1px solid rgba(255, 255, 255, 0.5);
   	backdrop-filter: blur(8px);
- 	 -webkit-backdrop-filter: blur(8px);
+ 	-webkit-backdrop-filter: blur(8px);
 }
 
 form{
