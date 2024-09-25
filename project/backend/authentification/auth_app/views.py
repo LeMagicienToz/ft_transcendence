@@ -53,9 +53,8 @@ def callback_42(request):
 
         #envoyer a game api les infos de l'utilisateur ---------------------------------------------------------------
 
-        return JsonResponse({'message': f"Bienvenue {user.username}!", 'user_id': user.id})
-
-    return JsonResponse({'error': 'Échec de l\'authentification'}, status=400)
+        return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
+    return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
 
 @require_POST
@@ -65,7 +64,7 @@ def login_user(request):
         username = data.get('username')
         password = data.get('password')
     except (json.JSONDecodeError, KeyError):
-        return JsonResponse({'error': 'Corps de la requête invalide ou manquant'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
     user = authenticate(request, username=username, password=password) # verifier si ca protege d'un user qui se connecte a un compte 42 mdp vide
     if user is not None:
         login(request, user)
@@ -73,9 +72,9 @@ def login_user(request):
         user.customuser.save()
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_SECRET_KEY, algorithm='HS256')
-        return JsonResponse({'message': f"Bienvenue {user.username}!",'token': token, 'refresh_token': refresh_token, 'user_id': user.id})
+        return JsonResponse({'success': true,'token': token, 'refresh_token': refresh_token, 'user_id': user.id}, status=200)
     else:
-        return JsonResponse({'error': 'Identifiants invalides'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Identifiants invalides'}, status=400)
         
 
 @login_required
@@ -86,27 +85,27 @@ def logout_user(request):
     user.customuser.is_online = False
     user.customuser.save()
     logout(request)
-    return JsonResponse({'message': 'Déconnexion réussie'})
+    return JsonResponse({'success': True, 'message': 'Déconnexion réussie'}, status=200)
 
 @require_POST
 def register(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Corps de la requête invalide ou manquant'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
 
     username = data.get('username')
     password = data.get('password')
     email = data.get('email')
 
     if User.objects.filter(username=username).exists():
-        return JsonResponse({'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)       
+        return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)       
     user = User.objects.create_user(username=username, password=password)
     custom_user = CustomUser(user=user)
     custom_user.intra_id = None
     custom_user.profile_picture_url = None
     custom_user.save()
-    return JsonResponse({'message': f"Utilisateur {user.username} créé avec succès!", 'user_id': user.id})
+    return JsonResponse({'success': True, 'message': f"Utilisateur {user.username} créé avec succès!", 'user_id': user.id}, status=201)
 
 
 @require_POST
@@ -116,25 +115,25 @@ def reset_password(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Corps de la requête invalide ou manquant'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
 
     username = data.get('username')
     new_password = data.get('new_password')
 
     if not new_password:
-        return JsonResponse({'error': 'Nouveau mot de passe manquant'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Nouveau mot de passe manquant'}, status=400)
 
     if username and username.endswith('#42'):
-        return JsonResponse({'error': 'Nom d\'utilisateur invalide'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
 
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Utilisateur non trouvé'}, status=404)
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
 
     user.set_password(new_password)
     user.save()
-    return JsonResponse({'message': 'Mot de passe réinitialisé avec succès', 'user_id': user.id})
+    return JsonResponse({'success': True, 'message': 'Mot de passe réinitialisé avec succès', 'user_id': user.id}, status=200)
 
 
 @require_POST
@@ -145,8 +144,8 @@ def delete_account(request):
         user_id = request.user.id
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Utilisateur non trouvé'}, status=404)
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
 
     user.delete()
-    return JsonResponse({'message': 'Compte supprimé avec succès'})
+    return JsonResponse({'success': True,'message': 'Compte supprimé avec succès'}, status=200)
 
