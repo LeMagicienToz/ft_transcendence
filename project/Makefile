@@ -36,6 +36,7 @@ prod-up: ## Start the production environment (generate certificates if missing)
 	else \
 		echo "Certificates already exist, skipping generation."; \
 	fi
+	$(DOCKER_COMPOSE_PROD) down --remove-orphans
 	$(DOCKER_COMPOSE_PROD) up --build -d
 
 prod-down: ## Stop the production environment
