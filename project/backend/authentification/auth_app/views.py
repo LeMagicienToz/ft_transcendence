@@ -98,6 +98,8 @@ def register(request):
     password = data.get('password')
     email = data.get('email')
 
+    if email and email.endswith('@student.42.fr'):
+        return JsonResponse({'success': False, 'error': 'Email invalide'}, status=400) 
     if User.objects.filter(username=username).exists():
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)       
     user = User.objects.create_user(username=username, password=password)
