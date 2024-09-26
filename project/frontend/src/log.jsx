@@ -44,10 +44,10 @@ const LoginForm = () => {
 		const [error, setError] = useState('');
 	
 		const handleLogin = async (e) => {
-			e.preventDefault();
+			e.preventDefault();			  
 			
 			try {
-				const response = await fetch('http://localhost:8080/login/', {
+				const response = await fetch('http://localhost:8000/Log', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ const RegisterForm = () => {
 			e.preventDefault();
 			
 			try {
-				const response = await fetch('http://localhost:8080/register/', {
+				const response = await fetch('http://localhost:8000/register', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

@@ -7,7 +7,9 @@ COPY package*.json ./
 RUN npm install && \
     npm install react-bootstrap bootstrap && \
     npm install react react-router-dom && \
-    npm install three @react-three/fiber @react-three/drei
+    npm install three @react-three/fiber @react-three/drei && \
+    npm install cors
+
 
 COPY . .
 

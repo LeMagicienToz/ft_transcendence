@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css';
+// import './App.css';
 import AstronautAvatar from './avatar/AstronautAvatar'
 import MyButton from './Theme/MyButton';
 import Typewriter from './Theme/typewritter';
