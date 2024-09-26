@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "Login",
+    path: "uWu",
     element: <ConnectionPage />,
   },
   {
@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: "Log",
+    path: "login",
     element: <Switch_button />,
   },
   {

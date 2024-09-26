@@ -20,5 +20,5 @@ from auth_app.views import login_42, callback_42
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('auth_app.urls')),
+    path('', include('auth_app.urls')),
 ]

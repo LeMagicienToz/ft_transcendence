@@ -56,7 +56,6 @@ def callback_42(request):
         return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
-
 @require_POST
 def login_user(request):
     try:

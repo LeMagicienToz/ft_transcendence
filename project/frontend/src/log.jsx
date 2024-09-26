@@ -44,14 +44,20 @@ const LoginForm = () => {
 		const [error, setError] = useState('');
 	
 		const handleLogin = async (e) => {
-			e.preventDefault();			  
+			e.preventDefault();
+			
+			if(document.cookie) {
+				console.log("DWADKWopdkwaodkwapdkwa");
+			}
 			
 			try {
-				const response = await fetch('http://localhost:8000/Log', {
+				const response = await fetch('https://localhost/api/auth/login', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
+						'X-CSRFToken': getCookie('csrftoken'),
 					},
+					credentials: 'include',
 					body: JSON.stringify({ id, password }),
 				});
 	
@@ -59,12 +65,13 @@ const LoginForm = () => {
 					const data = await response.json();
 					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
 				} else {
+					console.log("errorData");
 					const errorData = await response.json();
 					setError(errorData.error); // Gérer l'erreur
 				}
-			} catch (err) {
-				setError('Une erreur s\'est produite');
-			}
+				}catch (err) {
+			   setError('Une erreur s\'est produite');
+		   }
 		};	
 
 	
