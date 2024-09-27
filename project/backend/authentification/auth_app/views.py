@@ -6,6 +6,9 @@ from django.contrib.auth import logout, authenticate, login
 from .models import CustomUser
 from django.contrib.auth.models import User
 from .decorators import jwt_required
+import jwt, time, requests
+from django.conf import settings
+
 
 
 def login_42(request):
@@ -70,8 +73,8 @@ def login_user(request):
         user.customuser.is_online = True
         user.customuser.save()
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
-        refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_SECRET_KEY, algorithm='HS256')
-        return JsonResponse({'success': true,'token': token, 'refresh_token': refresh_token, 'user_id': user.id}, status=200)
+        refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
+        return JsonResponse({'success': True,'token': token, 'refresh_token': refresh_token, 'user_id': user.id}, status=200)
     else:
         return JsonResponse({'success': False, 'error': 'Identifiants invalides'}, status=400)
         
@@ -103,7 +106,7 @@ def register(request):
         return JsonResponse({'success': False, 'error': 'Email invalide'}, status=400) 
     if User.objects.filter(username=username).exists():
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)       
-    user = User.objects.create_user(username=username, password=password)
+    user = User.objects.create_user(username=username, password=password, email=email)
     custom_user = CustomUser(user=user)
     custom_user.intra_id = None
     custom_user.profile_picture_url = None
