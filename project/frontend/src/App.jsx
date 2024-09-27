@@ -12,9 +12,9 @@ function App() {
 						{/* {show_menu()} */}
 						
 					</h1>
-					<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-242573ba154f7837cd46b6784ee0617f44e56f4721266aa5e981458c6ed0ac86&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2FHome&response_type=code" text="Login with 42" />
+					<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-f1baaa46276efc8df101232e02ee11a95c2db9c89960cd4a176966f230277a1f&redirect_uri=https%3A%2F%2Flocalhost%3A8443%2Fhome&response_type=code" text="Login with 42" />
 						{/* {MyButton()} */}
-					<MyButton to="Log" text="Register/Login" />
+					<MyButton to="login" text="Register/Login" />
 						{/* {MyButton()} */}
 			</div>
 		</>

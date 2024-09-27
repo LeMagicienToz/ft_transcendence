@@ -43,6 +43,7 @@ const LoginForm = () => {
 		const [password, setPassword] = useState('');
 		const [userData, setUserData] = useState(null);
 		const [error, setError] = useState('');
+		const navigate = useNavigate();
 	
 		const handleLogin = async (e) => {
 			e.preventDefault();
@@ -59,6 +60,7 @@ const LoginForm = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
+					navigate('/Home');
 				} else {
 					// console.log("errorData");
 					const errorData = await response.json();
