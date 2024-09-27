@@ -11,6 +11,6 @@ RUN npm install && \
     npm install cors
 
 
-COPY . .
+COPY . .    
 
 CMD ["npm", "run", "build"]

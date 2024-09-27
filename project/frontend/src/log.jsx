@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import { Button, Card, Row, Col } from 'react-bootstrap';
 import './Theme/RegisterForm.css';
+import { useNavigate } from 'react-router-dom';
 // import { AuthService } from './services/AuthService';
 // import MyButton from './Theme/MyButton';
 
@@ -38,38 +39,32 @@ function Switch_button() {
 
 // Login Form Component
 const LoginForm = () => {
-		const [id, setId] = useState('');
+		const [username, setUserName] = useState('');
 		const [password, setPassword] = useState('');
 		const [userData, setUserData] = useState(null);
 		const [error, setError] = useState('');
 	
 		const handleLogin = async (e) => {
 			e.preventDefault();
-			
-			if(document.cookie) {
-				console.log("DWADKWopdkwaodkwapdkwa");
-			}
-			
+
 			try {
-				const response = await fetch('https://localhost/api/auth/login', {
+				const response = await fetch('https://localhost:8443/api/auth/login/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						'X-CSRFToken': getCookie('csrftoken'),
 					},
-					credentials: 'include',
-					body: JSON.stringify({ id, password }),
+					body: JSON.stringify({ username, password }),
 				});
 	
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
 				} else {
-					console.log("errorData");
+					// console.log("errorData");
 					const errorData = await response.json();
-					setError(errorData.error); // Gérer l'erreur
+					setError(errorData.error); // Gérer l'erreur	
 				}
-				}catch (err) {
+			}catch (err) {
 			   setError('Une erreur s\'est produite');
 		   }
 		};	
@@ -83,12 +78,12 @@ const LoginForm = () => {
 							<div className="case">
 								<label htmlFor="exampleInputEmail1">Email or UserName </label>
 								<input
-									type="id"
+									type="username"
 									className="case-input"
-									id="exampleInputEmail1"
+									username="exampleInputEmail1"
 									placeholder="Enter Email or UserName"
-									value={id}
-									onChange={(e) => setId(e.target.value)}
+									value={username}
+									onChange={(e) => setUserName(e.target.value)}
 								/>
 							</div>
 							<div className="case">
@@ -117,22 +112,24 @@ const RegisterForm = () => {
 		const [email, setEmail] = useState('');
 		const [userData, setUserData] = useState(null);
 		const [error, setError] = useState('');
+		const navigate = useNavigate();
 	
 		const handleRegister = async (e) => {
 			e.preventDefault();
 			
 			try {
-				const response = await fetch('http://localhost:8000/register', {
+				const response = await fetch('https://localhost:8443/api/auth/register/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ username, password }),
+					body: JSON.stringify({ username, password, email }),
 				});
 	
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data); // Ici, vous pouvez récupérer user_id, user_name et image_url
+					navigate('/Home');
 				} else {
 					const errorData = await response.json();
 					setError(errorData.error); // Gérer l'erreur
