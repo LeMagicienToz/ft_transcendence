@@ -11,40 +11,32 @@ from django.conf import settings
 import os
 
 
-
-def login_42(request):
-    login_url = f'{os.getenv("AUTH_URL")}?client_id={os.getenv("API_42_CLIENT_ID")}&redirect_uri={os.getenv("CALLBACK_URL_YOU_SET_ON_42")}&response_type=code'
-    return redirect(login_url)
-
 def callback_42(request):
     code = request.GET.get('code')
     
     token_data = {
-        'grant_type': 'client_credentials',
+        'grant_type': 'authorization_code',
         'client_id': os.getenv('API_42_CLIENT_ID'),
         'client_secret': os.getenv('API_42_CLIENT_SECRET'),
         'code': code,
         'redirect_uri': os.getenv('CALLBACK_URL_YOU_SET_ON_42')
     }
     
-    token_response = requests.post(os.getenv('TOKEN_URL'), data=token_data)
+    token_response = requests.post(url=os.getenv('TOKEN_URL'), data=token_data)
     token_json = token_response.json()
     access_token = token_json.get('access_token')
 
     if access_token:
         headers = {'Authorization': f'Bearer {access_token}'}
-        user_response = requests.get(header=header, os.getenv('USER_URL'))
-
-        return user_response.json()
-        # print(f"Status Code: {user_response.status_code}")
-        # print(f"Response Content: {user_response.text}")
+        user_response = requests.get(url=os.getenv('USER_URL'), headers=headers)
         user_data = user_response.json()
 
         username = user_data.get('login') + '#42'
         intra_id = user_data.get('id')
-        image_url = user_data.get('image_url')
+        #image_url = user_data['image']['link'] # you can set different size of image by adding [versions][large/medium/small], see 42 api doc 
+        image_url = user_data['image']['versions']['small'] # ['micro', 'small', 'medium', 'large']
 
-        user = User.objects.filter(id=intra_id).first()
+        user = User.objects.filter(username=username).first()
 
         if not user:
             user = User(username=username)
@@ -63,6 +55,7 @@ def callback_42(request):
 
         return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
+
 
 @require_POST
 def login_user(request):

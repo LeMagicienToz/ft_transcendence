@@ -12,7 +12,7 @@ function App() {
 						{/* {show_menu()} */}
 						
 					</h1>
-					<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-f1baaa46276efc8df101232e02ee11a95c2db9c89960cd4a176966f230277a1f&redirect_uri=https%3A%2F%2Flocalhost%3A8443%2Fhome&response_type=code" text="Login with 42" />
+					<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0fb37f903a509ffef7fef8a465a0d364fd68770a44139adc8a756ee25376f128&redirect_uri=https%3A%2F%2Flocalhost%3A8443%2Fapi%2Fauth%2Fcallback%2F42%2F&response_type=code" text="Login with 42" />
 						{/* {MyButton()} */}
 					<MyButton to="login" text="Register/Login" />
 						{/* {MyButton()} */}
