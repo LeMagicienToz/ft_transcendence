@@ -10,6 +10,10 @@ import jwt, time, requests
 from django.conf import settings
 import os
 
+def login_42(request):
+    login_url = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code"
+    login_url = f'{os.getenv("AUTH_URL")}?client_id={os.getenv("API_42_CLIENT_ID")}&redirect_uri={os.getenv("CALLBACK_URL_YOU_SET_ON_42")}&response_type=code'
+    return redirect(login_url)
 
 def callback_42(request):
     code = request.GET.get('code')
