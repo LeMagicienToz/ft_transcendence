@@ -54,9 +54,6 @@ def callback_42(request):
         custom_user.save()
 
         login(request, user)
-
-        #envoyer a game api les infos de l'utilisateur ---------------------------------------------------------------
-
         return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
@@ -69,27 +66,28 @@ def login_user(request):
         password = data.get('password')
     except (json.JSONDecodeError, KeyError):
         return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
-    user = authenticate(request, username=username, password=password) # verifier si ca protege d'un user qui se connecte a un compte 42 mdp vide
+    user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        user.customuser.is_online = True
-        user.customuser.save()
+        # user.customuser.is_online = True
+        # user.customuser.save()
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
-        return JsonResponse({'success': True,'token': token, 'refresh_token': refresh_token, 'user_id': user.id}, status=200)
+        response = JsonResponse({'success': True, 'user_id': user.id, 'message': 'connecté'}, status=200)
+        response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5) # secure for https only, samesite for csrf protection, max_age 5 min
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
+        return response
     else:
         return JsonResponse({'success': False, 'error': 'Identifiants invalides'}, status=400)
         
 
-@login_required
 @jwt_required
 @require_POST
 def logout_user(request):
-    user = request.user
-    user.customuser.is_online = False
-    user.customuser.save()
-    logout(request)
-    return JsonResponse({'success': True, 'message': 'Déconnexion réussie'}, status=200)
+    response = JsonResponse({'success': True, 'message': 'Utilisateur déconnecté'}, status=200)
+    response.delete_cookie('token')
+    response.delete_cookie('refresh_token')
+    return response
 
 @require_POST
 def register(request):
@@ -117,7 +115,6 @@ def register(request):
 
 
 @require_POST
-@login_required
 @jwt_required
 def reset_password(request):
     try:
@@ -145,7 +142,6 @@ def reset_password(request):
 
 
 @require_POST
-@login_required
 @jwt_required
 def delete_account(request):
     try:
@@ -158,21 +154,14 @@ def delete_account(request):
     return JsonResponse({'success': True,'message': 'Compte supprimé avec succès'}, status=200)
 
 
-def send_user_info(user):
-    api_key = os.getenv('GAME_API_KEY')
+# def send_user_info(user):
+#     api_key = os.getenv('GAME_API_KEY')
     
-    headers = {
-        'Authorization': f'Api-Key {api_key}',
-        'Content-Type': 'application/json'
-    }
+#     headers = {
+#         'Authorization': f'Api-Key {api_key}',
+#         'Content-Type': 'application/json'
+#     }
+#     data = {'user_id': user.id}
+#     response = requests.post('http://game:8001/api/game/users/', headers=headers, data=json.dumps(data))
     
-    data = {
-        'user_id': user.id,
-        'username': user.username,
-        'profile_picture_url': user.customuser.profile_picture_url
-
-
-    }
-    response = requests.post('http://game:8001/api/game/users/', headers=headers, data=json.dumps(data))
-    
-    return response.json()
+#     return response.json()
