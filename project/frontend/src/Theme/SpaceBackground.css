@@ -1,11 +1,26 @@
 
-body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+.bg-container {
+	position: relative;
+	height: 100vh; /* Pleine hauteur de l’écran */
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+}
+
+.space-background {
+    display: flex;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    /* margin: 0;
+    padding: 0; */
+    overflow: hidden; 
     background-color: black;
     z-index: -1;
 }
+
 
 .star {
     overflow: hidden;

@@ -1,17 +1,30 @@
 
+.mybtn {
+	display: flex;
+	justify-content: center;
+	position: absolute;
+	background-color: #ff8800;
+	bottom: 10%;
+	color: white;
+	border-radius: 8px;
+	padding: 10px 20px;
+	font-weight: bold;
+}
+
 .white-box {
 	display: flex;
-    justify-content: space-between; 
-    align-items: center;
+	justify-content: space-between; 
+	align-items: center;
+	position: absolute;
 	flex-direction: column;
-	height: 60vh;
-	/* margin-top: 25%; */
-	width: 30vw;
-  	border-radius: 8px;
-  	padding: 50px;
-  	border: 1px solid rgba(255, 255, 255, 0.5);
-  	backdrop-filter: blur(8px);
- 	-webkit-backdrop-filter: blur(8px);
+	height: 70%;
+	width: 30%;
+	font-family: 'Orbitron', sans-serif;
+	border-radius: 8px;
+	padding: 50px;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
 }
 
 form{
@@ -28,10 +41,11 @@ form{
 	display: flex;
     justify-content: center; 
     align-items: center;
-	width: 115%;
+	position: absolute;
+	font-size: 1.5em;
+	width: 35vw;
 	min-width: 100px;
 	height: 40px;
-	position: fixed;
 	border-radius: 8px;
 	bottom: 95%;
 	background-color: rgb(107, 107, 107);

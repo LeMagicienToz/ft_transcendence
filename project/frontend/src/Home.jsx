@@ -1,19 +1,24 @@
 import React from 'react';
 // import './App.css';
-import AstronautAvatar from './avatar/AstronautAvatar'
-import MyButton from './Theme/MyButton';
-import Typewriter from './Theme/typewritter';
-import My_Navbar from './Theme/My_Navbar';
+import { Canvas } from '@react-three/fiber';
+import Earth from './Home/Earth.jsx';
+import './Home/Earth.css';
+import Spaceship from './Home/Spaceship.jsx';
 
 function Home() {
 	return (
-		<>
-			<div>
-				{/* <AstronautAvatar></AstronautAvatar> */}
-			  <My_Navbar />
-			  {/* Your other components */}
-			</div>		
-		</>
+		<div className="earth-container">
+		<Canvas
+				style={{ height: '100vh', backgroundColor: 'black' }} // Canvas styles
+				camera={{ position: [0, 0, 10], fov: 75 }}
+		>
+			<ambientLight intensity={0.5} />
+			<directionalLight position={[5, 5, 5]} />
+			<Spaceship/>
+			<Earth />
+    </Canvas>
+</div>
+
 	);
 }
 

@@ -1,0 +1,65 @@
+#stage {
+	 background-color: #213547;
+		width: 100vw;
+		height: 100vh;
+		position: relative;
+		display: flex;
+}
+
+.input-container {
+	/* display: flex; Aligne les groupes d'input sur une ligne */
+	justify-content: center; /* Centre les inputs horizontalement */
+	align-items: flex-end; /* Assure que les inputs sont alignés en bas */
+	position: absolute;
+	bottom: 20%; /* Place les inputs à 20px du bas de la fenêtre */
+	left: 20%; /* Centrer horizontalement le conteneur */
+	transform: translateX(-50%); /* Ajuste pour un centrage parfait */
+}
+
+.input-group {
+	display: flex;
+	flex-direction: column; /* Aligne le label au-dessus de l'input */
+	align-items: center; /* Centre le label et l'input horizontalement */
+	margin: 0 15px; /* Espace entre chaque groupe d'input */
+}
+
+/* Stylisation des inputs */
+.input-group input {
+	width: 40px; /* Largeur de l'input */
+	height: 40px; /* Hauteur de l'input */
+	border-radius: 50%; /* Forme circulaire */
+	border: none; /* Supprime la bordure */
+	cursor: pointer; /* Change le curseur au survol */
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Ombre légère */
+	background-color: transparent; /* Fond transparent pour le champ principal */
+	/* Supprime l'apparence par défaut sur WebKit et d'autres navigateurs */
+	-webkit-appearance: none; /* Pour Chrome et Safari */
+	appearance: none; /* Pour d'autres navigateurs */
+}
+
+.raw_input input {
+	background-color: #213547;
+	width: 30px; /* Largeur de l'input */
+	height: 30px; /* Hauteur de l'input */
+	border-radius: 50%; /* Forme circulaire */
+	border: none; /* Supprime la bordure */
+	cursor: pointer; /* Change le curseur au survol */
+	margin: 0 15px; /* Espace entre les inputs */
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Ombre légère */
+	background-color: transparent;
+  
+  /* Supprime l'apparence par défaut sur WebKit et d'autres navigateurs */
+  -webkit-appearance: none; /* Pour Chrome et Safari */
+  appearance: none; /* Pour d'autres navigateurs */
+}
+
+.input-group label {
+	background-color: transparent; /* Assurez-vous que le label a un fond transparent */
+	color: #fff; /* Assurez-vous que le texte est blanc pour un bon contraste */
+  }
+
+#stage canvas {
+	width: 100%;
+	height: 100%;
+	display: block;
+  }

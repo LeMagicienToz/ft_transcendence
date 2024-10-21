@@ -1,0 +1,109 @@
+.Homebg {
+	display: flex;  
+	align-items: center;
+	justify-content: space-between; 
+	height: 100vh;
+	width: 100vw;
+	font-family: 'Orbitron', sans-serif;
+	background-color: #e59324;
+}
+
+.title-game {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 5vw;
+}
+
+.menu-button-container {
+	display: flex;
+	flex-direction: column;
+	gap: 15%;
+	justify-content: center;
+	height: 70%;
+	width : 40%;
+	/* border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px); */
+}
+
+.profil-button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	bottom: 10%;
+	position: absolute;
+}
+
+.left-container {
+	display: flex;
+	justify-content: center;
+	height: 70%;
+	width : 20%;
+	margin-left: 2%;
+	/* border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px); */
+}
+
+.button-middle {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.button-middle:active {
+	transform: scale(0.85);
+	opacity: 1;
+}
+
+.right-container {
+	display: flex;
+	margin-right: 2%;
+	height: 70%;
+	width : 20%;
+	/* border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px); */
+}
+
+/* BTN TWO */
+.btn-two::before, .btn-two::after {
+  content: '';
+  position: absolute;
+  /* width: 100%;
+	height: 100%; */
+  bottom: 0;
+	left: 0;
+	z-index: 1;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-two:hover::after {
+  animation-name: rotatecw;
+  animation-duration: 2s;
+}
+.btn-two:hover::before {
+  animation-name: rotateccw; 
+  animation-duration: 3s;
+}
+.btn-two:hover::after, .btn-two:hover::before {
+  left: 96px;
+  width: 64px;
+  
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes rotatecw {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}
+
+@keyframes rotateccw {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(-360deg);}
+}

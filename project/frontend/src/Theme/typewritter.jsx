@@ -3,10 +3,10 @@
 import React from 'react';
 import './Typewriter.css'; // We'll create this CSS file next
 
-const Typewriter = ({ text , csscontext}) => {
+const Typewriter = ({ text }) => {
 
   return (
-    <div className={csscontext}> 
+    <div> 
     {text.split("").map((letter, index) => (
         <span
           key={index}

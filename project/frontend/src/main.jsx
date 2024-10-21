@@ -4,8 +4,9 @@ import Home from './Home.jsx';
 import * as ReactDOM from "react-dom/client";
 import ConnectionPage from "./ConnectionPage.jsx";
 import Switch_button from "./log.jsx";
-import AstronautAvatar from "./avatar/AstronautAvatar.jsx"
-import SpaceBackground from './Theme/spacebg';
+import Show_Avatar from "./avatar/AstronautAvatar.jsx";
+import Code_sender from  "./42log.jsx";
+import Homepage from "./Home/Homepage.jsx";
 
 import {
   createBrowserRouter,
@@ -30,15 +31,21 @@ const router = createBrowserRouter([
     element: <Switch_button />,
   },
   {
+    path: "login_42",
+    element: <Code_sender />,
+  },
+  {
+    path: "Homepage",
+    element: <Homepage />,
+  },
+  {
     path: "Avatar",
-    element: <AstronautAvatar />,
+    element: <Show_Avatar />,
   }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <SpaceBackground>
     <React.StrictMode>
       <RouterProvider router={router} />
     </React.StrictMode>
-  </SpaceBackground>
 );
