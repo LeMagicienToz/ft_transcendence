@@ -56,7 +56,9 @@ def callback_42(request):
 
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
-        return redirect('https://localhost:8443/homepage/')
+        reponse = redirect('https://localhost:8443/homepage/')
+        response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
+        return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
 
@@ -167,3 +169,25 @@ def delete_account(request):
 #     response = requests.post('http://game:8001/api/game/users/', headers=headers, data=json.dumps(data))
     
 #     return response.json()
+
+def get_42_user(request):
+    access_token = request.COOKIES.get('42_access_token')
+    if not access_token:
+        return JsonResponse({'success': False, 'error': 'Access token manquant'}, status=400)
+    
+    headers = {'Authorization': f'Bearer {access_token}'}
+    response = requests.get(url="https://api.intra.42.fr/oauth/token/info", headers=headers)
+    token_data = response.json()
+    expires_in_seconds = token_data.get('expires_in_seconds')
+    if expires_in_seconds is None or expires_in_seconds <= 0:
+        return JsonResponse({'success': False, 'error': 'Access token expire'}, status=400)
+
+    response = requests.get(url=os.getenv('USER_URL'), headers=headers)
+    user_data = response.json()
+    intra_id = user_data.get('id')
+    username = user_data.get('login') + '#42'
+    image_url = user_data['image']['versions']['small']
+    user = User.objects.filter(username=username).first()
+    if not user:
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé ou token invalide'}, status=404)
+    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': image_url}, status=200)
