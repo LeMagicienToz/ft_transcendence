@@ -42,8 +42,9 @@ def callback_42(request):
         image_url = user_data['image']['versions']['small'] # ['micro', 'small', 'medium', 'large']
 
         user = User.objects.filter(username=username).first()
-
+        first_connection = False
         if not user:
+            first_connection = True
             user = User(username=username)
             user.set_unusable_password()
             user.save()
@@ -56,7 +57,10 @@ def callback_42(request):
 
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
-        response = redirect('https://localhost:8443/homepage/')
+        if first_connection:
+            return redirect('https://localhost:8443/Avatar/')
+        else:
+            return redirect('https://localhost:8443/home/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
@@ -170,17 +174,9 @@ def delete_account(request):
     
 #     return response.json()
 
+@jwt_42_required
 def get_42_user(request):
-    access_token = request.COOKIES.get('42_access_token')
-    if not access_token:
-        return JsonResponse({'success': False, 'error': 'Access token manquant'}, status=400)
-    
-    headers = {'Authorization': f'Bearer {access_token}'}
-    response = requests.get(url="https://api.intra.42.fr/oauth/token/info", headers=headers)
-    token_data = response.json()
-    expires_in_seconds = token_data.get('expires_in_seconds')
-    if expires_in_seconds is None or expires_in_seconds <= 0:
-        return JsonResponse({'success': False, 'error': 'Access token expire'}, status=400)
+    access_token = request.access_token_42
 
     response = requests.get(url=os.getenv('USER_URL'), headers=headers)
     user_data = response.json()

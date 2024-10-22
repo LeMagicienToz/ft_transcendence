@@ -36,3 +36,20 @@ def jwt_required(view_func):
             return JsonResponse({'error': 'Access token manquand'}, status=401)
 
     return _wrapped_view
+
+
+def jwt_42_required(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        access_token = request.COOKIES.get('42_access_token')
+
+        if access_token:
+            headers = {'Authorization': f'Bearer {access_token}'}
+            response = requests.get(url="https://api.intra.42.fr/oauth/token/info", headers=headers)
+            token_data = response.json()
+            expires_in_seconds = token_data.get('expires_in_seconds')
+            if expires_in_seconds is None or expires_in_seconds <= 0:
+                return JsonResponse({'success': False, 'error': 'Access token 42 expire'}, status=400)
+            request.access_token_42 = access_token
+            return view_func(request, *args, **kwargs)
+        else:
+            return JsonResponse({'error': 'Access token 42 manquand'}, status=401)
