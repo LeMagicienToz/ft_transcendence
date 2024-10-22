@@ -1,5 +1,5 @@
 import './Homepage.css'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Avatarhp from './Avatarhp';
 
@@ -23,7 +23,7 @@ const fetchUserData = async () => {
   
 	  if (response.ok) {
 		const data = await response.json();
-		console.log(data); // Stocker les données de l'utilisateur
+		return(data); // Stocker les données de l'utilisateur
 		// navigate('/Home'); // Rediriger vers la page d'accueil
 	  } else {
 		const errorData = await response.json();
@@ -34,18 +34,41 @@ const fetchUserData = async () => {
 	  console.log("Une erreur est survenue"); // Gérer les erreurs réseau ou autres
 	}
   };
+  
 
 const Homepage = () => {
+	
 
-	fetchUserData();
-		
+	const data=fetchUserData();
+	
 	const [suitColor] = useState('#A52A2A'); // Default color in hex
 	const [visColor] = useState('#A00A2A'); // Default color in hex ringsColor
 	const [ringsColor] = useState('#A52A2A');
 	const [bpColor] = useState('#A52A2A');
+	const [userData, setUserData] = useState(null); // Pour stocker les données utilisateur
+  	const [error, setError] = useState(null); // Pour stocker les erreurs
+
+	useEffect(() => {
+		const getUserData = async () => {
+		try {
+			const data = await fetchUserData(); // Attendre les données utilisateur
+			setUserData(data); // Mettre à jour userData avec les données récupérées
+		} catch (error) {
+			setError("Impossible de récupérer les données utilisateur"); // Gérer les erreurs
+		}
+		};
+		getUserData();
+	  }, []);
 
 	return (
 		<div className="Homebg">
+			{error ? (
+				<h1>{error}</h1> // Afficher un message d'erreur si une erreur est survenue
+			) : (
+				<h1>
+				{userData ? userData.username : "Chargement..."} {/* Afficher le nom d'utilisateur ou un message de chargement */}
+				</h1>
+			)}
 			<div className="left-container">
 				<Canvas style={{ touchAction: 'none' }}>
 						<ambientLight intensity={0.5} />	
