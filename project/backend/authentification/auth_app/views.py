@@ -9,6 +9,7 @@ from .decorators import jwt_required
 import jwt, time, requests
 from django.conf import settings
 from django.shortcuts import redirect
+from .decorators import jwt_42_required
 import os
 
 def login_42(request):
@@ -58,9 +59,9 @@ def callback_42(request):
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
         if first_connection:
-            return redirect('https://localhost:8443/Avatar/')
+            response = redirect('https://localhost:8443/Avatar/')
         else:
-            return redirect('https://localhost:8443/home/')
+            response = redirect('https://localhost:8443/Homepage/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
@@ -177,7 +178,8 @@ def delete_account(request):
 @jwt_42_required
 def get_42_user(request):
     access_token = request.access_token_42
-
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
     response = requests.get(url=os.getenv('USER_URL'), headers=headers)
     user_data = response.json()
     intra_id = user_data.get('id')

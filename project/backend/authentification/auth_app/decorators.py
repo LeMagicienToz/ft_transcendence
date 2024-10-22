@@ -1,4 +1,5 @@
 import jwt
+import requests
 from django.conf import settings
 from django.http import JsonResponse
 
@@ -53,3 +54,4 @@ def jwt_42_required(view_func):
             return view_func(request, *args, **kwargs)
         else:
             return JsonResponse({'error': 'Access token 42 manquand'}, status=401)
+    return _wrapped_view
