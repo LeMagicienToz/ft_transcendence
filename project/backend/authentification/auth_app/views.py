@@ -56,7 +56,7 @@ def callback_42(request):
 
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
-        reponse = redirect('https://localhost:8443/homepage/')
+        response = redirect('https://localhost:8443/homepage/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
