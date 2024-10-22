@@ -11,7 +11,33 @@ const hexToRgb = (hex) => {
 	return [r / 255, g / 255, b / 255];
 };
 
+const fetchUserData = async () => {
+	try {
+	  const response = await fetch('https://localhost:8443/api/auth/get_42_user/', {
+		method: 'GET',
+		headers: {
+		  'Content-Type': 'application/json',
+		},
+		credentials: 'include'
+	  });
+  
+	  if (response.ok) {
+		const data = await response.json();
+		console.log(data); // Stocker les données de l'utilisateur
+		// navigate('/Home'); // Rediriger vers la page d'accueil
+	  } else {
+		const errorData = await response.json();
+		console.log(errorData.error); // Gérer l'erreur
+	  }
+	} catch (error) {
+	  console.error("Erreur lors de la requête : ", error);
+	  console.log("Une erreur est survenue"); // Gérer les erreurs réseau ou autres
+	}
+  };
+
 const Homepage = () => {
+
+	fetchUserData();
 		
 	const [suitColor] = useState('#A52A2A'); // Default color in hex
 	const [visColor] = useState('#A00A2A'); // Default color in hex ringsColor
