@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from .decorators import jwt_required
 import jwt, time, requests
 from django.conf import settings
+from django.shortcuts import redirect
 import os
 
 def login_42(request):
@@ -54,7 +55,8 @@ def callback_42(request):
         custom_user.save()
 
         login(request, user)
-        return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
+        #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
+        return redirect('https://localhost:8443/homepage/')
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
 
