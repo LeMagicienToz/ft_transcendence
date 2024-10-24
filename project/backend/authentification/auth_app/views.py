@@ -177,15 +177,17 @@ def delete_account(request):
 
 @jwt_42_required
 def get_42_user(request):
-    access_token = request.access_token_42
-    headers = {'Authorization': f'Bearer {access_token}'}
-    
-    response = requests.get(url=os.getenv('USER_URL'), headers=headers)
-    user_data = response.json()
-    intra_id = user_data.get('id')
-    username = user_data.get('login') + '#42'
-    image_url = user_data['image']['versions']['small']
-    user = User.objects.filter(username=username).first()
-    if not user:
-        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé ou token invalide'}, status=404)
-    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': image_url}, status=200)
+    user = request.user
+    username = user.username
+    profile_picture_url = user.customuser.profile_picture_url
+    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url}, status=200)
+
+
+@jwt_required
+def get_regular_user(request):
+    user = request.user
+    username = user.username
+    profile_picture_url = user.customuser.profile_picture_url
+    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url}, status=200)
+
+
