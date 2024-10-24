@@ -13,7 +13,7 @@ const hexToRgb = (hex) => {
 
 const fetchUserData = async () => {
 	try {
-	  const response = await fetch('https://localhost:8443/api/auth/get_42_user/', {
+	  const response = await fetch('https://localhost:8443/api/auth/get_user/', {
 		method: 'GET',
 		headers: {
 		  'Content-Type': 'application/json',

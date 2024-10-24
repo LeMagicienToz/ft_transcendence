@@ -70,3 +70,13 @@ def jwt_42_required(view_func):
             return JsonResponse({'error': 'Access token 42 manquand'}, status=401)
 
     return _wrapped_view
+
+
+def request_from_42_or_regular_user(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if request.COOKIES.get('42_access_token'):
+            return jwt_42_required(view_func)(request, *args, **kwargs)
+        else:
+            return jwt_required(view_func)(request, *args, **kwargs)
+    
+    return _wrapped_view

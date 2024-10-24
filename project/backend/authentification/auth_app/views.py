@@ -10,6 +10,7 @@ import jwt, time, requests
 from django.conf import settings
 from django.shortcuts import redirect
 from .decorators import jwt_42_required
+from .decorators import request_from_42_or_regular_user
 import os
 
 def login_42(request):
@@ -175,19 +176,16 @@ def delete_account(request):
     
 #     return response.json()
 
-@jwt_42_required
-def get_42_user(request):
+@request_from_42_or_regular_user
+def get_user(request):
     user = request.user
     username = user.username
     profile_picture_url = user.customuser.profile_picture_url
     return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url}, status=200)
 
 
-@jwt_required
-def get_regular_user(request):
-    user = request.user
-    username = user.username
-    profile_picture_url = user.customuser.profile_picture_url
-    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url}, status=200)
+
+    
+    
 
 
