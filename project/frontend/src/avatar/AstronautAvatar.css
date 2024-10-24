@@ -63,3 +63,12 @@
 	height: 100%;
 	display: block;
   }
+
+.button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	bottom: 18%;
+	right: 20%;
+	position: absolute;
+}

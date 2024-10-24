@@ -7,7 +7,7 @@ const MyButton = ({ to, text }) => {
   return (
     <a
       href={isExternal ? to : `/${to}`}
-      className="btn btn-primary my-button"
+      className="btn btn-primary btn-one"
     >
       {text}
     </a>

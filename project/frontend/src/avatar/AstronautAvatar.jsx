@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PresentationControls, Stage } from '@react-three/drei';
 import "./AstronautAvatar.css";
-import MaterialAvatar from './MaterialAvatar.jsx'
-import * as THREE from 'three';
+import MaterialAvatar from './MaterialAvatar.jsx';
+import MyButton from '../Theme/MyButton.jsx';
 
 // Utility function to convert hex color to RGB array
 const hexToRgb = (hex) => {
@@ -74,6 +73,9 @@ const hexToRgb = (hex) => {
 						onChange={handleBpChange}
 					/>
 					</div>
+				</div>
+				<div className="button-container">
+				<MyButton to="home" text="Save & Quit"/>
 				</div>
 		</div>
 	);

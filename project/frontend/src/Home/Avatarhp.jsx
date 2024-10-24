@@ -1,6 +1,5 @@
 import React from 'react';
 import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
-// import "./AstronautAvatar.css";
 import * as THREE from 'three';
 
 const Avatarhp = ({ suitColor, visColor, ringsColor, bpColor }) => {
@@ -9,7 +8,6 @@ const Avatarhp = ({ suitColor, visColor, ringsColor, bpColor }) => {
 	scene.traverse((child) => {
         if (child.isMesh) 
 			{
-                // console.log(child.name)
 				if (child.name.includes('Object_4')) // Object_4 = suit
 				{
                     if (child.material instanceof THREE.MeshStandardMaterial) {

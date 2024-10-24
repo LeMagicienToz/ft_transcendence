@@ -1,5 +1,5 @@
 .Homebg {
-	display: flex;  
+	display: flex;
 	align-items: center;
 	justify-content: space-between; 
 	height: 100vh;
@@ -22,10 +22,6 @@
 	justify-content: center;
 	height: 70%;
 	width : 40%;
-	/* border-radius: 8px;
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	backdrop-filter: blur(8px);
-   -webkit-backdrop-filter: blur(8px); */
 }
 
 .profil-button-container {
@@ -42,10 +38,6 @@
 	height: 70%;
 	width : 20%;
 	margin-left: 2%;
-	/* border-radius: 8px;
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	backdrop-filter: blur(8px);
-   -webkit-backdrop-filter: blur(8px); */
 }
 
 .button-middle {
@@ -63,47 +55,68 @@
 	margin-right: 2%;
 	height: 70%;
 	width : 20%;
-	/* border-radius: 8px;
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	backdrop-filter: blur(8px);
-   -webkit-backdrop-filter: blur(8px); */
 }
 
-/* BTN TWO */
-.btn-two::before, .btn-two::after {
-  content: '';
-  position: absolute;
-  /* width: 100%;
-	height: 100%; */
-  bottom: 0;
+/*btn*/
+
+.btn-primary {
+background-color: #ff583300; /* Nouvelle couleur de fond */
+border-color: #00000000; /* Nouvelle couleur de la bordure */
+color: white; /* Couleur du texte */
+}
+
+.btn-primary:hover {
+background-color: #ff440000; /* Nouvelle couleur au survol */
+border-color: #ff440000; /* Nouvelle couleur de la bordure au survol */
+}
+
+.btn-one {
+	color: #FFF;
+	transition: all 0.3s;
+	position: relative;
+}
+.btn-one span {
+	transition: all 0.3s;
+}
+.btn-one::before {
+	content: '';
+	position: absolute;
+	bottom: 0;
 	left: 0;
+	width: 100%;
+	height: 100%;
 	z-index: 1;
-  transition: all 0.3s;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+	opacity: 0;
+	transition: all 0.3s;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	border-top-style: solid;
+	border-bottom-style: solid;
+	border-top-color: rgba(255,255,255,0.5);
+	border-bottom-color: rgba(255,255,255,0.5);
+	transform: scale(0.1, 1);
+}
+.btn-one:hover span {
+	letter-spacing: 2px;
+}
+.btn-one:hover::before {
+	opacity: 1;	
+	transform: scale(1, 1);	
+}
+.btn-one::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	transition: all 0.3s;
+	background-color: rgba(255,255,255,0.1);
+}
+.btn-one:hover::after {
+	opacity: 0;	
+	transform: scale(0.1, 1);
 }
 
-.btn-two:hover::after {
-  animation-name: rotatecw;
-  animation-duration: 2s;
-}
-.btn-two:hover::before {
-  animation-name: rotateccw; 
-  animation-duration: 3s;
-}
-.btn-two:hover::after, .btn-two:hover::before {
-  left: 96px;
-  width: 64px;
-  
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-}
 
-@keyframes rotatecw {
-    from {transform: rotate(0deg);}
-    to {transform: rotate(360deg);}
-}
-
-@keyframes rotateccw {
-    from {transform: rotate(0deg);}
-    to {transform: rotate(-360deg);}
-}

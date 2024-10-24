@@ -1,9 +1,8 @@
 
-import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import { useLoader } from '@react-three/fiber';
 import React, { useRef } from 'react';
 
-// import "./AstronautAvatar.css";
 import * as THREE from 'three';
 
 const Earth = () => {
