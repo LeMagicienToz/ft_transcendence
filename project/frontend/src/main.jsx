@@ -5,6 +5,7 @@ import * as ReactDOM from "react-dom/client";
 import Switch_button from "./log.jsx";
 import Show_Avatar from "./avatar/AstronautAvatar.jsx";
 import Homepage from "./Home/Homepage.jsx";
+import Profile from "./Home/Profile.jsx";
 
 import {
   createBrowserRouter,
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "Homepage",
     element: <Homepage />,
+  },
+  {
+    path: "Profile",
+    element: <Profile />,
   },
   {
     path: "Avatar",

@@ -7,7 +7,10 @@ import "./index.css";
 import SpaceBackground from "./Theme/spacebg.jsx";
 
 function App() {
-
+	const authorizeURL = new URL("https://api.intra.42.fr/oauth/authorize");
+	authorizeURL.searchParams.append("client_id", "u-s4t2ud-0fb37f903a509ffef7fef8a465a0d364fd68770a44139adc8a756ee25376f128")
+	authorizeURL.searchParams.append("redirect_uri", "https://localhost:8443/api/auth/callback/42/")
+	authorizeURL.searchParams.append("response_type", "code")
 	return (
 		<>
 			<div className="bg-container">	
@@ -16,7 +19,7 @@ function App() {
 						<Typewriter text="Ft_Transcendence"/>
 						<div className="button-placement">
 							<MyButton to="login" text="Register/Login" />
-							<MyButton to="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0fb37f903a509ffef7fef8a465a0d364fd68770a44139adc8a756ee25376f128&redirect_uri=https%3A%2F%2Flocalhost%3A8443%2Fapi%2Fauth%2Fcallback%2F42%2F&response_type=code" text="log42" />
+							<MyButton to={authorizeURL} text="log42" href={true} />
 						</div>
 					</div>
 			</div>

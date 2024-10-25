@@ -1,0 +1,34 @@
+.background {
+	background-image: url('../../public/profile_bg.jpg');
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: 100vw 100vh;;
+	background-position: absolute;
+	background-repeat: no-repeat;
+	height: 100vh;
+	width: 100vw;
+ }
+
+ .container-profile {
+	display: flex;
+	justify-content: space-between; 
+	align-items: center;
+	position: absolute;
+	flex-direction: column;
+	height: 70%;
+	width: 30%;
+	font-family: 'Orbitron', sans-serif;
+	border-radius: 8px;
+	padding: 50px;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(50px);
+   -webkit-backdrop-filter: blur(8px);
+
+   /* Centering adjustments */
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+  
+  

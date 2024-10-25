@@ -124,10 +124,10 @@ const RegisterForm = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data);
-					navigate('/Home');
+					navigate('/Avatar');
 				} else {
 					const errorData = await response.json();
-					setError(errorData.error); 
+					setError(errorData.error);
 				}
 			} catch (err) {
 				setError('Une erreur s\'est produite');
