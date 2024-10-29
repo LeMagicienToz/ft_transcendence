@@ -1,6 +1,6 @@
 import json
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login
 from .models import CustomUser
@@ -11,6 +11,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from .decorators import jwt_42_required
 from .decorators import request_from_42_or_regular_user
+from .utils_views import utils_set_user_color, utils_set_username, utils_set_email
 import os
 
 def login_42(request):
@@ -55,6 +56,10 @@ def callback_42(request):
         custom_user.profile_picture_url = image_url
         custom_user.is_online = True
         custom_user.intra_id = intra_id
+        custom_user.suitColor = ''
+        custom_user.visColor = ''
+        custom_user.ringsColor = ''
+        custom_user.bpColor = ''
         custom_user.save()
 
         login(request, user)
@@ -76,7 +81,12 @@ def login_user(request):
         password = data.get('password')
     except (json.JSONDecodeError, KeyError):
         return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
-    user = authenticate(request, username=username, password=password)
+    if username and '@' in username:
+        user = User.objects.filter(email=username).first()
+        if user:
+            user = authenticate(request, username=user.username, password=password)
+    else:
+        user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
         # user.customuser.is_online = True
@@ -91,12 +101,13 @@ def login_user(request):
         return JsonResponse({'success': False, 'error': 'Identifiants invalides'}, status=400)
         
 
-@jwt_required
+@request_from_42_or_regular_user
 @require_POST
 def logout_user(request):
     response = JsonResponse({'success': True, 'message': 'Utilisateur déconnecté'}, status=200)
     response.delete_cookie('token')
     response.delete_cookie('refresh_token')
+    response.delete_cookie('42_access_token')
     return response
 
 @require_POST
@@ -112,16 +123,35 @@ def register(request):
 
     if not username or not password or not email:
         return JsonResponse({'success': False, 'error': 'username, password ou email manquant'}, status=400)
-    if email and email.endswith('@student.42.fr'):
-        return JsonResponse({'success': False, 'error': 'Email invalide'}, status=400) 
+    if email and (email.endswith('@student.42.fr' or not '@' in email)):
+        return JsonResponse({'success': False, 'error': 'Email invalide'}, status=400)
+    if username and (username.endswith('#42') or '@' in username):
+        return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({'success': False, 'error': 'Email déjà utilisé'}, status=400)
     if User.objects.filter(username=username).exists():
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)       
+    
     user = User.objects.create_user(username=username, password=password, email=email)
     custom_user = CustomUser(user=user)
     custom_user.intra_id = None
     custom_user.profile_picture_url = None
+    custom_user.suitColor = ''
+    custom_user.visColor = ''
+    custom_user.ringsColor = ''
+    custom_user.bpColor = ''
     custom_user.save()
-    return JsonResponse({'success': True, 'message': f"Utilisateur {user.username} créé avec succès!", 'user_id': user.id}, status=201)
+
+    login(request, user)
+    token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
+    refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
+
+    response = JsonResponse({'success': True, 'message': f"Utilisateur {user.username} créé avec succès + login!", 'user_id': user.id}, status=201)
+    response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5)  # sécurisé
+    response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
+
+    return response
+
 
 
 @require_POST
@@ -135,12 +165,14 @@ def reset_password(request):
     username = data.get('username')
     new_password = data.get('new_password')
 
-    if not new_password:
-        return JsonResponse({'success': False, 'error': 'Nouveau mot de passe manquant'}, status=400)
+    if not new_password or not username:
+        return JsonResponse({'success': False, 'error': 'username ou new_password manquant'}, status=400)
 
     if username and username.endswith('#42'):
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
-
+    if username and '@' in username:
+        user = User.objects.filter(email=username).first()
+        username = user.username
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
@@ -152,7 +184,7 @@ def reset_password(request):
 
 
 @require_POST
-@jwt_required
+@request_from_42_or_regular_user
 def delete_account(request):
     try:
         user_id = request.user.id
@@ -177,11 +209,57 @@ def delete_account(request):
 #     return response.json()
 
 @request_from_42_or_regular_user
+@require_GET
 def get_user(request):
     user = request.user
     username = user.username
     profile_picture_url = user.customuser.profile_picture_url
-    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url}, status=200)
+    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url, 'suitColor': user.customuser.suitColor, 'visColor': user.customuser.visColor, 'ringsColor': user.customuser.ringsColor, 'bpColor': user.customuser.bpColor}, status=200)
+
+
+@request_from_42_or_regular_user
+@require_POST
+def set_user_color(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
+    user = request.user
+    response = utils_set_user_color(data, user)
+    return response
+
+
+@request_from_42_or_regular_user
+@require_POST
+def set_profile(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'profile: Corps de la requête invalide ou manquant'}, status=400)
+    user = request.user
+    #username
+    response = utils_set_username(data, user)
+    if response['success'] == False:
+        return response
+    #email
+    response = utils_set_email(data, user)
+    if response['success'] == False:
+        return response
+    #profile_picture_url
+    user.custom_user.profile_picture_url = data.get('profile_picture_url')
+    if not user.custom_user.profile_picture_url:
+        user.custom_user.profile_picture_url = None
+    #colors
+    response = utils_set_user_color(data, user)
+    if response['success'] == False:
+        return response
+
+    user.custom_user.save()
+    user.save()
+    return JsonResponse({'success': True, 'message': 'Profil mis à jour avec succès', 'user_id': user.id}, status=200)
+    
+    
+
 
 
 
