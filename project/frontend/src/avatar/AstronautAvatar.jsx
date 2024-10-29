@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import "./AstronautAvatar.css";
+import { useNavigate } from 'react-router-dom';
 import MaterialAvatar from './MaterialAvatar.jsx';
 import MyButton from '../Theme/MyButton.jsx';
 
+
+//set_user_color
 // Utility function to convert hex color to RGB array
 const hexToRgb = (hex) => {
 	const bigint = parseInt(hex.replace('#', ''), 16);
@@ -12,7 +15,6 @@ const hexToRgb = (hex) => {
 	const b = bigint & 255;
 	return [r / 255, g / 255, b / 255];
 };
-	
 	function Show_Avatar() {
 		const [suitColor, setSuitColor] = useState('#FFFFFF'); // Default color in hex
 		const [visColor, setVisColor] = useState('#FFFFFF'); // Default color in hex ringsColor
@@ -23,6 +25,34 @@ const hexToRgb = (hex) => {
 		const handleVisChange = (e) => setVisColor(e.target.value);
 		const handleRingsChange = (e) => setRingsColor(e.target.value);
 		const handleBpChange = (e) => setBpColor(e.target.value);
+
+		const navigate = useNavigate();
+		const handleClick = async (e) => {
+			e.preventDefault();
+
+			try {
+				const response = await fetch('https://localhost:8443/api/auth/set_user_color/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ suitColor, visColor, ringsColor, bpColor }),
+					credentials: 'include',
+				});
+	
+				if (response.ok) {
+					const data = await response.json();
+					setUserData(data);
+					navigate('/Home');
+				} else {
+					// console.log("errorData");
+					const errorData = await response.json();
+					// setError(errorData.error); // Gérer l'erreur
+				}
+			}catch (err) {
+			   setError('Une erreur s\'est produite');
+		   }
+		};
 
 		return (
 			<div id="stage">
@@ -75,7 +105,7 @@ const hexToRgb = (hex) => {
 					</div>
 				</div>
 				<div className="button-container">
-				<MyButton to="home" text="Save & Quit"/>
+				<MyButton text="Save & Quit" onClick={handleClick}/>
 				</div>
 		</div>
 	);

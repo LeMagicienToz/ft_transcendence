@@ -2,30 +2,37 @@ import React from 'react';
 import './MyButton.css';
 import { useNavigate } from "react-router-dom";
 
-const MyButton = ({ to, text, href}) => {
+const MyButton = ({ to, text, href, onClick}) => {
 	const navigate = useNavigate();
 	const testos = () => {
 		navigate(`/${to}`)
 	}
 	if(href == true)
 		return(
-			<a
-			href={to}
-			className="btn btn-primary btn-one"
-			// target="_blank"
-		>
+				<a
+				href={to}
+				className="btn btn-primary btn-one"
+			>
 			{text}
-		</a>
+			</a>
 		)
-
-	return (
-		<a
-			onClick={testos}
-			className="btn btn-primary btn-one"
-		>
+	else if(onClick)
+		return (
+				<a
+				onClick={onClick}
+				className="btn btn-primary btn-one"
+			>
 			{text}
-		</a>
-	);
+			</a>
+		)
+	return (
+			<a
+				onClick={testos}
+				className="btn btn-primary btn-one"
+			>
+			{text}
+			</a>
+		);
 };
 
 
