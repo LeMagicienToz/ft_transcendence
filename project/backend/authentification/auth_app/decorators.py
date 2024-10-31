@@ -2,7 +2,10 @@ import jwt
 import requests
 from django.conf import settings
 from django.http import JsonResponse
+from .models import CustomUser
 from django.contrib.auth.models import User
+from .redis_client import r
+import time
 import os
 import time
 
@@ -24,6 +27,7 @@ def jwt_required(view_func):
                 if refresh_token:
                     try:
                         refresh_payload = jwt.decode(refresh_token, settings.REFRESH_TOKEN_SECRET, algorithms=['HS256'])
+                        request.user = User.objects.get(id=refresh_payload['user_id'])
                         new_access_token = jwt.encode({'user_id': refresh_payload['user_id'], 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
                         response = view_func(request, *args, **kwargs)
                         response.set_cookie('token', new_access_token, max_age=60*5, httponly=True, secure=True, samesite='Strict')
@@ -79,5 +83,17 @@ def request_from_42_or_regular_user(view_func):
             return jwt_42_required(view_func)(request, *args, **kwargs)
         else:
             return jwt_required(view_func)(request, *args, **kwargs)
+    
+    return _wrapped_view
+
+def twoFA_status_check(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        user = request.user
+        custom_user = CustomUser.objects.get(user=user) # custom_user = CustomUser.objects.get(user=user)  fonctionne, mais pas user.custom_user ou request.user.custom_user ???? why
+        if custom_user.twoFA_enabled == False:
+            return view_func(request, *args, **kwargs)
+        if custom_user.twoFA_enabled and r.get(f'user_{user.id}_twoFA_verified') == True:
+            return view_func(request, *args, **kwargs)
+        return JsonResponse({'Success': False, 'error': '2FA non verifié'}, status=401)
     
     return _wrapped_view

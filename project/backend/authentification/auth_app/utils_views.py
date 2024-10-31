@@ -2,6 +2,11 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 import json
 from .models import CustomUser
+from .redis_client import r
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 def utils_set_user_color(data, user): # la fonction ne save pas l'objet user
     suitColor = data.get('suitColor')
@@ -50,3 +55,30 @@ def utils_set_email(data, user): # la fonction ne save pas l'objet user
         return JsonResponse({'success': False, 'error': 'Email déjà utilisé'}, status=400)
     user.email = data.get('email')
     return JsonResponse({'success': True, 'message': 'Email valide'}, status=200)
+
+# def email_is_confirmed(user):
+#     if user.custom_user.email_confirmed == True:
+#         return JsonResponse({'success': True, 'message': 'Email confirmé'}, status=200)
+#     return JsonResponse({'success': False, 'error': 'Email non confirmé'}, status=400)
+
+def utils_delete_account(user):
+    user.custom_user.delete()
+    user.delete()
+    return JsonResponse({'success': True, 'message': 'Compte supprimé'}, status=200)
+
+def utils_send_twoFA_code(user):
+    twoFA_code = random.randint(100000, 999999)
+    r.setex(f'user_{user.id}_twoFA_code', 300, twoFA_code) # 300 = 5 minutes
+    send_mail(
+        '2FA code',
+        f'Your 2FA code is {twoFA_code}',
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+
+# def utils_set_twoFA_verified(user, status, time_to_live=300):
+#     r.setex(f"user:{user.id}:twoFA_verified", time_to_live, status)
+
+# def utils_get_twoFA_verified(user):
+#     return r.get(f"user:{user.id}:twoFA_verified")

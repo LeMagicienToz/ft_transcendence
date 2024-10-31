@@ -7,3 +7,5 @@ requests>=2.25.1
 PyJWT>=2.0.0
 redis
 channels
+redis-cli
+aioredis

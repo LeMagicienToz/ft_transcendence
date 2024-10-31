@@ -10,9 +10,13 @@ import jwt, time, requests
 from django.conf import settings
 from django.shortcuts import redirect
 from .decorators import jwt_42_required
-from .decorators import request_from_42_or_regular_user
-from .utils_views import utils_set_user_color, utils_set_username, utils_set_email
+from .decorators import request_from_42_or_regular_user, twoFA_status_check
+from .utils_views import utils_set_user_color, utils_set_username, utils_set_email, utils_delete_account, utils_send_twoFA_code
 import os
+from django.core.mail import send_mail
+from .redis_client import r
+# mettre toute l'app asynchrone ???????????
+
 
 def login_42(request):
     login_url = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code"
@@ -54,20 +58,21 @@ def callback_42(request):
 
         custom_user, created = CustomUser.objects.get_or_create(user=user)
         custom_user.profile_picture_url = image_url
-        custom_user.is_online = True
         custom_user.intra_id = intra_id
-        custom_user.suitColor = ''
-        custom_user.visColor = ''
-        custom_user.ringsColor = ''
-        custom_user.bpColor = ''
-        custom_user.save()
+        if first_connection:
+            custom_user.suitColor = ''
+            custom_user.visColor = ''
+            custom_user.ringsColor = ''
+            custom_user.bpColor = ''
+            custom_user.twoFA_enabled = False
+            custom_user.save()
 
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
         if first_connection:
-            response = redirect('https://localhost:8443/Avatar/')
+            response = redirect('https://${HOST_SERVERNAME}:8443/Avatar/')
         else:
-            response = redirect('https://localhost:8443/Homepage/')
+            response = redirect('https://${HOST_SERVERNAME}:8443/Homepage/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
@@ -91,9 +96,12 @@ def login_user(request):
         login(request, user)
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
-        response = JsonResponse({'success': True, 'user_id': user.id, 'message': 'connecté'}, status=200)
+        response = JsonResponse({'success': True, 'user_id': user.id, 'twoFA_enabled': user.customuser.twoFA_enabled, 'profile_picture_url': user.customuser.profile_picture_url, 'message': 'Utilisateur connecté avec succès'}, status=200)
         response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5) # secure for https only, samesite for csrf protection, max_age 5 min
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
+
+        if user.customuser.twoFA_enabled:
+            utils_send_twoFA_code(user)
         return response
     else:
         return JsonResponse({'success': False, 'error': 'Identifiants invalides'}, status=400)
@@ -101,7 +109,11 @@ def login_user(request):
 
 @request_from_42_or_regular_user
 @require_POST
+@twoFA_status_check
 def logout_user(request):
+    user = request.user
+    r.delete(f'user_{user.id}_twoFA_code')
+    r.delete(f'user_{user.id}_twoFA_verified')
     response = JsonResponse({'success': True, 'message': 'Utilisateur déconnecté'}, status=200)
     response.delete_cookie('token')
     response.delete_cookie('refresh_token')
@@ -138,6 +150,7 @@ def register(request):
     custom_user.visColor = ''
     custom_user.ringsColor = ''
     custom_user.bpColor = ''
+    custom_user.twoFA_enabled = False
     custom_user.save()
 
     login(request, user)
@@ -147,13 +160,14 @@ def register(request):
     response = JsonResponse({'success': True, 'message': f"Utilisateur {user.username} créé avec succès + login!", 'user_id': user.id}, status=201)
     response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5)  # sécurisé
     response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
-
+ 
     return response
 
 
 
 @require_POST
 @jwt_required
+@twoFA_status_check
 def reset_password(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
@@ -183,6 +197,7 @@ def reset_password(request):
 
 @require_POST
 @request_from_42_or_regular_user
+@twoFA_status_check
 def delete_account(request):
     try:
         user_id = request.user.id
@@ -190,6 +205,7 @@ def delete_account(request):
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
 
+    user.custom_user.delete()
     user.delete()
     return JsonResponse({'success': True,'message': 'Compte supprimé avec succès'}, status=200)
 
@@ -208,6 +224,7 @@ def delete_account(request):
 
 @request_from_42_or_regular_user
 @require_GET
+@twoFA_status_check
 def get_user(request):
     user = request.user
     username = user.username
@@ -217,6 +234,7 @@ def get_user(request):
 
 @request_from_42_or_regular_user
 @require_POST
+@twoFA_status_check
 def set_user_color(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
@@ -229,6 +247,7 @@ def set_user_color(request):
 
 @request_from_42_or_regular_user
 @require_POST
+@twoFA_status_check
 def set_profile(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
@@ -247,14 +266,73 @@ def set_profile(request):
     user.custom_user.profile_picture_url = data.get('profile_picture_url')
     if not user.custom_user.profile_picture_url:
         user.custom_user.profile_picture_url = None
-    #colors
-    response = utils_set_user_color(data, user)
-    if response['success'] == False:
-        return response
+    # #colors
+    # response = utils_set_user_color(data, user)
+    # if response['success'] == False:
+    #     return response
+
+    # set twoFA
+    twoFA_enabled = data.get('twoFA_enabled')
+    if twoFA_enabled == True:
+        user.custom_user.twoFA_enabled = True
+    else:
+        user.custom_user.twoFA_enabled = False
 
     user.custom_user.save()
     user.save()
     return JsonResponse({'success': True, 'message': 'Profil mis à jour avec succès', 'user_id': user.id}, status=200)
+
+#     @require_GET
+# def confirm_email(request):
+#     token = request.GET.get('token')
+
+#     try:
+#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+#         user_id = payload['user_id']
+#         user = User.objects.get(id=user_id)
+        
+#         user.custom_user.email_confirmed = True
+#         user.custom_user.save()
+        
+#         # return JsonResponse({'success': True, 'message': 'E-mail confirmé avec succès.'}, status=200)
+#         return redirect('https://${HOST_SERVERNAME}:8443/home/')
+#     except (jwt.ExpiredSignatureError):
+#         utils_delete_account(user)
+#         return edirect('https://${HOST_SERVERNAME}:8443/login/')
+#         # return JsonResponse({'success': False, 'error': 'Lien de confirmation expiré, inscrivez-vous à nouveau'}, status=400)
+#     except jwt.InvalidTokenError:
+#         return redirect('https://${HOST_SERVERNAME}:8443/login/')
+#         # return JsonResponse({'success': False, 'error': 'Lien de confirmation invalide'}, status=400)
+#     except User.DoesNotExist:
+#         return redirect('https://${HOST_SERVERNAME}:8443/login/')
+        # return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+
+@require_POST
+@jwt_required
+def twoFA_validation(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
+
+    user = request.user
+    twoFA_code = data.get('twoFA_code')
+    
+    if not twoFA_code:
+        return JsonResponse({'success': False, 'error': 'Code 2FA manquant ou invalide'}, status=400)
+
+    redis_code = r.get(f'user_{user.id}_twoFA_code')
+    if redis_code is None:
+        return JsonResponse({'success': False, 'error': 'Code 2FA non trouvé'}, status=404)
+    
+    if redis_code.decode('utf-8') == twoFA_code: # ne pas oublier de decoder se qui vient de redis
+        r.set(f'user_{user.id}_twoFA_verified', 'True')
+        return JsonResponse({'success': True, 'message': 'Code 2FA validé avec succès'}, status=200)
+    return JsonResponse({'success': False, 'error': 'Code 2FA invalide'}, status=400)
+
+
+
+
     
     
 

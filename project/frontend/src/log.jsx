@@ -55,9 +55,6 @@ const LoginForm = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data);
-					navigate('/Home');
-				} else {
-					// console.log("errorData");
 					const errorData = await response.json();
 					setError(errorData.error); // Gérer l'erreur
 				}
