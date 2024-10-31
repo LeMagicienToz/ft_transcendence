@@ -19,14 +19,15 @@ def utils_set_user_color(data, user): # la fonction ne save pas l'objet user
     for color_name, color_value in colors_to_validate.items(): # items renvoie un tuple (clé, valeur)
         if color_value and (not color_value.startswith('#') or 
                             len(color_value) != 7 or 
-                            not all(c in '0123456789ABCDEF' for c in color_value[1:])):
+                            not all(c in '0123456789ABCDEFabcdef' for c in color_value[1:])):
             return JsonResponse({'success': False, 'error': f'Couleur {color_name} invalide'}, status=400)
 
     try:
-        user.custom_user.suitColor = suitColor
-        user.custom_user.visColor = visColor
-        user.custom_user.ringsColor = ringsColor
-        user.custom_user.bpColor = bpColor
+        custom_user = user.custom_user
+        custom_user.suitColor = suitColor
+        custom_user.visColor = visColor
+        custom_user.ringsColor = ringsColor
+        custom_user.bpColor = bpColor
     except CustomUser.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
     return JsonResponse({'success': True, 'message': 'Couleurs mises à jour avec succès', 'user_id': user.id}, status=200)

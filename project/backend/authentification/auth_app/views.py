@@ -89,8 +89,6 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        # user.customuser.is_online = True
-        # user.customuser.save()
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
         response = JsonResponse({'success': True, 'user_id': user.id, 'message': 'connecté'}, status=200)
@@ -213,8 +211,8 @@ def delete_account(request):
 def get_user(request):
     user = request.user
     username = user.username
-    profile_picture_url = user.customuser.profile_picture_url
-    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url, 'suitColor': user.customuser.suitColor, 'visColor': user.customuser.visColor, 'ringsColor': user.customuser.ringsColor, 'bpColor': user.customuser.bpColor}, status=200)
+    profile_picture_url = user.custom_user.profile_picture_url
+    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url, 'suitColor': user.custom_user.suitColor, 'visColor': user.custom_user.visColor, 'ringsColor': user.custom_user.ringsColor, 'bpColor': user.custom_user.bpColor}, status=200)
 
 
 @request_from_42_or_regular_user

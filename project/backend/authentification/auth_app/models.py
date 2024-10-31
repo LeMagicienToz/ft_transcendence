@@ -1,8 +1,9 @@
+from typing import Any
 from django.contrib.auth.models import User
 from django.db import models
 
 class CustomUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='custom_user')
     is_online = models.BooleanField(default=False)
     profile_picture_url = models.URLField(null=True, blank=True)
     intra_id = models.IntegerField(null=True, blank=True)
