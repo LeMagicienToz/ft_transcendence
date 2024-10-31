@@ -70,9 +70,9 @@ def callback_42(request):
         login(request, user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
         if first_connection:
-            response = redirect('https://${HOST_SERVERNAME}:8443/Avatar/')
+            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Avatar/')
         else:
-            response = redirect('https://${HOST_SERVERNAME}:8443/Homepage/')
+            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Homepage/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
@@ -96,11 +96,11 @@ def login_user(request):
         login(request, user)
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
-        response = JsonResponse({'success': True, 'user_id': user.id, 'twoFA_enabled': user.customuser.twoFA_enabled, 'profile_picture_url': user.customuser.profile_picture_url, 'message': 'Utilisateur connecté avec succès'}, status=200)
+        response = JsonResponse({'success': True, 'user_id': user.id, 'twoFA_enabled': user.custom_user.twoFA_enabled, 'profile_picture_url': user.custom_user.profile_picture_url, 'message': 'Utilisateur connecté avec succès'}, status=200)
         response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5) # secure for https only, samesite for csrf protection, max_age 5 min
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
 
-        if user.customuser.twoFA_enabled:
+        if user.custom_user.twoFA_enabled:
             utils_send_twoFA_code(user)
         return response
     else:
