@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
-@require_POST
-def receive_user(request):
+def ping(request):
         return JsonResponse({'received': 'ok'})
