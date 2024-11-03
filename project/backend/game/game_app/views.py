@@ -19,14 +19,12 @@ class GameCreateView(View):
         # Vérification du type de requête
         if request.method != 'POST':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
-
         # Récupérer les données du joueur 1
         try:
             player1_user_id = int(request.POST.get('user_id'))
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid user ID'}, status=400)
         player1_user_name = request.POST.get('user_name')
-
         # Récupérer le type de jeu (1 vs 1 ou 2 vs 2)
         match_type = request.POST.get('match_type')
         if not match_type:
@@ -39,11 +37,9 @@ class GameCreateView(View):
             game_type = 'pong'
         elif game_type not in ['pong', 'snake']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
-
         # Validation data
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
-
         # Initialiser le jeu avec les informations du joueur 1
         try:
             game = Game.objects.create(
@@ -55,6 +51,36 @@ class GameCreateView(View):
             )
         except Exception as e:
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
-
         # Retourner une réponse JSON avec le game_id
         return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
+
+class GameListView(View):
+    def get(self, request):
+        # Vérification du type de requête
+        if request.method != 'GET':
+            return JsonResponse({'error': 'Method not allowed'}, status=405)
+        # Récupérer toutes les parties avec leur infos
+        games = Game.objects.all().values(
+            'id',
+            'status',
+            'game_type',
+            'match_type',
+            'player1_user_id',   # eventuellement supprimer id et name si GPRD
+            'player1_user_name',
+            'player1_score',
+            'player1_nickname',
+            'player2_user_id',
+            'player2_user_name',
+            'player2_score',
+            'player2_nickname',
+            'player3_user_id',
+            'player3_user_name',
+            'player3_score',
+            'player3_nickname',
+            'player4_user_id',
+            'player4_user_name',
+            'player4_score',
+            'player4_nickname'
+        )
+        # Transformer les résultats en liste et renvoyer sous forme de JSON
+        return JsonResponse(list(games), safe=False)
