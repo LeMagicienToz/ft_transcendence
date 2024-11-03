@@ -51,15 +51,12 @@ class GameCreateView(View):
             )
         except Exception as e:
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
-        # Retourner une réponse JSON avec le game_id
         return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
 
 class GameListView(View):
     def get(self, request):
-        # Vérification du type de requête
         if request.method != 'GET':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
-        # Récupérer toutes les parties avec leur infos
         games = Game.objects.all().values(
             'id',
             'status',
@@ -82,5 +79,33 @@ class GameListView(View):
             'player4_score',
             'player4_nickname'
         )
-        # Transformer les résultats en liste et renvoyer sous forme de JSON
         return JsonResponse(list(games), safe=False)
+
+class GameDetailView(View):
+    def get(self, request, game_id):
+        if request.method != 'GET':
+            return JsonResponse({'error': 'Method not allowed'}, status=405)
+        game = get_object_or_404(Game, id=game_id)
+        game_details = {
+            'game_id': game.id,
+            'status': game.status,
+            'game_type': game.game_type,
+            'match_type': game.match_type,
+            'player1_user_id': game.player1_user_id,
+            'player1_user_name': game.player1_user_name,
+            'player1_score': game.player1_score,
+            'player1_nickname': game.player1_nickname,
+            'player2_user_id': game.player2_user_id,
+            'player2_user_name': game.player2_user_name,
+            'player2_score': game.player2_score,
+            'player2_nickname': game.player2_nickname,
+            'player3_user_id': game.player3_user_id,
+            'player3_user_name': game.player3_user_name,
+            'player3_score': game.player3_score,
+            'player3_nickname': game.player3_nickname,
+            'player4_user_id': game.player4_user_id,
+            'player4_user_name': game.player4_user_name,
+            'player4_score': game.player4_score,
+            'player4_nickname': game.player4_nickname,
+        }
+        return JsonResponse(game_details)
