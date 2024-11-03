@@ -12,7 +12,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 def ping(request):
-        return JsonResponse({'received': 'ok'})
+        return JsonResponse({'received': 'pong'})
 
 class GameCreateView(View):
     def post(self, request):
