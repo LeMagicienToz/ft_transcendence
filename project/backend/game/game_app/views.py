@@ -109,3 +109,87 @@ class GameDetailView(View):
             'player4_nickname': game.player4_nickname,
         }
         return JsonResponse(game_details)
+
+class GameJoinView(View):
+    def put(self, request, game_id):
+        if request.method != 'PUT':
+            return JsonResponse({'error': 'Method not allowed'}, status=405)
+        # Récupérer la partie en cours
+        game = get_object_or_404(Game, id=game_id)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        player2_user_id = data.get('user_id')
+        player2_user_name = data.get('user_name')
+        # Validation des informations du joueur 2
+        if not player2_user_id or not player2_user_name:
+            return JsonResponse({'error': 'Player information is required'}, status=400)
+        # Validation ID du joueur 2
+        try:
+            player2_user_id = int(player2_user_id)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Invalid user ID'}, status=400)
+        # Vérifier que ce joueur n'est pas déjà dans la partie
+        if player2_user_id in [game.player1_user_id, game.player2_user_id, game.player3_user_id, game.player4_user_id]:
+            return JsonResponse({'error': 'Player has already joined the game'}, status=400)
+        # Vérifier si le type de match est valide
+        if game.match_type not in ['1v1', '2v2']:
+            return JsonResponse({'error': 'Invalid match type'}, status=400)
+        if game.match_type == '1v1':
+            # Vérifier si player2 est déjà assigné
+            if game.player2_user_id != 0:
+                return JsonResponse({'message': 'Game is already full'}, status=400)
+            # Assignation des données au joueur 2
+            game.player2_user_id = player2_user_id
+            game.player2_user_name = player2_user_name
+        elif game.match_type == '2v2':
+            # Vérifier si les joueurs 2, 3 et 4 sont assignés
+            if game.player2_user_id != 0 and game.player3_user_id != 0 and game.player4_user_id != 0:
+                return JsonResponse({'message': 'Game is already full'}, status=400)
+            # Assignation des données au joueur 2 ou 3 ou 4
+            if game.player2_user_id == 0:
+                game.player2_user_id = player2_user_id
+                game.player2_user_name = player2_user_name
+            elif game.player3_user_id == 0:
+                game.player3_user_id = player2_user_id
+                game.player3_user_name = player2_user_name
+            elif game.player4_user_id == 0:
+                game.player4_user_id = player2_user_id
+                game.player4_user_name = player2_user_name
+        game.save()
+        return JsonResponse({'message': 'Player joined', 'game_id': game.id})
+
+"""
+class GameStartView(View):
+    def post(self, request, game_id):
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Method not allowed'}, status=405)
+        # Récupérer la partie à démarrer
+        game = get_object_or_404(Game, id=game_id)
+        # Vérifier si le jeu est en attente et a le bon type de match
+        #if game.status != 'waiting':
+        #    return JsonResponse({'message': 'Game cannot be started'}, status=400)
+        if game.match_type not in ['1v1', '2v2']:
+            return JsonResponse({'error': 'Invalid match type'}, status=400)
+        active_players = (game.player1_user_id != 0) + (game.player2_user_id != 0) + (game.player3_user_id != 0) + (game.player4_user_id != 0)
+        if game.match_type == '1v1' and active_players != 2:
+            return JsonResponse({'error': 'A 1v1 game requires exactly 2 players'}, status=400)
+        elif game.match_type == '2v2' and active_players != 4:
+            return JsonResponse({'error': 'A 2v2 game requires exactly 4 players'}, status=400)
+        # Changer le statut du jeu et enregistrer l'heure de début
+        game.status = 'playing'
+        game.start_time = timezone.now()
+        game.save()
+        # ask the async game consumer to start a loop
+        # Send a message to the GameConsumer to start the game loop
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"game_{game.id}",  # group name from the consumer
+            {
+                "type": "start_game_loop",  # the custom type we'll handle in the consumer
+                "message": "start"
+            }
+        )
+        return JsonResponse({'message': 'Game started', 'game_id': game.id})
+"""
