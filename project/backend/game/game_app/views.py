@@ -160,7 +160,6 @@ class GameJoinView(View):
         game.save()
         return JsonResponse({'message': 'Player joined', 'game_id': game.id})
 
-"""
 class GameStartView(View):
     def post(self, request, game_id):
         if request.method != 'POST':
@@ -192,4 +191,3 @@ class GameStartView(View):
             }
         )
         return JsonResponse({'message': 'Game started', 'game_id': game.id})
-"""
