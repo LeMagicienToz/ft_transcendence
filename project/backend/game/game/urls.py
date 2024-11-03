@@ -20,5 +20,5 @@ from django.urls.conf import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('game_app.urls')),
+    path('api/game/', include('game_app.urls')),
 ]
