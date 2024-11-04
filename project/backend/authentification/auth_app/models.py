@@ -15,6 +15,7 @@ class CustomUser(models.Model):
     twoFA_enabled = models.BooleanField(default=False)
     # twoFA_code_expiration = models.DateTimeField(null=True, blank=True)
     # twoFA_verified = models.BooleanField(default=False)
+    friends_list = models.ManyToManyField("self", blank=True)
 
     def __str__(self):
         return f"{self.user.username} (ID: {self.user.id}, IntraID: {self.intra_id})" # pour debug

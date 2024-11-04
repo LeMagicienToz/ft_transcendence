@@ -13,4 +13,8 @@ urlpatterns = [
     path('set_user_color/', views.set_user_color, name='set_user_color'),
     path('set_profile/', views.set_profile, name='set_profile'),
     path('twoFA_validation/', views.twoFA_validation, name='twoFA_validation'),
+    path('search_user/', views.search_user, name='search_user'),
+    path('add_friend/', views.add_friend, name='add_friend'),
+    path('remove_friend/', views.remove_friend, name='remove_friend'),
+    path('get_friends_list/', views.get_friends_list, name='get_friends_list'),
 ]

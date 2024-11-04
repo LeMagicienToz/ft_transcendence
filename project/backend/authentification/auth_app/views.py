@@ -330,6 +330,72 @@ def twoFA_validation(request):
         return JsonResponse({'success': True, 'message': 'Code 2FA validé avec succès'}, status=200)
     return JsonResponse({'success': False, 'error': 'Code 2FA invalide'}, status=400)
 
+@require_POST
+@request_from_42_or_regular_user
+@twoFA_status_check
+def search_user(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
+    username = data.get('username')
+    if not username:
+        return JsonResponse({'success': False, 'error': 'username manquant'}, status=400)
+    user = User.objects.filter(username=username).first()
+    if not user:
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+    return JsonResponse({'success': True, 'message': 'Utilisateur trouvé', 'user_id': user.id, 'username': user.username, 'profile_picture_url': user.custom_user.profile_picture_url}, status=200)
+    
+
+@require_POST
+@request_from_42_or_regular_user
+@twoFA_status_check
+def add_friend(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
+    username = data.get('username')
+    if not username:
+        return JsonResponse({'success': False, 'error': 'username manquant'}, status=400)
+    friend = User.objects.filter(username=username).first()
+    if not friend:
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+    user = request.user
+    if user.custom_user.friends_list.filter(id=friend.custom_user.id).exists():
+        return JsonResponse({'success': False, 'error': 'Ami déjà ajouté'}, status=400)
+    user.custom_user.friends_list.add(friend.custom_user)
+    return JsonResponse({'success': True, 'message': 'Ami ajouté avec succès', 'user_id': user.id}, status=200)
+
+@require_POST
+@request_from_42_or_regular_user
+@twoFA_status_check
+def remove_friend(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
+    username = data.get('username')
+    if not username:
+        return JsonResponse({'success': False, 'error': 'username manquant'}, status=400)
+    friend = User.objects.filter(username=username).first()
+    if not friend:
+        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+    user = request.user
+    user.custom_user.friends_list.remove(friend.custom_user)
+    return JsonResponse({'success': True, 'message': 'Ami supprimé avec succès', 'user_id': user.id}, status=200)
+
+@require_POST
+@request_from_42_or_regular_user
+@twoFA_status_check
+def get_friends_list(request):
+    user = request.user
+    friends_list = user.custom_user.friends_list.all()
+    friends = [{'username': friend.user.username, 'profile_picture_url': friend.profile_picture_url} for friend in friends_list]
+    return JsonResponse({'success': True, 'friends': friends}, status=200)
+
+
+
 
 
 
