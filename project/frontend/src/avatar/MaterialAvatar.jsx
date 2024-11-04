@@ -4,11 +4,11 @@ import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
 import * as THREE from 'three';
 
 
-const MaterialAvatar = ({ suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition }) => {
+const MaterialAvatar = ({ suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
 
 	const { scene } = useGLTF('/scene.gltf');
 	const textureLoader = new THREE.TextureLoader();
-	const visTexture = textureLoader.load('https://cdn.intra.42.fr/users/df0b59b389617dbb05954acb33173422/muteza.jpg', (texture) => {
+	visTexture = textureLoader.load('https://cdn.intra.42.fr/users/df0b59b389617dbb05954acb33173422/muteza.jpg', (texture) => {
 		// Ajustez la répétition pour réduire la taille de la texture
 		texture.repeat.set(2, flatness); // augmente le deuxieme pour applatir la texture
 		texture.wrapS = THREE.RepeatWrapping; // Permet à la texture de se répéter horizontalement

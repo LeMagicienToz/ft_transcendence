@@ -21,9 +21,11 @@ const hexToRgb = (hex) => {
 		const [ringsColor, setRingsColor] = useState('#FFFFFF');
 		const [bpColor, setBpColor] = useState('#FFFFFF');
 		const [flatness, setFlatness] = useState(2.8);
+		const [visTexture, setVisTexture] = useState("");
 		const [horizontalPosition, setHorizontalPosition] = useState(0.73);
 		const [verticalPosition, setVerticalPosition] = useState(0.08);
 
+		const handleVisTexture = (e) => setVisTexture(e.target.value);
 		const handleSuitChange = (e) => setSuitColor(e.target.value);
 		const handleVisChange = (e) => setVisColor(e.target.value);
 		const handleRingsChange = (e) => setRingsColor(e.target.value);
@@ -47,19 +49,18 @@ const hexToRgb = (hex) => {
 					body: JSON.stringify({ suitColor, visColor, ringsColor, bpColor }),
 					credentials: 'include',
 				});
-	
+			
 				if (response.ok) {
-					const data = await response.json();
-					setUserData(data);
+					// const data = await response.json();
 					navigate('/Home');
 				} else {
-					// console.log("errorData");
-					const errorData = await response.json();
-					// setError(errorData.error); // Gérer l'erreur
+					console.log("Non-200 response", response.status, response.statusText);
+					// Optional: Capture the response error details here
 				}
-			}catch (err) {
-			   setError('Une erreur s\'est produite');
-		   }
+			} catch (err) {
+				console.error("Fetch error:", err);
+				// setError('Une erreur s\'est produite');
+			}
 		};
 
 		return (
@@ -78,6 +79,14 @@ const hexToRgb = (hex) => {
 					/>
 			</Canvas>
 			<div className="input-container">
+					<div className="Photo_url" htmlFor="visTexture">Photos URL</div>
+					<input
+						className="Photo_container"
+						id="visTexture"
+						type="text"
+						value={visTexture}
+						onChange={handleVisTexture}
+					/>
 					<div className="input-group">
 					<label htmlFor="suitColor">Suit Color</label>
 					<input

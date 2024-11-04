@@ -14,20 +14,56 @@ const hexToRgb = (hex) => {
 	return [r / 255, g / 255, b / 255];
 };
 
-const Homepage = () => {
-	const navigate = useNavigate();
-	
-	const [suitColor] = useState('#A52A2A');
-	const [visColor] = useState('#A00A2A');
-	const [ringsColor] = useState('#A52A2A');
-	const [bpColor] = useState('#A52A2A');
-	const [logoMoved, setLogoMoved] = useState(false);
+const fetchUserData = async () => {
+	try {
+	  const response = await fetch('https://localhost:8443/api/auth/get_user/', {
+		method: 'GET',
+		headers: {
+		  'Content-Type': 'application/json',
+		},
+		credentials: 'include'
+	  });
+  
+	  if (response.ok) {
+		const data = await response.json();
+		return(data);
+	  } else {
+		  const errorData = await response.json();
+		  console.log(errorData.error);
+		}
+	} catch (error) {
+	  console.error("Erreur lors de la requête : ", error);
+	  console.log("Une erreur est survenue");
+	}
+  };
 
-	const handleClick = () => {
-		setLogoMoved(true);
-		setTimeout(() => {
-			navigate('/');
-		  }, 600); // 0.6 seconds delay
+const Homepage = () => {
+
+	const data=fetchUserData();
+	const navigate = useNavigate();
+
+	const [logoMoved, setLogoMoved] = useState(false);
+	
+	const [userData, setUserData] = useState(null);
+	const [error, setError] = useState(null);
+	
+	useEffect(() => {
+		const getUserData = async () => {
+			try {
+				const data = await fetchUserData();
+				setUserData(data);
+			} catch (error) {
+				setError("Impossible de récupérer les données utilisateur");
+			}
+		};
+	getUserData();
+}, []);
+
+const handleClick = () => {
+	setLogoMoved(true);
+	setTimeout(() => {
+		navigate('/');
+	}, 600); // 0.6 seconds delay
 	};
 
 	return (
@@ -43,10 +79,10 @@ const Homepage = () => {
 						<ambientLight intensity={0.5} />	
 						<directionalLight position={[3, 3, 5]} />
 						<Avatarhp
-							suitColor={hexToRgb(suitColor)} 
-							visColor={hexToRgb(visColor)} 
-							ringsColor={hexToRgb(ringsColor)} 
-							bpColor={hexToRgb(bpColor)}
+							suitColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.suitColor : '#FFFFFF')}
+							visColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.visColor : '#FFFFFF')}
+							ringsColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.ringsColor : '#FFFFFF')}
+							bpColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.bpColor : '#FFFFFF')}
 						/>
 				</Canvas>
 				<div className="profil-button-container">
