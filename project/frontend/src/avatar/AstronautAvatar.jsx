@@ -17,14 +17,22 @@ const hexToRgb = (hex) => {
 };
 	function Show_Avatar() {
 		const [suitColor, setSuitColor] = useState('#FFFFFF'); // Default color in hex
-		const [visColor, setVisColor] = useState('#FFFFFF'); // Default color in hex ringsColor
+		const [visColor, setVisColor] = useState('#FFFFFF');
 		const [ringsColor, setRingsColor] = useState('#FFFFFF');
 		const [bpColor, setBpColor] = useState('#FFFFFF');
+		const [flatness, setFlatness] = useState(2.8);
+		const [horizontalPosition, setHorizontalPosition] = useState(0.73);
+		const [verticalPosition, setVerticalPosition] = useState(0.08);
 
 		const handleSuitChange = (e) => setSuitColor(e.target.value);
 		const handleVisChange = (e) => setVisColor(e.target.value);
 		const handleRingsChange = (e) => setRingsColor(e.target.value);
 		const handleBpChange = (e) => setBpColor(e.target.value);
+
+	// Button click handlers
+		const adjustFlatness = (amount) => setFlatness(prev => Math.max(0, Math.min(5, prev + amount)));
+		const adjustHorizontal = (amount) => setHorizontalPosition(prev => prev + amount);
+		const adjustVertical = (amount) => setVerticalPosition(prev => prev + amount);
 
 		const navigate = useNavigate();
 		const handleClick = async (e) => {
@@ -64,6 +72,9 @@ const hexToRgb = (hex) => {
 						visColor={hexToRgb(visColor)} 
 						ringsColor={hexToRgb(ringsColor)} 
 						bpColor={hexToRgb(bpColor)}
+						flatness={flatness} // Control flatness
+						horizontalPosition={horizontalPosition} // Control horizontal position
+						verticalPosition={verticalPosition} // Control vertical position
 					/>
 			</Canvas>
 			<div className="input-container">
@@ -103,7 +114,27 @@ const hexToRgb = (hex) => {
 						onChange={handleBpChange}
 					/>
 					</div>
+
+					<div className="input-group">
+					<label>Flatness</label>
+					<button onClick={() => adjustFlatness(-0.1)}>-</button>
+					<button onClick={() => adjustFlatness(0.1)}>+</button>
 				</div>
+
+				{/* Horizontal Position Control */}
+				<div className="input-group">
+					<label>Horizontal Position</label>
+					<button onClick={() => adjustHorizontal(-0.01)}>-</button>
+					<button onClick={() => adjustHorizontal(0.01)}>+</button>
+				</div>
+
+				{/* Vertical Position Control */}
+				<div className="input-group">
+					<label>Vertical Position</label>
+					<button onClick={() => adjustVertical(-0.01)}>-</button> 
+					<button onClick={() => adjustVertical(0.01)}>+</button>
+				</div>
+			</div>
 				<div className="button-container">
 				<MyButton text="Save & Quit" onClick={handleClick}/>
 				</div>
