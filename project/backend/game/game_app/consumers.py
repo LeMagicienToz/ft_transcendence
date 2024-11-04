@@ -18,6 +18,11 @@ class Consumer(AsyncWebsocketConsumer):
         if (self.pick_game_logic()) == False:
             await self.send(text_data=json.dumps({"error": "Invalid game type"}))
             return
+
+        # add the player if not yet here
+        #if not await sync_to_async(self.game.players.filter(id=self.player_id).exists)():
+        #    await sync_to_async(self.game.players.add)(self.player_id)
+
         await self.game_logic.on_connect()
         await self.listen()
 
@@ -71,7 +76,7 @@ class Consumer(AsyncWebsocketConsumer):
         await self.send(text_data=event["message"])
 
     def is_player_1(self):
-        return (self.game.player1_user_id == self.player_id)
+        return (self.game.players.first().user_id == self.player_id)
 
     async def start_game_loop(self, event):
         if (self.is_player_1()):
