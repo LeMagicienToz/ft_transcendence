@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 def ping(request):
         return JsonResponse({'received': 'pong'})
 
-class GameCreateView(View):
+class GameCreateView(APIView):
     def post(self, request):
         # Vérification du type de requête
         if request.method != 'POST':
@@ -53,7 +53,7 @@ class GameCreateView(View):
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
         return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
 
-class GameListView(View):
+class GameListView(APIView):
     def get(self, request):
         if request.method != 'GET':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -81,7 +81,7 @@ class GameListView(View):
         )
         return JsonResponse(list(games), safe=False)
 
-class GameDetailView(View):
+class GameDetailView(APIView):
     def get(self, request, game_id):
         if request.method != 'GET':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -110,7 +110,7 @@ class GameDetailView(View):
         }
         return JsonResponse(game_details)
 
-class GameJoinView(View):
+class GameJoinView(APIView):
     def put(self, request, game_id):
         if request.method != 'PUT':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -160,7 +160,7 @@ class GameJoinView(View):
         game.save()
         return JsonResponse({'message': 'Player joined', 'game_id': game.id})
 
-class GameStartView(View):
+class GameStartView(APIView):
     def post(self, request, game_id):
         if request.method != 'POST':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
