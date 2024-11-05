@@ -229,9 +229,10 @@ def get_user(request):
     user = request.user
     username = user.username
     profile_picture_url = user.custom_user.profile_picture_url
-    #Ajouter flatness , horizontalPosition , verticalPosition pour la photo
-    return JsonResponse({'success': True, 'username': username, 'profile_picture_url': profile_picture_url, 'suitColor': user.custom_user.suitColor, 'visColor': user.custom_user.visColor, 'ringsColor': user.custom_user.ringsColor, 'bpColor': user.custom_user.bpColor}, status=200)
-
+    flatness = user.custom_user.flatness
+    horizontalPosition = user.custom_user.horizontalPosition
+    verticalPosition = user.custom_user.verticalPosition
+    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition}, status=200)
 
 @request_from_42_or_regular_user
 @require_POST
@@ -243,9 +244,21 @@ def set_user_color(request):
         return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
     user = request.user
     response = utils_set_user_color(data, user)
+
+    user.custom_user.flatness = data.get('flatness')
+    if not user.custom_user.flatness:
+        user.custom_user.flatness = 2.8
+    user.custom_user.horizontalPosition = data.get('horizontalPosition')
+    if not user.custom_user.horizontalPosition:
+        user.custom_user.horizontalPosition = 0.73
+    user.custom_user.verticalPosition = data.get('verticalPosition')
+    if not user.custom_user.verticalPosition:
+        user.custom_user.verticalPosition = 0.08
+    user.custom_user.profile_picture_url = data.get('profile_picture_url')
+    if not user.custom_user.profile_picture_url:
+        user.custom_user.profile_picture_url = None
     user.save()
     user.custom_user.save()
-    #Ajouter flatness , horizontalPosition , verticalPosition pour la photo 
     return response
 
 
