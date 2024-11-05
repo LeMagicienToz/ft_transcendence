@@ -72,7 +72,7 @@ def callback_42(request):
         if first_connection:
             response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Avatar/')
         else:
-            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Homepage/')
+            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Home/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
