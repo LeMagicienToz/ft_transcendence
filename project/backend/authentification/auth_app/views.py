@@ -151,6 +151,10 @@ def register(request):
     custom_user.ringsColor = ''
     custom_user.bpColor = ''
     custom_user.twoFA_enabled = False
+    custom_user.flatness = 2.8
+    custom_user.horizontalPosition = 0.73
+    custom_user.verticalPosition = 0.08
+    custom_user.visTexture = None
     custom_user.save()
 
     login(request, user)
@@ -232,7 +236,15 @@ def get_user(request):
     flatness = user.custom_user.flatness
     horizontalPosition = user.custom_user.horizontalPosition
     verticalPosition = user.custom_user.verticalPosition
-    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition}, status=200)
+    visTexture = user.custom_user.visTexture
+    flatness = user.custom_user.flatness
+    horizontalPosition = user.custom_user.horizontalPosition
+    verticalPosition = user.custom_user.verticalPosition
+    suitColor = user.custom_user.suitColor
+    visColor = user.custom_user.visColor
+    ringsColor = user.custom_user.ringsColor
+    bpColor = user.custom_user.bpColor
+    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'visTexture': visTexture, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor}, status=200)
 
 @request_from_42_or_regular_user
 @require_POST
@@ -244,21 +256,12 @@ def set_user_color(request):
         return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
     user = request.user
     response = utils_set_user_color(data, user)
-
-    user.custom_user.flatness = data.get('flatness')
-    if not user.custom_user.flatness:
-        user.custom_user.flatness = 2.8
-    user.custom_user.horizontalPosition = data.get('horizontalPosition')
-    if not user.custom_user.horizontalPosition:
-        user.custom_user.horizontalPosition = 0.73
-    user.custom_user.verticalPosition = data.get('verticalPosition')
-    if not user.custom_user.verticalPosition:
-        user.custom_user.verticalPosition = 0.08
-    user.custom_user.profile_picture_url = data.get('profile_picture_url')
-    if not user.custom_user.profile_picture_url:
-        user.custom_user.profile_picture_url = None
-    user.save()
+    user.custom_user.flatness = data.get('flatness', 2.8)
+    user.custom_user.horizontalPosition = data.get('horizontalPosition', 0.73)
+    user.custom_user.verticalPosition = data.get('verticalPosition', 0.08)
+    user.custom_user.visTexture = data.get('visTexture', None)
     user.custom_user.save()
+    user.save()
     return response
 
 

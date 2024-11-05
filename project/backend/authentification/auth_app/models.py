@@ -19,6 +19,7 @@ class CustomUser(models.Model):
     flatness = models.FloatField(default=2.8)
     horizontalPosition = models.FloatField(default=0.73)
     verticalPosition = models.FloatField(default=0.08)
+    visTexture = models.CharField(max_length=100, default=None, null=True)
 
 
     def __str__(self):
