@@ -243,7 +243,9 @@ def set_user_color(request):
         return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
     user = request.user
     response = utils_set_user_color(data, user)
-    #Ajouter flatness , horizontalPosition , verticalPosition pour la photo
+    user.save()
+    user.custom_user.save()
+    #Ajouter flatness , horizontalPosition , verticalPosition pour la photo 
     return response
 
 
