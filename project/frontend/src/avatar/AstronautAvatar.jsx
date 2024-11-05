@@ -46,7 +46,7 @@ const hexToRgb = (hex) => {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ suitColor, visColor, ringsColor, bpColor }),
+					body: JSON.stringify({ suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture}),
 					credentials: 'include',
 				});
 			
@@ -76,6 +76,7 @@ const hexToRgb = (hex) => {
 						flatness={flatness} // Control flatness
 						horizontalPosition={horizontalPosition} // Control horizontal position
 						verticalPosition={verticalPosition} // Control vertical position
+						visTexture={visTexture}
 					/>
 			</Canvas>
 			<div className="input-container">

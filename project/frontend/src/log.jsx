@@ -55,6 +55,14 @@ const LoginForm = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data);
+					if(data.twoFA_enabled == true)
+					{
+						// fetch a : /twoFA_validation
+					}
+					navigate('/Home');
+				}
+				else 
+				{
 					const errorData = await response.json();
 					setError(errorData.error); // Gérer l'erreur
 				}
@@ -69,12 +77,12 @@ const LoginForm = () => {
 		<div>
 						<form onSubmit={handleLogin}>
 							<div className="case">
-								<label htmlFor="exampleInputEmail1">Email or UserName </label>
+								<label htmlFor="exampleInputUsername1">UserName </label>
 								<input
 									type="username"
 									className="case-input"
-									username="exampleInputEmail1"
-									placeholder="Enter Email or UserName"
+									username="exampleInputUsername1"
+									placeholder="UserName"
 									value={username}
 									onChange={(e) => setUserName(e.target.value)}
 									/>

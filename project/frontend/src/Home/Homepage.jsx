@@ -1,4 +1,4 @@
-import './Homepage.css'
+import './Homepage.css';
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Avatarhp from './Avatarhp';
@@ -7,100 +7,98 @@ import logo from '../../public/logout.svg';
 import { useNavigate } from "react-router-dom";
 
 const hexToRgb = (hex) => {
-	const bigint = parseInt(hex.replace('#', ''), 16);
-	const r = (bigint >> 16) & 255;
-	const g = (bigint >> 8) & 255;
-	const b = bigint & 255;
-	return [r / 255, g / 255, b / 255];
+	console.log(hex);
+	if (typeof hex === 'string') {
+		const bigint = parseInt(hex.replace('#', ''), 16);
+		const r = (bigint >> 16) & 255;
+		const g = (bigint >> 8) & 255;
+		const b = bigint & 255;
+		return [r / 255, g / 255, b / 255];
+	} else {
+		return [1, 1, 1]; // Valeur par défaut pour éviter les erreurs
+	}
 };
 
 const fetchUserData = async () => {
 	try {
-	  const response = await fetch('https://localhost:8443/api/auth/get_user/', {
-		method: 'GET',
-		headers: {
-		  'Content-Type': 'application/json',
-		},
-		credentials: 'include'
-	  });
-  
-	  if (response.ok) {
-		const data = await response.json();
-		return(data);
-	  } else {
-		  const errorData = await response.json();
-		  console.log(errorData.error);
+		const response = await fetch('https://localhost:8443/api/auth/get_user/', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include'
+		});
+
+		if (response.ok) {
+			return await response.json();
+		} else {
+			const errorData = await response.json();
+			console.log(errorData.error);
+			return null;
 		}
 	} catch (error) {
-	  console.error("Erreur lors de la requête : ", error);
-	  console.log("Une erreur est survenue");
+		console.error("Erreur lors de la requête : ", error);
+		return null;
 	}
-  };
+};
 
 const Homepage = () => {
-
-	const data=fetchUserData();
 	const navigate = useNavigate();
-
 	const [logoMoved, setLogoMoved] = useState(false);
-	
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
-	
+
 	useEffect(() => {
 		const getUserData = async () => {
-			try {
-				const data = await fetchUserData();
+			const data = await fetchUserData();
+			if (data) {
 				setUserData(data);
-			} catch (error) {
+			} else {
 				setError("Impossible de récupérer les données utilisateur");
 			}
 		};
-	getUserData();
-}, []);
+		getUserData();
+	}, []);
 
-const handleClick = () => {
-	setLogoMoved(true);
-	setTimeout(() => {
-		navigate('/');
-	}, 600); // 0.6 seconds delay
+	const handleClick = () => {
+		setLogoMoved(true);
+		setTimeout(() => {
+			navigate('/');
+		}, 600);
 	};
 
 	return (
 		<div className="Homebg">
 			<div className="logout-container">
 				<button type="button" className="logout-button" onClick={handleClick}>
-					<img src={logo} alt="Logo"  className={`logout-logo ${logoMoved ? 'move-logo' : ''}`} />
+					<img src={logo} alt="Logo" className={`logout-logo ${logoMoved ? 'move-logo' : ''}`} />
 					Logout
 				</button>
 			</div>
 			<div className="left-container">
 				<Canvas style={{ touchAction: 'none' }}>
-						<ambientLight intensity={0.5} />	
-						<directionalLight position={[3, 3, 5]} />
-						<Avatarhp
-							suitColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.suitColor : '#FFFFFF')}
-							visColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.visColor : '#FFFFFF')}
-							ringsColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.ringsColor : '#FFFFFF')}
-							bpColor={error ? hexToRgb('#FFFFFF') : hexToRgb(userData ? userData.bpColor : '#FFFFFF')}
-						/>
+					<ambientLight intensity={0.5} />
+					<directionalLight position={[3, 3, 5]} />
+					<Avatarhp
+						suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
+						visColor={hexToRgb(userData?.visColor || '#FFFFFF')}
+						ringsColor={hexToRgb(userData?.ringsColor || '#FFFFFF')}
+						bpColor={hexToRgb(userData?.bpColor || '#FFFFFF')}
+					/>
 				</Canvas>
 				<div className="profil-button-container">
-					<MyButton to="Profile" text="My Profile"/>
+					<MyButton to="Profile" text="My Profile" />
 				</div>
 			</div>
-				<div className="menu-button-container">
-					<div className="title-game">Game</div>
-					<button type="button" className="btn btn-primary btn-one">1v1</button>
-					<button type="button" className="btn btn-primary btn-one">Tournois</button>
-					<button type="button" className="btn btn-primary btn-one">3d game</button>
-		
+			<div className="menu-button-container">
+				<div className="title-game">Game</div>
+				<button type="button" className="btn btn-primary btn-one">1v1</button>
+				<button type="button" className="btn btn-primary btn-one">Tournois</button>
+				<button type="button" className="btn btn-primary btn-one">3d game</button>
 			</div>
-			<div className="right-container">
-
-			</div>
+			<div className="right-container"></div>
 		</div>
-	)
+	);
 };
 
-export default Homepage
+export default Homepage;
