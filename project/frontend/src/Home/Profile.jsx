@@ -1,5 +1,129 @@
+import MyButton from "../Theme/MyButton";
 import "./Profile.css"
 import React, { useState, useEffect } from 'react';
+
+const Profile = () => {
+	const [userData, setUserData] = useState(null);
+	const [error, setError] = useState(null);
+	const [isNormal, setIsNormal] = useState(true);
+
+	useEffect(() => {
+		const getUserData = async () => {
+			try {
+				const data = await fetchUserData();
+				setUserData(data);
+				// Définir `isNormal` une fois que `userData` est récupéré
+				if (data && data.username.endsWith("#42")) {
+					setIsNormal(false);
+				}
+			} catch (error) {
+				setError("Impossible de récupérer les données utilisateur");
+			}
+		};
+		getUserData();
+	}, []);
+
+	return (
+		<div className="background">
+			<div className="container-profile">
+				{error ? (
+					<h1>{error}</h1>
+				) : (
+					<h1>{userData ? userData.username : "Loading ..."}</h1>
+				)}
+				{isNormal ? (
+					<NormalUserForm />
+				) : (
+					<FortytwoUserForm />
+				)}
+			</div>
+			<div className="container-avatar">
+				<MyButton text="Change avatar" to="avatar" />
+			</div>
+		</div>
+	);
+};
+
+
+const NormalUserForm = () => {
+	const [username, setUserName] = useState('');
+	const [password, setPassword] = useState('');
+	const [email, setEmail] = useState('');
+	const [userData, setUserData] = useState(null);
+	const [error, setError] = useState('');
+
+	const handleNormal = async (e) => {
+		e.preventDefault();
+		
+		try {
+			const response = await fetch('https://localhost:8443/api/auth/set_profile/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ username, password, email }),
+			});
+			if (response.ok) {
+				const data = await response.json();
+				setUserData(data);
+			} else {
+				const errorData = await response.json();
+				setError(errorData.error);
+			}
+		} catch (err) {
+			setError('Une erreur s\'est produite');
+		}
+	};	
+
+return (
+	<>
+		<div className="form-nuser">
+			<form onSubmit={handleNormal}>
+					<label className="label-profile" htmlFor="exampleInputUsername1">UserName </label>
+					<input
+						type="username"
+						className="case-input"
+						username="exampleInputUsername1"
+						placeholder="UserName"
+						value={username}
+						onChange={(e) => setUserName(e.target.value)}
+						/>
+					<label className="label-profile" htmlFor="exampleInputEmail1">Email address </label>
+							<input
+								type="email"
+								className="case-input"
+								id="exampleInputEmail1"
+								placeholder="Enter email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+							/>
+					<label className="label-profile" htmlFor="exampleInputPassword1">Password </label>
+					<input
+						type="password"
+						className="case-input"
+						id="exampleInputPassword1"
+						placeholder="Password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						/>
+					<div style={{ marginTop: "20px" }}>
+						<MyButton text="Save and Quit" onClick={handleNormal}></MyButton>
+					</div>
+			</form>
+		</div>
+	</>
+
+);
+}
+
+const FortytwoUserForm = () => {
+	return (
+		<div>
+			dwadwa
+		</div>
+	)
+
+}
 
 const fetchUserData = async () => {
 	try {
@@ -23,37 +147,5 @@ const fetchUserData = async () => {
 	  console.log("Une erreur est survenue");
 	}
   };
-
-const Profile = () => {
-	const data=fetchUserData();
-
-	const [userData, setUserData] = useState(null);
-  	const [error, setError] = useState(null);
-
-	useEffect(() => {
-		const getUserData = async () => {
-		try {
-			const data = await fetchUserData();
-			setUserData(data);
-		} catch (error) {
-			setError("Impossible de récupérer les données utilisateur");
-		}
-		};
-		getUserData();
-	  }, []);
-	return (
-		<div className="background">
-			<div className="container-profile">
-				{error ? (
-					<h1>{error}</h1>
-				) : (
-					<h1>
-					{userData ? userData.username : "Loading ..."}
-					</h1>
-				)}
-			</div>
-		</div>
-	)
-};
 
 export default Profile

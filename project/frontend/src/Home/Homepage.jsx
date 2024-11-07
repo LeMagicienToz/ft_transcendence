@@ -7,7 +7,6 @@ import logo from '../../public/logout.svg';
 import { useNavigate } from "react-router-dom";
 
 const hexToRgb = (hex) => {
-	console.log(hex);
 	if (typeof hex === 'string') {
 		const bigint = parseInt(hex.replace('#', ''), 16);
 		const r = (bigint >> 16) & 255;
@@ -18,6 +17,36 @@ const hexToRgb = (hex) => {
 		return [1, 1, 1]; // Valeur par défaut pour éviter les erreurs
 	}
 };
+
+
+const fetchlogOut = async () => {
+	const navigate = useNavigate();
+	
+	const handleLogout = async (e) => {
+		e.preventDefault();
+
+		try {
+			const response = await fetch('https://localhost:8443/api/auth/logout_user/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include'
+			});
+
+			if (response.ok) {
+				navigate('/');
+			}
+			else 
+			{
+				const errorData = await response.json();
+				setError(errorData.error); // Gérer l'erreur
+			}
+		}catch (err) {
+		   setError('Une erreur s\'est produite');
+	   }
+	};
+}
 
 const fetchUserData = async () => {
 	try {
@@ -30,7 +59,7 @@ const fetchUserData = async () => {
 		});
 
 		if (response.ok) {
-			return await response.json();
+			return null;
 		} else {
 			const errorData = await response.json();
 			console.log(errorData.error);
@@ -60,10 +89,30 @@ const Homepage = () => {
 		getUserData();
 	}, []);
 
+	const handleLogout = async () => {
+		try {
+			const response = await fetch('https://localhost:8443/api/auth/logout/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include'
+			});
+
+			if (response.ok) {
+				navigate('/');
+			} else {
+				const errorData = await response.json();
+				setError(errorData.error);
+			}
+		} catch (err) {
+			console.log("dwadwa");
+			setError('Une erreur s\'est produite');
+		}
+	};
+
 	const handleClick = () => {
 		setLogoMoved(true);
 		setTimeout(() => {
-			navigate('/');
+			handleLogout(); // Logout after logo animation
 		}, 600);
 	};
 
@@ -91,10 +140,10 @@ const Homepage = () => {
 				</div>
 			</div>
 			<div className="menu-button-container">
-				<div className="title-game">Game</div>
-				<button type="button" className="btn btn-primary btn-one">1v1</button>
-				<button type="button" className="btn btn-primary btn-one">Tournois</button>
-				<button type="button" className="btn btn-primary btn-one">3d game</button>
+				<div className="title-game">Game Mode</div>
+				<MyButton text="1 vs 1"></MyButton>
+				<MyButton text="Tournois"></MyButton>
+				<MyButton text="2 vs 2"></MyButton>
 			</div>
 			<div className="right-container"></div>
 		</div>

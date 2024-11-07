@@ -10,9 +10,35 @@
 	width: 100vw;
  }
 
+ .container-avatar {
+	 display: flex;
+	 justify-content: center;
+	 align-items: center;
+	 width: 150px;
+	 height: 50px;
+ }
+
+ .form-nuser {
+	display: flex;
+	justify-content: space-between;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+ }
+
+ .label-profile{
+	 margin-top: 10%;
+	display: flex;
+	justify-content: center;
+	width: 215px;
+	align-items: center;
+ }
+
  .container-profile {
 	display: flex;
-	justify-content: space-between; 
+	/* justify-content: s; */
+	gap: 20%;
+	color: white;
 	align-items: center;
 	position: absolute;
 	flex-direction: column;
