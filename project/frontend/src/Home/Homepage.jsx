@@ -49,26 +49,26 @@ const fetchlogOut = async () => {
 }
 
 const fetchUserData = async () => {
-	try {
-		const response = await fetch('https://localhost:8443/api/auth/get_user/', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			credentials: 'include'
-		});
-
-		if (response.ok) {
-			return null;
-		} else {
-			const errorData = await response.json();
-			console.log(errorData.error);
+		try {
+			const response = await fetch('https://localhost:8443/api/auth/get_user/', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include'
+			});
+	
+			if (response.ok) {
+				return await response.json();
+			} else {
+				const errorData = await response.json();
+				console.log(errorData.error);
+				return null;
+			}
+		} catch (error) {
+			console.error("Erreur lors de la requête : ", error);
 			return null;
 		}
-	} catch (error) {
-		console.error("Erreur lors de la requête : ", error);
-		return null;
-	}
 };
 
 const Homepage = () => {

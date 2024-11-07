@@ -11,7 +11,7 @@ const MyButton = ({ to, text, href, onClick}) => {
 		return(
 				<a
 				href={to}
-				className="btn btn-primary btn-one"
+				className={`btn btn-primary btn-one `}
 			>
 			{text}
 			</a>
@@ -20,7 +20,7 @@ const MyButton = ({ to, text, href, onClick}) => {
 		return (
 				<a
 				onClick={onClick}
-				className="btn btn-primary btn-one"
+				className={`btn btn-primary btn-one `}
 			>
 			{text}
 			</a>
@@ -28,7 +28,7 @@ const MyButton = ({ to, text, href, onClick}) => {
 	return (
 			<a
 				onClick={testos}
-				className="btn btn-primary btn-one"
+				className={`btn btn-primary btn-one `}
 			>
 			{text}
 			</a>

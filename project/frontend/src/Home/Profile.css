@@ -10,10 +10,12 @@
 	width: 100vw;
  }
 
+ .case-input.read-only {
+	background-color: rgb(150, 147, 147);
+}
+
  .container-avatar {
-	 display: flex;
-	 justify-content: center;
-	 align-items: center;
+	position: absolute;
 	 width: 150px;
 	 height: 50px;
  }
@@ -27,7 +29,7 @@
  }
 
  .label-profile{
-	 margin-top: 10%;
+	margin: 4%;
 	display: flex;
 	justify-content: center;
 	width: 215px;

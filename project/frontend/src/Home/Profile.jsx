@@ -34,7 +34,7 @@ const Profile = () => {
 				{isNormal ? (
 					<NormalUserForm />
 				) : (
-					<FortytwoUserForm />
+					<FortytwoUserForm username={userData.username}/>
 				)}
 			</div>
 			<div className="container-avatar">
@@ -107,7 +107,7 @@ return (
 						onChange={(e) => setPassword(e.target.value)}
 						/>
 					<div style={{ marginTop: "20px" }}>
-						<MyButton text="Save and Quit" onClick={handleNormal}></MyButton>
+						<MyButton text="Save and Quit" onClick={handleNormal}/>
 					</div>
 			</form>
 		</div>
@@ -116,12 +116,46 @@ return (
 );
 }
 
-const FortytwoUserForm = () => {
+const FortytwoUserForm = ({username}) => {
 	return (
-		<div>
-			dwadwa
-		</div>
-	)
+			<>
+					<div className="form-nuser">
+						<h2>You can't change 42 User Information</h2>
+					<form>
+						<label className="label-profile" htmlFor="exampleInputUsername1">UserName </label>
+						<input
+							type="text"
+							className="case-input read-only"
+							id="exampleInputUsername1"
+							placeholder={username}
+							readOnly
+						/>
+
+						<label className="label-profile" htmlFor="exampleInputEmail1">Email address </label>
+						<input
+							type="email"
+							className="case-input read-only"
+							id="exampleInputEmail1"
+							placeholder="Undefined"
+							readOnly
+						/>
+
+						<label className="label-profile" htmlFor="exampleInputPassword1">Password </label>
+						<input
+							type="password"
+							className="case-input read-only"
+							id="exampleInputPassword1"
+							placeholder="***********"
+							readOnly
+						/>
+
+						<div style={{ marginTop: "20px" }}>
+							<MyButton text="Quit" to="homepage"/>
+						</div>
+					</form>
+				</div>
+			</>
+	);
 
 }
 

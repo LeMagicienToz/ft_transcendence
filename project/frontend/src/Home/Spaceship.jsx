@@ -50,7 +50,6 @@ const Spaceship = () => {
 			ref.current.position.copy(endPosition);
 			ref.current.scale.copy(endScale);
 			ref.current.rotation.copy(endRotation);
-			console.log("abcdefg");
 			setTimeout(() => {
 				navigate('/Homepage');
 			}, 0);

@@ -3,7 +3,14 @@
 		color: #FFF;
 		transition: all 0.3s;
 		position: relative;
+		background-color: aqua;
 	}
+	
+	.btn-primary.btn-one.custom-bg {
+    background-color: #ff5833 !important;
+    border-color: #00000000 !important;
+    color: white !important;
+}
 
 	.btn-one span {
 		transition: all 0.3s;
