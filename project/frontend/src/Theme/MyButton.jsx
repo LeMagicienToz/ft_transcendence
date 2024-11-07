@@ -9,29 +9,29 @@ const MyButton = ({ to, text, href, onClick}) => {
 	}
 	if(href == true)
 		return(
-				<button
+				<a
 				href={to}
 				className="btn btn-primary btn-one"
 			>
 			{text}
-			</button>
+			</a>
 		)
 	else if(onClick)
 		return (
-				<button
+				<a
 				onClick={onClick}
 				className="btn btn-primary btn-one"
 			>
 			{text}
-			</button>
+			</a>
 		)
 	return (
-			<button
+			<a
 				onClick={testos}
 				className="btn btn-primary btn-one"
 			>
 			{text}
-			</button>
+			</a>
 		);
 };
 
