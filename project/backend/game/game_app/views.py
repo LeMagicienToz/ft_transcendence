@@ -22,8 +22,8 @@ class GameCreateView(APIView):
     """
     Create a new Game object
     the request must be POST
-    body = {'user_id': type int,
-    'user_name': type string,
+    body = {'token': type string,
+    '42_access_token': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
@@ -31,13 +31,15 @@ class GameCreateView(APIView):
     }
     """
     def post(self, request):
+        token = request.data.get('token')
+        token42 = request.data.get('42_acccess_token')
         # get player 1 user_id and user_name
         try:
-            player1_user_id = int(request.POST.get('user_id'))
+            player1_user_id = int(request.data.get('user_id'))
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        player1_user_name = request.POST.get('user_name')
-        nickname = request.POST.get('nickname', player1_user_name)
+        player1_user_name = request.data.get('user_name')
+        nickname = request.data.get('nickname', player1_user_name)
         # Data validation
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
@@ -58,20 +60,20 @@ class GameCreateView(APIView):
             player1.nickname = nickname
             player1.save()
         # get game type (1 vs 1 or 2 vs 2)
-        match_type = request.POST.get('match_type')
+        match_type = request.data.get('match_type')
         if not match_type:
             match_type = '1v1'
         elif match_type not in ['1v1', '2v2']:
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # get game name (pong or snake)
-        game_type = request.POST.get('game_type')
+        game_type = request.data.get('game_type')
         if not game_type:
             game_type = 'pong'
         elif game_type not in ['pong', 'snake']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
         # get tournament id and check if it's valid
         try:
-            tourn_id = int(request.POST.get('tournament_id', 0))
+            tourn_id = int(request.data.get('tournament_id', 0))
             tourn = Tournament.objects.get(id=tourn_id) if tourn_id > 0 else None
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, Tournament.DoesNotExist):
