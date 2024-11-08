@@ -157,10 +157,8 @@ class GameJoinView(APIView):
     def put(self, request, game_id):
         # get game from id
         game = get_object_or_404(Game, id=game_id)
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # read the JSON file from the request
+        data = request.data
         # get new player user_id and user_name
         try:
             player_user_id = int(data.get('user_id'))
@@ -430,11 +428,8 @@ class TournamentJoinView(APIView):
         # tournament must be waiting
         if tournament.status != 'waiting':
             return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
-        # get the data
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # read the JSON file from the request
+        data = request.data
         # get player id
         try:
             player_user_id = int(data.get('user_id'))
