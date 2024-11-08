@@ -87,7 +87,7 @@ class GameCreateView(APIView):
         # Get score to win
         try:
             score_to_win = int(request.data.get('score_to_win', 3))
-        except (ValueError, TypeError, Tournament.DoesNotExist):
+        except (ValueError, TypeError):
             score_to_win = 3
         # get tournament id and check if it's valid
         try:
@@ -125,9 +125,11 @@ class GameListView(APIView):
         games_data = [
             {
                 'id': game.id,
+                'game_custom_name': game.game_custom_name,
                 'status': game.status,
                 'game_type': game.game_type,
                 'match_type': game.match_type,
+                'score_to_win': game.score_to_win,
                 'tournament_id': game.tournament_id,
                 'players': [
                     {
@@ -152,9 +154,11 @@ class GameDetailView(APIView):
         game = get_object_or_404(Game, id=game_id)
         game_details = {
             'game_id': game.id,
+            'game_custom_name': game.game_custom_name,
             'status': game.status,
             'game_type': game.game_type,
             'match_type': game.match_type,
+            'score_to_win': game.score_to_win,
             'tournament_id': game.tournament_id,
             'players': [
                 {
