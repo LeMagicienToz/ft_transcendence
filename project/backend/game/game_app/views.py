@@ -344,7 +344,7 @@ class TournamentCreateView(APIView):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
         # create tournament
         tournament = Tournament.objects.create(
-            tournament_custom_name=tournament_custom_name
+            tournament_custom_name=tournament_custom_name,
             match_type=tourn_match_type,
             game_type=tourn_game_type,
             score_to_win=score_to_win,
