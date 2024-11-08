@@ -40,6 +40,7 @@ class Game(models.Model):
 
 class Tournament(models.Model):
     tournament_custom_name = models.CharField(max_length=30, default="tournament_custom_name")
+    score_to_win = models.IntegerField(default=3)
     player_count = models.IntegerField(default = 0)
     players = models.ManyToManyField(Player, related_name="tournaments")
     games = models.ManyToManyField(Game, related_name="tournaments")
