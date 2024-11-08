@@ -44,7 +44,10 @@ def utils_set_username(data, user): # la fonction ne save pas l'objet user
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
     if User.objects.filter(username=username).exists():
         return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur déjà utilisé'}, status=400)
-    user.username = data.get('username')
+    if username:
+        user.username = data.get('username')
+    else:
+        return JsonResponse({'success': False, 'error': 'username manquant'}, status=400)
     return JsonResponse({'success': True, 'message': 'Nom d\'utilisateur valide'}, status=200)
 
 def utils_set_email(data, user): # la fonction ne save pas l'objet user
@@ -53,7 +56,10 @@ def utils_set_email(data, user): # la fonction ne save pas l'objet user
         return JsonResponse({'success': False, 'error': 'Email invalide'}, status=400)
     if User.objects.filter(email=email).exists():
         return JsonResponse({'success': False, 'error': 'Email déjà utilisé'}, status=400)
-    user.email = data.get('email')
+    if email:
+        user.email = data.get('email')
+    else:
+        return JsonResponse({'success': False, 'error': 'Email manquant'}, status=400)
     return JsonResponse({'success': True, 'message': 'Email valide'}, status=200)
 
 # def email_is_confirmed(user):
@@ -82,3 +88,23 @@ def utils_send_twoFA_code(user):
 
 # def utils_get_twoFA_verified(user):
 #     return r.get(f"user:{user.id}:twoFA_verified")
+
+def utils_reset_password(data, user): # la fonction ne save pas l'objet user
+    username = data.get('username')
+    new_password = data.get('new_password')
+
+    if not new_password or not username:
+        return JsonResponse({'success': False, 'error': 'username ou new_password manquant'}, status=400)
+
+    if username and username.endswith('#42'):
+        return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
+    if username and '@' in username:
+        user = User.objects.filter(email=username).first()
+        username = user.username
+    # user_exist = User.objects.get(username=user.username)
+    # if not user_exist:
+    #     return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+    user.set_password(new_password)
+    user.save()
+    return JsonResponse({'success': True, 'message': 'Mot de passe réinitialisé avec succès', 'user_id': user.id}, status=200)
+
