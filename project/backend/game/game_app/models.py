@@ -28,6 +28,7 @@ class Game(models.Model):
                   ("playing", "Game in progress"), ("finished", "Game finished")],
         default="waiting"
     )
+    tournament_id = models.IntegerField(default = 0)
     creation_time = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -36,7 +37,9 @@ class Game(models.Model):
         return (f'Game {self.id} (Type: {self.game_type}, Match: {self.match_type}, Status: {self.status})')
 
 class Tournament(models.Model):
+    player_count = models.IntegerField(default = 0)
     players = models.ManyToManyField(Player, related_name="tournaments")
+    games = models.ManyToManyField(Game, related_name="tournaments")
     match_type = models.CharField(
         max_length=10,
         choices=[("1v1", "1 vs 1"), ("2v2", "2 vs 2")],
