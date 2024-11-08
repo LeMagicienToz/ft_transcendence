@@ -41,7 +41,7 @@ class GameCreateView(APIView):
         #user_info = self.get_info_from_token(token, token42)
         #if not user_info:
         #    return JsonResponse({'error': 'No info from token'}, status=401)
-        
+
         # get player 1 user_id and user_name
         #try:
         #    player1_user_id = int(user_info.get('user_id'))
@@ -393,11 +393,11 @@ class TournamentListView(APIView):
             ]
             tournament_data = {
                 "id": tournament.id,
-                "tournament_custom_name": tourament.tournament_custom_name,
+                "tournament_custom_name": tournament.tournament_custom_name,
                 "match_type": tournament.match_type,
                 "game_type": tournament.game_type,
                 "player_count": tournament.player_count,
-                "score_to_win": game.score_to_win,
+                "score_to_win": tournament.score_to_win,
                 "status": tournament.status,
                 "creation_time": tournament.creation_time,
                 "start_time": tournament.start_time,
@@ -449,11 +449,11 @@ class TournamentDetailView(APIView):
 
         tournament_data = {
             "id": tournament.id,
-            "tournament_custom_name": tourament.tournament_custom_name,
+            "tournament_custom_name": tournament.tournament_custom_name,
             "match_type": tournament.match_type,
             "game_type": tournament.game_type,
             "player_count": tournament.player_count,
-            "score_to_win": game.score_to_win,
+            "score_to_win": tournament.score_to_win,
             "status": tournament.status,
             "creation_time": tournament.creation_time,
             "start_time": tournament.start_time,
