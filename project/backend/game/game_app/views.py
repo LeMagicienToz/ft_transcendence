@@ -22,8 +22,8 @@ class GameCreateView(APIView):
     """
     Create a new Game object
     the request must be POST
-    body = {'user_id': type int,
-    'user_name': type string,
+    body = {'token': type string,
+    '42_access_token': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
@@ -31,13 +31,15 @@ class GameCreateView(APIView):
     }
     """
     def post(self, request):
+        token = request.data.get('token')
+        token42 = request.data.get('42_acccess_token')
         # get player 1 user_id and user_name
         try:
-            player1_user_id = int(request.POST.get('user_id'))
+            player1_user_id = int(request.data.get('user_id'))
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        player1_user_name = request.POST.get('user_name')
-        nickname = request.POST.get('nickname', player1_user_name)
+        player1_user_name = request.data.get('user_name')
+        nickname = request.data.get('nickname', player1_user_name)
         # Data validation
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
@@ -58,20 +60,20 @@ class GameCreateView(APIView):
             player1.nickname = nickname
             player1.save()
         # get game type (1 vs 1 or 2 vs 2)
-        match_type = request.POST.get('match_type')
+        match_type = request.data.get('match_type')
         if not match_type:
             match_type = '1v1'
         elif match_type not in ['1v1', '2v2']:
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # get game name (pong or snake)
-        game_type = request.POST.get('game_type')
+        game_type = request.data.get('game_type')
         if not game_type:
             game_type = 'pong'
         elif game_type not in ['pong', 'snake']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
         # get tournament id and check if it's valid
         try:
-            tourn_id = int(request.POST.get('tournament_id', 0))
+            tourn_id = int(request.data.get('tournament_id', 0))
             tourn = Tournament.objects.get(id=tourn_id) if tourn_id > 0 else None
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, Tournament.DoesNotExist):
@@ -155,10 +157,8 @@ class GameJoinView(APIView):
     def put(self, request, game_id):
         # get game from id
         game = get_object_or_404(Game, id=game_id)
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # read the JSON file from the request
+        data = request.data
         # get new player user_id and user_name
         try:
             player_user_id = int(data.get('user_id'))
@@ -178,13 +178,13 @@ class GameJoinView(APIView):
             defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
         )
         # if player allready exist and user_name is different, then update
-        if not created and player1.user_name != player1_user_name:
-            player1.user_name = player1_user_name
-            player1.save()
+        if not created and player.user_name != player_user_name:
+            player.user_name = player_user_name
+            player.save()
         # if player allready exist and nickname is different, then update
-        if not created and player1.nickname != nickname:
-            player1.nickname = nickname
-            player1.save()
+        if not created and player.nickname != nickname:
+            player.nickname = nickname
+            player.save()
         # check valid match type
         #if game.match_type not in ['1v1', '2v2']:
         #    return JsonResponse({'error': 'Invalid match type'}, status=400)
@@ -272,7 +272,7 @@ class TournamentCreateView(APIView):
             player_count = int(request.data.get('player_count'))
             if player_count <= 1:
                 raise ValueError
-            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 4 != 0):
+            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
@@ -428,11 +428,8 @@ class TournamentJoinView(APIView):
         # tournament must be waiting
         if tournament.status != 'waiting':
             return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
-        # get the data
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # read the JSON file from the request
+        data = request.data
         # get player id
         try:
             player_user_id = int(data.get('user_id'))
