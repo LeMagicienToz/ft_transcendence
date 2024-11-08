@@ -178,13 +178,13 @@ class GameJoinView(APIView):
             defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
         )
         # if player allready exist and user_name is different, then update
-        if not created and player1.user_name != player1_user_name:
-            player1.user_name = player1_user_name
-            player1.save()
+        if not created and player.user_name != player_user_name:
+            player.user_name = player_user_name
+            player.save()
         # if player allready exist and nickname is different, then update
-        if not created and player1.nickname != nickname:
-            player1.nickname = nickname
-            player1.save()
+        if not created and player.nickname != nickname:
+            player.nickname = nickname
+            player.save()
         # check valid match type
         #if game.match_type not in ['1v1', '2v2']:
         #    return JsonResponse({'error': 'Invalid match type'}, status=400)
@@ -272,7 +272,7 @@ class TournamentCreateView(APIView):
             player_count = int(request.data.get('player_count'))
             if player_count <= 1:
                 raise ValueError
-            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 4 != 0):
+            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
