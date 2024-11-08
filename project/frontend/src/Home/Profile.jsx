@@ -34,7 +34,7 @@ const Profile = () => {
 				{isNormal ? (
 					<NormalUserForm />
 				) : (
-					<FortytwoUserForm username={userData.username}/>
+					<NormalUserForm />
 				)}
 			</div>
 			<div className="container-avatar">

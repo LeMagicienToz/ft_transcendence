@@ -1,0 +1,104 @@
+/* Main Container */
+.Box-gamemenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center vertically */
+    height: 50%; /* Full viewport height */
+    width: 50%; /* Full viewport width */
+    background-color: #1a6cdb;
+    border: 4mm ridge #d86e0bc4;
+}
+
+.title-gamemenu {
+    position: absolute;
+    top: 13%;
+    font-size: 50px;
+    border: 4mm ridge #d86e0bc4;
+    background-color: #1a6cdb;
+}
+
+/* Create Form Container */
+.Create-gamemenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    gap: 20px; /* Add space between elements */
+}
+
+/* Form Settings */
+.create-setting {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Fieldset Styling */
+fieldset {
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Input and Label Styling */
+input[type="text"] {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+label {
+    color: white;
+}
+
+
+.game-mode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+}
+
+.game-mode-switcher {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.arrow-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.arrow-button:hover {
+    background-color: #2980b9;
+}
+
+.game-mode-display {
+    font-size: 24px;
+    font-weight: bold;
+}

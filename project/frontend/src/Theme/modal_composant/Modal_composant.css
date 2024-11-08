@@ -1,0 +1,13 @@
+.blur-container {
+    display: flex;
+    position: fixed;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    z-index: 200000;
+    background-color: rgba(8, 8, 8, 0.651);
+    backdrop-filter: blur(4px);
+    top: 0;
+    left: 0;
+}
