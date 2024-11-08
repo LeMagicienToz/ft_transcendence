@@ -11,7 +11,7 @@ class Player(models.Model):
         return (f'Player {self.nickname} (ID: {self.user_id}, Username: {self.user_name}, Score: {self.score})')
 
 class Game(models.Model):
-    game_custom_name = models.CharField(max_length=30)
+    game_custom_name = models.CharField(max_length=30, default="game_custom_name")
     score_to_win = models.IntegerField(default=3)
     players = models.ManyToManyField(Player, related_name="games")
     match_type = models.CharField(
