@@ -47,28 +47,30 @@ const Profile = () => {
 
 const NormalUserForm = () => {
 	const [username, setUserName] = useState('');
-	const [password, setPassword] = useState('');
+	const [new_password, setPassword] = useState('');
 	const [email, setEmail] = useState('');
+	const [twoFA_enabled, setTwoFAEnabled] = useState(false);
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState('');
 
-	const handleNormal = async (e) => {
-		e.preventDefault();
-		
+	const handleNormal = async () => {
 		try {
 			const response = await fetch('https://localhost:8443/api/auth/set_profile/', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ username, password, email }),
+				body: JSON.stringify({ username, email, twoFA_enabled, new_password}),
+				credentials: 'include',
 			});
 			if (response.ok) {
 				const data = await response.json();
+				console.log("OOOOOOOOOOKKKKKKKKKKKKKK");
 				setUserData(data);
 			} else {
 				const errorData = await response.json();
 				setError(errorData.error);
+				console.log("dwajdiwajdoiwa");
 			}
 		} catch (err) {
 			setError('Une erreur s\'est produite');
@@ -78,7 +80,7 @@ const NormalUserForm = () => {
 return (
 	<>
 		<div className="form-nuser">
-			<form onSubmit={handleNormal}>
+			<form>
 					<label className="label-profile" htmlFor="exampleInputUsername1">UserName </label>
 					<input
 						type="username"
@@ -97,13 +99,13 @@ return (
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 							/>
-					<label className="label-profile" htmlFor="exampleInputPassword1">Password </label>
+					<label className="label-profile" htmlFor="exampleInputPassword1">new_password </label>
 					<input
 						type="password"
 						className="case-input"
 						id="exampleInputPassword1"
 						placeholder="Password"
-						value={password}
+						value={new_password}
 						onChange={(e) => setPassword(e.target.value)}
 						/>
 					<div style={{ marginTop: "20px" }}>

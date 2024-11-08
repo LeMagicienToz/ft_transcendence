@@ -11,7 +11,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from .decorators import jwt_42_required
 from .decorators import request_from_42_or_regular_user, twoFA_status_check
-from .utils_views import utils_set_user_color, utils_set_username, utils_set_email, utils_delete_account, utils_send_twoFA_code
+from .utils_views import utils_set_user_color, utils_set_username, utils_set_email, utils_delete_account, utils_send_twoFA_code, utils_reset_password
 import os
 from django.core.mail import send_mail
 from .redis_client import r
@@ -45,35 +45,60 @@ def callback_42(request):
 
         username = user_data.get('login') + '#42'
         intra_id = user_data.get('id')
+        email = user_data.get('email')
         #image_url = user_data['image']['link'] # you can set different size of image by adding [versions][large/medium/small], see 42 api doc 
         image_url = user_data['image']['versions']['small'] # ['micro', 'small', 'medium', 'large']
 
-        user = User.objects.filter(username=username).first()
-        first_connection = False
-        if not user:
+        user = User.objects.filter(custom_user__intra_id=intra_id).first()
+        #return JsonResponse({'success': True, 'message': 'testtttttttttttttttt', 'user_id': user.id, 'username': username, 'custom_user_intra_id': user.custom_user.intra_id}, status=200)
+        if user is None:
             first_connection = True
-            user = User(username=username)
-            user.set_unusable_password()
-            user.save()
+        else:
+            first_connection = False
+        # if first_connection:
+        #     user = User(username=username)
+        #     user.email = email
+        #     user.set_unusable_password()
+        #     user.save()
 
-        custom_user, created = CustomUser.objects.get_or_create(user=user)
-        custom_user.profile_picture_url = image_url
-        custom_user.intra_id = intra_id
+        # custom_user, created = CustomUser.objects.get_or_create(user=user)
+        # custom_user.profile_picture_url = image_url
+        # custom_user.intra_id = intra_id
+        # custom_user.twoFA_enabled = False
+        # if first_connection:
+        #     custom_user.suitColor = ''
+        #     custom_user.visColor = ''
+        #     custom_user.ringsColor = ''
+        #     custom_user.bpColor = ''
+        #     custom_user.twoFA_enabled = False
+        #     custom_user.save()
+
+
         if first_connection:
-            custom_user.suitColor = ''
-            custom_user.visColor = ''
-            custom_user.ringsColor = ''
-            custom_user.bpColor = ''
+            user = User(username=username, email=email)
+            user.set_unusable_password()
+            custom_user = CustomUser(user=user)
+            custom_user.intra_id = intra_id
+            custom_user.profile_picture_url = image_url
             custom_user.twoFA_enabled = False
-            custom_user.save()
+        else:
+            custom_user = CustomUser.objects.get(user=user)
+            custom_user.profile_picture_url = image_url
+            custom_user.intra_id = intra_id
+        
+        user.save()
+        custom_user.save()
 
-        login(request, user)
+        #login(request, user)
+        if user.custom_user.twoFA_enabled:
+            utils_send_twoFA_code(user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
         if first_connection:
             response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Avatar/')
         else:
             response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Home/')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
+        r.setex(f'user_{user.custom_user.intra_id}_42_access_token', 60 * 60 * 24 * 7, access_token)
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
@@ -93,9 +118,12 @@ def login_user(request):
     else:
         user = authenticate(request, username=username, password=password)
     if user is not None:
-        login(request, user)
+        #login(request, user)
         token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
         refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
+        r.setex(f'user_{user.id}_token', 60 * 5, token)
+        r.setex(f'user_{user.id}_refresh_token', 60 * 60 * 24 * 7, refresh_token)
+
         response = JsonResponse({'success': True, 'user_id': user.id, 'twoFA_enabled': user.custom_user.twoFA_enabled, 'profile_picture_url': user.custom_user.profile_picture_url, 'message': 'Utilisateur connecté avec succès'}, status=200)
         response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5) # secure for https only, samesite for csrf protection, max_age 5 min
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='Strict', max_age=60 * 60 * 24 * 7)
@@ -112,6 +140,10 @@ def login_user(request):
 @twoFA_status_check
 def logout_user(request):
     user = request.user
+    r.delete(f'user_{user.id}_token')
+    r.delete(f'user_{user.id}_refresh_token')
+    r.delete(f'user_{user.custom_user.intra_id}_42_access_token')
+
     r.delete(f'user_{user.id}_twoFA_code')
     r.delete(f'user_{user.id}_twoFA_verified')
     response = JsonResponse({'success': True, 'message': 'Utilisateur déconnecté'}, status=200)
@@ -157,9 +189,11 @@ def register(request):
     custom_user.visTexture = None
     custom_user.save()
 
-    login(request, user)
+    #login(request, user)
     token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
     refresh_token = jwt.encode({'user_id': user.id, 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 60 * 24 * 7}, settings.REFRESH_TOKEN_SECRET, algorithm='HS256')
+    r.setex(f'user_{user.id}_token', 60 * 5, token)
+    r.setex(f'user_{user.id}_refresh_token', 60 * 60 * 24 * 7, refresh_token)
 
     response = JsonResponse({'success': True, 'message': f"Utilisateur {user.username} créé avec succès + login!", 'user_id': user.id}, status=201)
     response.set_cookie(key='token', value=token, httponly=True, secure=True, samesite='Strict', max_age=60 * 5)  # sécurisé
@@ -168,47 +202,11 @@ def register(request):
     return response
 
 
-
-@require_POST
-@jwt_required
-@twoFA_status_check
-def reset_password(request):
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Corps de la requête invalide ou manquant'}, status=400)
-
-    username = data.get('username')
-    new_password = data.get('new_password')
-
-    if not new_password or not username:
-        return JsonResponse({'success': False, 'error': 'username ou new_password manquant'}, status=400)
-
-    if username and username.endswith('#42'):
-        return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur invalide'}, status=400)
-    if username and '@' in username:
-        user = User.objects.filter(email=username).first()
-        username = user.username
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
-
-    user.set_password(new_password)
-    user.save()
-    return JsonResponse({'success': True, 'message': 'Mot de passe réinitialisé avec succès', 'user_id': user.id}, status=200)
-
-
 @require_POST
 @request_from_42_or_regular_user
 @twoFA_status_check
 def delete_account(request):
-    try:
-        user_id = request.user.id
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
-
+    user = request.user
     user.custom_user.delete()
     user.delete()
     return JsonResponse({'success': True,'message': 'Compte supprimé avec succès'}, status=200)
@@ -268,7 +266,7 @@ def set_user_color(request):
 @request_from_42_or_regular_user
 @require_POST
 @twoFA_status_check
-def set_profile(request):
+def set_profile(request): # username, email, twoFA_enabled, new_password
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:
@@ -276,21 +274,16 @@ def set_profile(request):
     user = request.user
     #username
     response = utils_set_username(data, user)
-    if response['success'] == False:
+    if response.get('success') == False:
         return response
     #email
     response = utils_set_email(data, user)
-    if response['success'] == False:
+    if response.get('success') == False:
         return response
-    #profile_picture_url
-    user.custom_user.profile_picture_url = data.get('profile_picture_url')
-    if not user.custom_user.profile_picture_url:
-        user.custom_user.profile_picture_url = None
-    # #colors
-    # response = utils_set_user_color(data, user)
-    # if response['success'] == False:
-    #     return response
-
+    #password
+    response = utils_reset_password(data, user)
+    if response.get('success') == False:
+        return response
     # set twoFA
     twoFA_enabled = data.get('twoFA_enabled')
     if twoFA_enabled == True:
