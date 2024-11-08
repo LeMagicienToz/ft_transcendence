@@ -104,6 +104,7 @@ class GameCreateView(APIView):
                 game_type=game_type,
                 score_to_win=score_to_win,
                 tournament_id=tourn_id,
+                creation_time=timezone.now(),
                 status='waiting'
             )
             game.players.add(player1)
@@ -277,24 +278,62 @@ class TournamentCreateView(APIView):
     """
     Create a tourament
     the request must be DELETE
-    body = {
+    body = {'token': type string,
+    '42_access_token': type string,
+    'tournament_custom_name': type string,
+    'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
+    'score_to_win': type int,
     'player_count': type int,
-    'players': [
-        {
-            'user_id': type int,
-            'user_name': type string,
-            'score': '0',
-            'nickname': type string,
-        }
-    ]
     }
     """
     def post(self, request):
+        token = request.data.get('token')
+        token42 = request.data.get('42_acccess_token')
+        if not token and token42:
+            return JsonResponse({'error': 'Missing authentification token'}, status=400)
+        # TO DO get the user_id and user_name
+        player1_user_id = 1
+        player1_user_name = 'Toto'
+        # end of TO DO
+        tournament_custom_name = request.data.get('tournament_custom_name')
+        nickname = request.data.get('nickname', player1_user_name)
+        # Data validation
+        if not player1_user_id or not player1_user_name:
+            return JsonResponse({'error': 'Player information is required'}, status=400)
+        # get or create the player
+        player1, created = Player.objects.get_or_create(
+            user_id=player1_user_id,
+            defaults={'user_id': player1_user_id,
+                       'user_name': player1_user_name,
+                       'nickname': nickname,
+                       'score': 0}
+        )
+        # if player allready exist and user_name is different, then update
+        if not created and player1.user_name != player1_user_name:
+            player1.user_name = player1_user_name
+            player1.save()
+        # if player allready exist and nickname is different, then update
+        if not created and player1.nickname != nickname:
+            player1.nickname = nickname
+            player1.save()
+        # get game type (1 vs 1 or 2 vs 2)
         tourn_match_type = request.data.get('match_type')
         if tourn_match_type not in ['1v1', '2v2']:
             return JsonResponse({'error': 'Invalid match type'}, status=400)
+        # get game type (pong or snake)
+        tourn_game_type = request.data.get('game_type')
+        if not tourn_game_type:
+            tourn_game_type = 'pong'
+        elif tourn_game_type not in ['pong', 'snake']:
+            return JsonResponse({'error': 'Invalid game type'}, status=400)
+        # Get score to win
+        try:
+            score_to_win = int(request.data.get('score_to_win', 3))
+        except (ValueError, TypeError):
+            score_to_win = 3
+        # Get the number of players
         try:
             player_count = int(request.data.get('player_count'))
             if player_count <= 1:
@@ -303,43 +342,17 @@ class TournamentCreateView(APIView):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
-        tourn_game_type = request.data.get('game_type')
-        if tourn_game_type not in ['pong', 'snake']:
-            return JsonResponse({'error': 'Invalid game type'}, status=400)
-        # get the player who create the tournament
-        player_data = request.data.get('player')
-        if not player_data:
-            return JsonResponse({'error': 'Player data is required to create a tournament'}, status=400)
-        try:
-            user_id = player_data.get('user_id')
-            user_name = player_data.get('user_name')
-            nickname = player_data.get('nickname', user_name)
-        except KeyError:
-            return JsonResponse({'error': 'Missing player information'}, status=400)
-        # check if the player exist, create or update if needed
-        player, created = Player.objects.get_or_create(
-            user_id=user_id,
-            defaults={
-                'user_name': user_name,
-                'nickname': nickname,
-                'score': 0
-            }
-        )
-        if not created:
-            if player.user_name != user_name:
-                player.user_name = user_name
-            if player.nickname != nickname:
-                player.nickname = nickname
-            player.save()
         # create tournament
         tournament = Tournament.objects.create(
+            tournament_custom_name=tournament_custom_name
             match_type=tourn_match_type,
             game_type=tourn_game_type,
-            status='waiting',
+            score_to_win=score_to_win,
             player_count=player_count,
-            creation_time=timezone.now()
+            creation_time=timezone.now(),
+            status='waiting'
         )
-        tournament.players.add(player)
+        tournament.players.add(player1)
 
         create_round_robin_matches(tournament)
         return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
@@ -367,9 +380,12 @@ class TournamentListView(APIView):
             games = [
                 {
                     "id": game.id,
+                    "game_custom_name": game.game_custom_name,
                     "match_type": game.match_type,
                     "game_type": game.game_type,
+                    "score_to_win": game.score_to_win,
                     "status": game.status,
+                    "creation_time": game.creation_time,
                     "start_time": game.start_time,
                     "end_time": game.end_time
                 }
@@ -377,8 +393,11 @@ class TournamentListView(APIView):
             ]
             tournament_data = {
                 "id": tournament.id,
+                "tournament_custom_name": tourament.tournament_custom_name,
                 "match_type": tournament.match_type,
                 "game_type": tournament.game_type,
+                "player_count": tournament.player_count,
+                "score_to_win": game.score_to_win,
                 "status": tournament.status,
                 "creation_time": tournament.creation_time,
                 "start_time": tournament.start_time,
@@ -416,9 +435,12 @@ class TournamentDetailView(APIView):
         games = [
             {
                 "id": game.id,
+                "game_custom_name": game.game_custom_name,
                 "match_type": game.match_type,
                 "game_type": game.game_type,
+                "score_to_win": game.score_to_win,
                 "status": game.status,
+                "creation_time": game.creation_time,
                 "start_time": game.start_time,
                 "end_time": game.end_time
             }
@@ -427,8 +449,11 @@ class TournamentDetailView(APIView):
 
         tournament_data = {
             "id": tournament.id,
+            "tournament_custom_name": tourament.tournament_custom_name,
             "match_type": tournament.match_type,
             "game_type": tournament.game_type,
+            "player_count": tournament.player_count,
+            "score_to_win": game.score_to_win,
             "status": tournament.status,
             "creation_time": tournament.creation_time,
             "start_time": tournament.start_time,

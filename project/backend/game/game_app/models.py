@@ -39,6 +39,7 @@ class Game(models.Model):
         return (f'Game {self.id} (Type: {self.game_type}, Match: {self.match_type}, Status: {self.status})')
 
 class Tournament(models.Model):
+    tournament_custom_name = models.CharField(max_length=30, default="tournament_custom_name")
     player_count = models.IntegerField(default = 0)
     players = models.ManyToManyField(Player, related_name="tournaments")
     games = models.ManyToManyField(Game, related_name="tournaments")
