@@ -24,21 +24,34 @@ class GameCreateView(APIView):
     the request must be POST
     body = {'token': type string,
     '42_access_token': type string,
+    'game_custom_name': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
+    'score_to_win': type int,
     'tournament_id': type int, 0 if not in a tournament,
     }
     """
     def post(self, request):
         token = request.data.get('token')
         token42 = request.data.get('42_acccess_token')
+        if not token and token42:
+            return JsonResponse({'error': 'Missing authentification token'}, status=400)
+        # get user_id and user_name from authentification app
+        #user_info = self.get_info_from_token(token, token42)
+        #if not user_info:
+        #    return JsonResponse({'error': 'No info from token'}, status=401)
+        
         # get player 1 user_id and user_name
-        try:
-            player1_user_id = int(request.data.get('user_id'))
-        except (ValueError, TypeError):
-            return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        player1_user_name = request.data.get('user_name')
+        #try:
+        #    player1_user_id = int(user_info.get('user_id'))
+        #except (ValueError, TypeError):
+        #    return JsonResponse({'error': 'Invalid user ID'}, status=400)
+        #player1_user_name = user_info.get('user_name')
+        player1_user_id = 1
+        player1_user_name = 'Toto'
+
+        game_custom_name = request.data.get('game_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
         # Data validation
         if not player1_user_id or not player1_user_name:
@@ -71,6 +84,11 @@ class GameCreateView(APIView):
             game_type = 'pong'
         elif game_type not in ['pong', 'snake']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
+        # Get score to win
+        try:
+            score_to_win = int(request.data.get('score_to_win', 3))
+        except (ValueError, TypeError, Tournament.DoesNotExist):
+            score_to_win = 3
         # get tournament id and check if it's valid
         try:
             tourn_id = int(request.data.get('tournament_id', 0))
@@ -78,18 +96,23 @@ class GameCreateView(APIView):
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, Tournament.DoesNotExist):
             tourn_id = 0
-        # Game init with palyer 1
+        # Game init with pLayer 1
         try:
             game = Game.objects.create(
-                status='waiting',
+                game_custom_name=game_custom_name,
                 match_type=match_type,
                 game_type=game_type,
-                tournament_id=tourn_id
+                score_to_win=score_to_win,
+                tournament_id=tourn_id,
+                status='waiting'
             )
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
         return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
+
+    def get_info_from_token(self, token, token42):
+        pass
 
 class GameListView(APIView):
     """
