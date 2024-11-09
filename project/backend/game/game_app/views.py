@@ -176,8 +176,8 @@ class GameJoinView(APIView):
     """
     this allow a player to join a game
     the request must be PUT
-    body = {'user_id': type int,
-    'user_name': type string,
+    body = {'token': type string,
+    '42_access_token': type string,
     'nickname': type string,
     }
     the game_id is in the url
@@ -185,14 +185,25 @@ class GameJoinView(APIView):
     def put(self, request, game_id):
         # get game from id
         game = get_object_or_404(Game, id=game_id)
+        # check if game is full
+        if game.match_type == '1v1' and game.players.count() >= 2:
+            return JsonResponse({'message': 'Game is already full'}, status=400)
+        elif game.match_type == '2v2' and game.players.count() >= 4:
+            return JsonResponse({'message': 'Game is already full'}, status=400)
+        # tournament must be waiting
+        if game.status != 'waiting':
+            return JsonResponse({'error': 'Game has already started or finished'}, status=400)
         # read the JSON file from the request
         data = request.data
-        # get new player user_id and user_name
-        try:
-            player_user_id = int(data.get('user_id'))
-        except (ValueError, TypeError):
-            return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        player_user_name = data.get('user_name')
+        token = request.data.get('token')
+        token42 = request.data.get('42_acccess_token')
+        if not token and token42:
+            return JsonResponse({'error': 'Missing authentification token'}, status=400)
+        # get user_id and user_name from authentification app
+        player_user_id = 2
+        player_user_name = 'Tutu'
+        # to finish
+
         nickname = data.get('nickname', player_user_name)
         # Player info validation
         if not player_user_id or not player_user_name:
@@ -205,25 +216,16 @@ class GameJoinView(APIView):
             user_id=player_user_id,
             defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
         )
-        # if player allready exist and user_name is different, then update
-        if not created and player.user_name != player_user_name:
-            player.user_name = player_user_name
+        # update if needed
+        if not created:
+            if player.user_name != player_user_name:
+                player.user_name = player_user_name
+            if player.nickname != nickname:
+                player.nickname = nickname
             player.save()
-        # if player allready exist and nickname is different, then update
-        if not created and player.nickname != nickname:
-            player.nickname = nickname
-            player.save()
-        # check valid match type
-        #if game.match_type not in ['1v1', '2v2']:
-        #    return JsonResponse({'error': 'Invalid match type'}, status=400)
-        # check if game is full
-        #if game.match_type == '1v1' and game.players.count() >= 2:
-        #    return JsonResponse({'message': 'Game is already full'}, status=400)
-        #elif game.match_type == '2v2' and game.players.count() >= 4:
-        #    return JsonResponse({'message': 'Game is already full'}, status=400)
         # Assign new player
         game.players.add(player)
-        #game.save()
+        game.save()
         return JsonResponse({'message': 'Player joined', 'game_id': game.id})
 
 class GameStartView(APIView):
@@ -468,8 +470,8 @@ class TournamentJoinView(APIView):
     """
     this allow a player to join a tournament
     the request must be PUT
-    body = {'user_id': type int,
-    'user_name': type string,
+    body = {'token': type string,
+    '42_access_token': type string,
     'nickname': type string,
     }
     'tournament_id' is in the url.
@@ -477,21 +479,30 @@ class TournamentJoinView(APIView):
     def put(self, request, tournament_id):
         # get tournament
         tournament = get_object_or_404(Tournament, id=tournament_id)
+        # check if tournament is full
+        if tournament.players.count() >= tournament.player_count:
+            return JsonResponse({'error': 'Tournament is already full'}, status=400)
         # tournament must be waiting
         if tournament.status != 'waiting':
             return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
         # read the JSON file from the request
         data = request.data
-        # get player id
-        try:
-            player_user_id = int(data.get('user_id'))
-        except (ValueError, TypeError):
-            return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        player_user_name = data.get('user_name')
+        token = request.data.get('token')
+        token42 = request.data.get('42_acccess_token')
+        if not token and token42:
+            return JsonResponse({'error': 'Missing authentification token'}, status=400)
+        # get user_id and user_name from authentification app
+        player_user_id = 2
+        player_user_name = 'Tutu'
+        # to finish
+
         nickname = data.get('nickname', player_user_name)
         # check the player info
         if not player_user_id or not player_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
+        # Check if player allready in tournament
+        if tournament.players.filter(user_id=player_user_id).exists():
+            return JsonResponse({'error': 'Player has already joined the tournament'}, status=400)
         # get or create the player in database
         player, created = Player.objects.get_or_create(
             user_id=player_user_id,
@@ -504,14 +515,9 @@ class TournamentJoinView(APIView):
             if player.nickname != nickname:
                 player.nickname = nickname
             player.save()
-        # check if player allready in the tournament
-        if tournament.players.filter(user_id=player_user_id).exists():
-            return JsonResponse({'error': 'Player has already joined this tournament'}, status=400)
-        # check if tournament is full
-        if tournament.players.count() >= tournament.player_count:
-            return JsonResponse({'error': 'Tournament is already full'}, status=400)
         # add the player
         tournament.players.add(player)
+        tournament.save()
         return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id}, status=200)
 
 class TournamentStartView(APIView):
