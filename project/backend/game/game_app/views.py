@@ -356,7 +356,7 @@ class TournamentCreateView(APIView):
         )
         tournament.players.add(player1)
 
-        create_round_robin_matches(tournament)
+        #create_round_robin_matches(tournament)
         return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
 
 class TournamentListView(APIView):
@@ -389,7 +389,16 @@ class TournamentListView(APIView):
                     "status": game.status,
                     "creation_time": game.creation_time,
                     "start_time": game.start_time,
-                    "end_time": game.end_time
+                    "end_time": game.end_time,
+                    "players": [
+                        {
+                            "user_id": player.user_id,
+                            "user_name": player.user_name,
+                            "score": player.score,
+                            "nickname": player.nickname,
+                        }
+                        for player in game.players.all()
+                    ]
                 }
                 for game in tournament.games.all()
             ]
@@ -409,7 +418,7 @@ class TournamentListView(APIView):
             }
             tournament_list.append(tournament_data)
 
-        return Response(tournament_list)
+        return Response(tournament_list, status=200)
 
 class TournamentDetailView(APIView):
     """
@@ -419,10 +428,7 @@ class TournamentDetailView(APIView):
     the tournament_id is in the url
     """
     def get(self, request, tournament_id):
-        try:
-            tournament = Tournament.objects.get(id=tournament_id)
-        except Tournament.DoesNotExist:
-            return Response({"error": "Tournament not found"}, status=404)
+        tournament = get_object_or_404(Tournament, id=tournament_id)
 
         players = [
             {
@@ -444,7 +450,16 @@ class TournamentDetailView(APIView):
                 "status": game.status,
                 "creation_time": game.creation_time,
                 "start_time": game.start_time,
-                "end_time": game.end_time
+                "end_time": game.end_time,
+                "players": [
+                    {
+                        "user_id": player.user_id,
+                        "user_name": player.user_name,
+                        "score": player.score,
+                        "nickname": player.nickname,
+                    }
+                    for player in game.players.all()
+                ]
             }
             for game in tournament.games.all()
         ]
@@ -482,9 +497,11 @@ class TournamentJoinView(APIView):
         # check if tournament is full
         if tournament.players.count() >= tournament.player_count:
             return JsonResponse({'error': 'Tournament is already full'}, status=400)
+
         # tournament must be waiting
-        if tournament.status != 'waiting':
-            return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
+        #if tournament.status != 'waiting':
+        #    return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
+
         # read the JSON file from the request
         data = request.data
         token = request.data.get('token')
@@ -492,8 +509,8 @@ class TournamentJoinView(APIView):
         if not token and token42:
             return JsonResponse({'error': 'Missing authentification token'}, status=400)
         # get user_id and user_name from authentification app
-        player_user_id = 2
-        player_user_name = 'Tutu'
+        player_user_id = 5
+        player_user_name = 'Fifi'
         # to finish
 
         nickname = data.get('nickname', player_user_name)
@@ -529,9 +546,11 @@ class TournamentStartView(APIView):
     def post(self, request, tournament_id):
         # Get tournament
         tournament = get_object_or_404(Tournament, id=tournament_id)
+
         # Check if tournament is waiting
-        if tournament.status != 'waiting':
-            return JsonResponse({'message': 'Tournament cannot be started'}, status=400)
+        #if tournament.status != 'waiting':
+        #    return JsonResponse({'message': 'Tournament cannot be started'}, status=400)
+
         # Check if the number of players matches the required player_count
         player_count = tournament.players.count()
         if player_count != tournament.player_count:
@@ -540,6 +559,10 @@ class TournamentStartView(APIView):
         tournament.status = 'playing'
         tournament.start_time = timezone.now()
         tournament.save()
+
+        # create the list of games
+        create_round_robin_matches(tournament)
+
         # Send a message to the TournamentConsumer to start the tournament loop
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
