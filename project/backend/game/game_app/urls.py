@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 from .views import (
     GameCreateView, GameListView, GameDetailView, GameJoinView, GameStartView, GameDeleteView,
-	TournamentCreateView, TournamentListView, TournamentDetailView, TournamentJoinView, TournamentDeleteView
+	TournamentCreateView, TournamentListView, TournamentDetailView, TournamentJoinView,
+	TournamentStartView, TournamentDeleteView
 )
 
 urlpatterns = [
@@ -17,7 +18,7 @@ urlpatterns = [
     path("tournament/details/<int:tournament_id>/", TournamentDetailView.as_view(), name="tournament-detail"),   # List all tournaments
     path("tournament/list/", TournamentListView.as_view(), name="tournament-list"),   # List all tournaments
     path("tournament/join/<int:tournament_id>/", TournamentJoinView.as_view(), name="tournament-join"),  # Join a tournament
-
+    path("tournament/start/<int:tournament_id>/", TournamentStartView.as_view(), name="tournament-start"), # Start a tournament
     path("tournament/delete/<int:tournament_id>/", TournamentDeleteView.as_view(), name="tournament-delete"),   # Delete a tournament
 ]
 # use {% url 'game-join' id=12 %} in html
