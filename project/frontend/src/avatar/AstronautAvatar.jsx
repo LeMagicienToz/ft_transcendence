@@ -46,11 +46,10 @@ function Show_Avatar() {
 						setHorizontalPosition(data.horizontalPosition);
 						setVerticalPosition(data.verticalPosition);
 					} else {
-						console.log("Aieaieaie", response);
-						// Optional: Capture the response error details here
+						console.error("Failed to fetch data.");
 					}
 				} catch (err) {
-					console.log('error: ', err);
+					console.log("Failed to fetch data.");
 				}
 			};
 			fetchData();
@@ -80,10 +79,10 @@ function Show_Avatar() {
 					body: JSON.stringify({ suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture}),
 					credentials: 'include',
 				});
-			
+
 				if (response.ok) {
 					// const data = await response.json();
-					navigate('/home');
+					navigate('/homepage');
 				} else {
 					console.log("Non-200 response", response.status, response.statusText);
 					// Optional: Capture the response error details here

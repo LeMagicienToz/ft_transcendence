@@ -178,15 +178,7 @@ def register(request):
     custom_user = CustomUser(user=user)
     custom_user.intra_id = None
     custom_user.profile_picture_url = None
-    custom_user.suitColor = ''
-    custom_user.visColor = ''
-    custom_user.ringsColor = ''
-    custom_user.bpColor = ''
     custom_user.twoFA_enabled = False
-    custom_user.flatness = 2.8
-    custom_user.horizontalPosition = 0.73
-    custom_user.verticalPosition = 0.08
-    custom_user.visTexture = None
     custom_user.save()
 
     #login(request, user)

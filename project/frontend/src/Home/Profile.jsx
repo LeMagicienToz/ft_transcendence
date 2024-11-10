@@ -50,6 +50,27 @@ const NormalUserForm = () => {
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState('');
 
+	React.useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch('/api/auth/get_user/', {
+					method: 'GET',
+					credentials: 'include'
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setUserName(data.username);
+					//setEmail(data.email);
+				} else {
+					console.error("Failed to fetch data.");
+				}
+			} catch (err) {
+				console.log("Failed to fetch data.");
+			}
+		};
+		fetchData();
+	}, []);
+
 	const handleNormal = async () => {
 		try {
 			const response = await fetch('/api/auth/set_profile/', {
