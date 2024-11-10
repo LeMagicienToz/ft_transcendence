@@ -94,9 +94,9 @@ def callback_42(request):
             utils_send_twoFA_code(user)
         #return JsonResponse({'success': True, 'message': 'Authentification réussie', 'user_id': user.id, 'username': user.username, 'profile_picture_url': image_url}, status=200)
         if first_connection:
-            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Avatar/')
+            response = redirect(f'/avatar')
         else:
-            response = redirect(f'https://{os.getenv("HOST_SERVERNAME")}:8443/Home/')
+            response = redirect(f'/home')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', 60 * 60 * 24 * 7, access_token)
         return response

@@ -51,7 +51,7 @@ const Spaceship = () => {
 			ref.current.scale.copy(endScale);
 			ref.current.rotation.copy(endRotation);
 			setTimeout(() => {
-				navigate('/Homepage');
+				navigate('/homepage');
 			}, 0);
 		}
 	  };

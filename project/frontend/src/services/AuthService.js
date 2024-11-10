@@ -2,7 +2,7 @@ export class AuthService {
 
 
 	constructor() {
-		this.backendApi = 'http://localhost:8443/api/';
+		this.backendApi = '/api/auth/';
 	}
 
 

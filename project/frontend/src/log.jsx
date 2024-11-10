@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button, Card, Row, Col } from 'react-bootstrap';
 import './Theme/RegisterForm.css';
 // import Button from 'react-bootstrap/Button';
@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import SpaceBackground from "./Theme/spacebg.jsx";
 import SwapButton from "./Theme/Swap_button.jsx";
+import { AuthContext } from './auth/AuthContext';
 
 function Switch_button() {
 	const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +20,7 @@ function Switch_button() {
 		<div className="bg-container">	
 			<SpaceBackground/>
 				<div className="white-box">
-					{isLogin ? <h2 className="top-bg">login</h2> : <h2 className="top-bg">Register</h2>}
+					{isLogin ? <h2 className="top-bg">Login</h2> : <h2 className="top-bg">Register</h2>}
 					<div>
 						{/* Bouton animé pour basculer entre Login et Register */}
 						<SwapButton isLogin={isLogin} onToggle={toggleForm} />
@@ -40,11 +41,13 @@ const LoginForm = () => {
 		const [userData, setUserData] = useState(null);
 		const [error, setError] = useState('');
 		const navigate = useNavigate();
+		const { login } = useContext(AuthContext);
+
 		const handleLogin = async (e) => {
-			e.preventDefault();
+		e.preventDefault();
 
 			try {
-				const response = await fetch('https://localhost:8443/api/auth/login/', {
+				const response = await fetch('/api/auth/login/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -53,13 +56,14 @@ const LoginForm = () => {
 				});
 	
 				if (response.ok) {
+					login();
 					const data = await response.json();
 					setUserData(data);
 					if(data.twoFA_enabled == true)
 					{
 						// fetch a : /twoFA_validation
 					}
-					navigate('/Home');
+					navigate('/home');
 				}
 				else 
 				{
@@ -114,12 +118,13 @@ const RegisterForm = () => {
 		const [userData, setUserData] = useState(null);
 		const [error, setError] = useState('');
 		const navigate = useNavigate();
+		const { login } = useContext(AuthContext);
 	
 		const handleRegister = async (e) => {
 			e.preventDefault();
 			
 			try {
-				const response = await fetch('https://localhost:8443/api/auth/register/', {
+				const response = await fetch('/api/auth/register/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -129,7 +134,8 @@ const RegisterForm = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setUserData(data);
-					navigate('/Avatar');
+					login();
+					navigate('/avatar');
 				} else {
 					const errorData = await response.json();
 					setError(errorData.error);

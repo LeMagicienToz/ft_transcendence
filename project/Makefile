@@ -1,6 +1,6 @@
 # Variables
 # DOCKER_COMPOSE_DEV = docker-compose -f docker-compose-dev.yml
-DOCKER_COMPOSE_PROD = docker-compose
+DOCKER_COMPOSE_PROD = docker compose
 
 # Commands
 .PHONY: help dev-build dev-up dev-down dev-migrate dev-shell prod-build prod-up prod-down prod-migrate prod-shell
@@ -37,7 +37,7 @@ prod-up: ## Start the production environment (generate certificates if missing)
 		echo "Certificates already exist, skipping generation."; \
 	fi
 	$(DOCKER_COMPOSE_PROD) down --remove-orphans
-	$(DOCKER_COMPOSE_PROD) up --build -d
+	$(DOCKER_COMPOSE_PROD) up --build
 
 prod-down: ## Stop the production environment
 	$(DOCKER_COMPOSE_PROD) down

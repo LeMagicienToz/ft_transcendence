@@ -16,10 +16,10 @@ function App() {
 			<div className="bg-container">	
 				<SpaceBackground/>
 					<div className="typewriter-container">
-						<Typewriter text="Ft_Transcendence"/>
+						<Typewriter text="ft_transcendence"/>
 						<div className="button-placement">
-							<MyButton to="login" text="Register/Login" />
-							<MyButton to={authorizeURL} text="log42" href={true} />
+							<MyButton to="login" text="Login with username" />
+							<MyButton to={authorizeURL} text="Login with 42" href={true} />
 						</div>
 					</div>
 			</div>

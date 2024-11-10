@@ -6,41 +6,32 @@ import Switch_button from "./log.jsx";
 import Show_Avatar from "./avatar/AstronautAvatar.jsx";
 import Homepage from "./Home/Homepage.jsx";
 import Profile from "./Home/Profile.jsx";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from './auth/AuthContext';
+import StandardRoute from "./auth/StandardRoute.jsx";
+import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-  },
-  {
-    path: "Home",
-    element: <Home />,
-  },
-  {
-    path: "login",
-    element: <Switch_button />,
-  },
-  {
-    path: "Homepage",
-    element: <Homepage />,
-  },
-  {
-    path: "Profile",
-    element: <Profile />,
-  },
-  {
-    path: "Avatar",
-    element: <Show_Avatar />,
-  }
-]);
+const AppRouter = () => (
+  <AuthProvider>
+    <Router>
+      <Routes>
+        <Route element={<StandardRoute />}>
+          <Route path="/" element={<App />} />
+          <Route path="/login" element={<Switch_button />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/homepage" element={<Homepage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/avatar" element={<Show_Avatar />} />
+        </Route>
+      </Routes>
+    </Router>
+  </AuthProvider>
+);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
+  <React.StrictMode>
+    <AppRouter />
+  </React.StrictMode>
 );

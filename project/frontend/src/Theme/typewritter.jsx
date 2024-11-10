@@ -11,7 +11,7 @@ const Typewriter = ({ text }) => {
         <span
           key={index}
           className="typewriter-letter"
-          style={{ animationDelay: `${index * 0.2}s` }}
+          style={{ animationDelay: `${index * 0.1}s` }}
         >
           {letter}
         </span>

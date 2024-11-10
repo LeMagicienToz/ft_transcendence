@@ -15,7 +15,9 @@ const hexToRgb = (hex) => {
 	const b = bigint & 255;
 	return [r / 255, g / 255, b / 255];
 };
-	function Show_Avatar() {
+
+function Show_Avatar() {
+
 		const [suitColor, setSuitColor] = useState('#FFFFFF'); // Default color in hex
 		const [visColor, setVisColor] = useState('#FFFFFF');
 		const [ringsColor, setRingsColor] = useState('#FFFFFF');
@@ -41,7 +43,7 @@ const hexToRgb = (hex) => {
 			e.preventDefault();
 
 			try {
-				const response = await fetch('https://localhost:8443/api/auth/set_user_color/', {
+				const response = await fetch('/api/auth/set_user_color/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -52,7 +54,7 @@ const hexToRgb = (hex) => {
 			
 				if (response.ok) {
 					// const data = await response.json();
-					navigate('/Home');
+					navigate('/home');
 				} else {
 					console.log("Non-200 response", response.status, response.statusText);
 					// Optional: Capture the response error details here

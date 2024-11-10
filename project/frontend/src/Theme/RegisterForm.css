@@ -13,11 +13,12 @@
 
 .white-box {
 	display: flex;
-	justify-content: space-between; 
+	justify-content: space-between;
 	align-items: center;
 	position: absolute;
 	flex-direction: column;
 	height: 70%;
+	min-width: 340px;
 	width: 30%;
 	font-family: 'Orbitron', sans-serif;
 	border-radius: 8px;
@@ -43,8 +44,7 @@ form{
     align-items: center;
 	position: absolute;
 	font-size: 1.5em;
-	width: 35vw;
-	min-width: 100px;
+	width: 90%;
 	height: 40px;
 	border-radius: 8px;
 	bottom: 95%;

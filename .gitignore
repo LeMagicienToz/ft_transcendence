@@ -64,3 +64,4 @@ yarn-error.log*
 # package-lock.json
 # yarn.lock
 project/databases/game_db_data*
+project/databases/auth_db_data*

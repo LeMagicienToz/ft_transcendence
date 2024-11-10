@@ -1,5 +1,5 @@
 import './Homepage.css';
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Avatarhp from './Avatarhp';
 import MyButton from '../Theme/MyButton';
@@ -7,6 +7,7 @@ import logo from '../../public/logout.svg';
 import { useNavigate } from "react-router-dom";
 import Modal_composant from "../Theme/modal_composant/Modal_composant.jsx";
 import Tableone from "../game/Tableone.jsx";
+import { AuthContext } from '../auth/AuthContext';
 
 const hexToRgb = (hex) => {
 	if (typeof hex === 'string') {
@@ -22,7 +23,7 @@ const hexToRgb = (hex) => {
 
 const fetchUserData = async () => {
 		try {
-			const response = await fetch('https://localhost:8443/api/auth/get_user/', {
+			const response = await fetch('/api/auth/get_user/', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -51,6 +52,7 @@ const Homepage = () => {
 	const [error, setError] = useState(null);
 	const [closed_modal, setClosed_modal] = useState(true);
 	const [value_modal, setValueModal] = useState(0);
+	const { logout } = useContext(AuthContext);
 
 	const onClosedModal = () => {
 		setClosed_modal(true);
@@ -79,13 +81,14 @@ const Homepage = () => {
 
 	const handleLogout = async () => {
 		try {
-			const response = await fetch('https://localhost:8443/api/auth/logout/', {
+			const response = await fetch('/api/auth/logout/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include'
 			});
 
 			if (response.ok) {
+				logout();
 				navigate('/');
 			} else {
 				const errorData = await response.json();
