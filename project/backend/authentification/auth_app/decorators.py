@@ -38,7 +38,7 @@ def jwt_required(view_func):
                         response = view_func(request, *args, **kwargs)
                         response.set_cookie('token', new_access_token, max_age=60*5, httponly=True, secure=True, samesite='Strict')
                         return response
-                        
+
                     except jwt.ExpiredSignatureError:
                         return JsonResponse({'success': False, 'error': 'Refresh token expire'}, status=401)
                     except jwt.InvalidTokenError:

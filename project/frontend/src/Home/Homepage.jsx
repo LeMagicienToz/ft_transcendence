@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Modal_composant from "../Theme/modal_composant/Modal_composant.jsx";
 import Tableone from "../game/Tableone.jsx";
 import { AuthContext } from '../auth/AuthContext';
+import MaterialAvatar from '../avatar/MaterialAvatar.jsx';
 
 const hexToRgb = (hex) => {
 	if (typeof hex === 'string') {
@@ -123,15 +124,20 @@ const Homepage = () => {
 					<Canvas style={{ touchAction: 'none' }}>
 						<ambientLight intensity={0.5} />
 						<directionalLight position={[3, 3, 5]} />
-						<Avatarhp
+						<MaterialAvatar
 							suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
 							visColor={hexToRgb(userData?.visColor || '#FFFFFF')}
 							ringsColor={hexToRgb(userData?.ringsColor || '#FFFFFF')}
 							bpColor={hexToRgb(userData?.bpColor || '#FFFFFF')}
+							flatness={userData?.flatness || 2.8}
+							horizontalPosition={userData?.horizontalPosition || 0.73}
+							verticalPosition={userData?.verticalPosition || 0.08}
+							visTexture={userData?.visTexture || null}
 							/>
 					</Canvas>
 					<div className="profil-button-container">
-						<MyButton to="Profile" text="My Profile" />
+						<MyButton text="Profile" to="profile" />
+						<MyButton text="Avatar" to="avatar" />
 					</div>
 				</div>
 				<div className="menu-button-container">

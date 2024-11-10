@@ -37,9 +37,6 @@ const Profile = () => {
 					<NormalUserForm />
 				)}
 			</div>
-			<div className="container-avatar">
-				<MyButton text="Change avatar" to="avatar" />
-			</div>
 		</div>
 	);
 };

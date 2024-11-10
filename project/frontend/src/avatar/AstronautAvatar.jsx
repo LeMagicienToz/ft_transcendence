@@ -27,6 +27,35 @@ function Show_Avatar() {
 		const [horizontalPosition, setHorizontalPosition] = useState(0.73);
 		const [verticalPosition, setVerticalPosition] = useState(0.08);
 
+		React.useEffect(() => {
+			const fetchData = async () => {
+				try {
+					const response = await fetch('/api/auth/get_user/', {
+						method: 'GET',
+						credentials: 'include'
+					});
+					if (response.ok) {
+						const data = await response.json();
+						console.log(data);
+						setVisTexture(data.visTexture);
+						setSuitColor(data.suitColor);
+						setVisColor(data.visColor);
+						setRingsColor(data.ringsColor);
+						setBpColor(data.bpColor);
+						setFlatness(data.flatness);
+						setHorizontalPosition(data.horizontalPosition);
+						setVerticalPosition(data.verticalPosition);
+					} else {
+						console.log("Aieaieaie", response);
+						// Optional: Capture the response error details here
+					}
+				} catch (err) {
+					console.log('error: ', err);
+				}
+			};
+			fetchData();
+		}, []);
+
 		const handleVisTexture = (e) => setVisTexture(e.target.value);
 		const handleSuitChange = (e) => setSuitColor(e.target.value);
 		const handleVisChange = (e) => setVisColor(e.target.value);
@@ -136,8 +165,8 @@ function Show_Avatar() {
 				{/* Horizontal Position Control */}
 				<div className="input-group">
 					<label>Horizontal Position</label>
-					<button onClick={() => adjustHorizontal(-0.01)}>-</button>
-					<button onClick={() => adjustHorizontal(0.01)}>+</button>
+					<button onClick={() => adjustHorizontal(0.01)}>-</button>
+					<button onClick={() => adjustHorizontal(-0.01)}>+</button>
 				</div>
 
 				{/* Vertical Position Control */}
