@@ -8,6 +8,7 @@ from .views import (
 
 urlpatterns = [
     path('ping/', views.ping, name='ping'),
+	path('test-get-user-info/', views.get_user_info, name='test'),
     path("create/", GameCreateView.as_view(), name="game-create"),     # Create game
     path("list/", GameListView.as_view(), name="game-list"),                # List all games
     path("game-details/<int:game_id>/", GameDetailView.as_view(), name="game-detail"),   # Detail one game
