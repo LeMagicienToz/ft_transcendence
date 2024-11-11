@@ -13,5 +13,4 @@ done
 python3 manage.py makemigrations
 python3 manage.py migrate
 
-
-python manage.py runserver 0.0.0.0:8001
+python -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8001
