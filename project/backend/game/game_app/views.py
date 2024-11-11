@@ -222,14 +222,12 @@ class GameJoinView(APIView):
             return JsonResponse({'error': 'Game has already started or finished'}, status=400)
         # read the JSON file from the request
         data = request.data
-        token = request.data.get('token')
-        token42 = request.data.get('42_acccess_token')
-        if not token and token42:
-            return JsonResponse({'error': 'Missing authentification token'}, status=400)
         # get user_id and user_name from authentification app
-        player_user_id = 2
-        player_user_name = 'Tutu'
-        # to finish
+        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        player_user_id = user_info['user_id']
+        player_user_name = user_info['username']
 
         nickname = data.get('nickname', player_user_name)
         # Player info validation
@@ -318,14 +316,13 @@ class TournamentCreateView(APIView):
     }
     """
     def post(self, request):
-        token = request.data.get('token')
-        token42 = request.data.get('42_acccess_token')
-        if not token and token42:
-            return JsonResponse({'error': 'Missing authentification token'}, status=400)
-        # TO DO get the user_id and user_name
-        player1_user_id = 1
-        player1_user_name = 'Toto'
-        # end of TO DO
+        # get user_id and user_name from authentification app
+        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        player1_user_id = user_info['user_id']
+        player1_user_name = user_info['username']
+
         tournament_custom_name = request.data.get('tournament_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
         # Data validation
@@ -531,14 +528,12 @@ class TournamentJoinView(APIView):
 
         # read the JSON file from the request
         data = request.data
-        token = request.data.get('token')
-        token42 = request.data.get('42_acccess_token')
-        if not token and token42:
-            return JsonResponse({'error': 'Missing authentification token'}, status=400)
         # get user_id and user_name from authentification app
-        player_user_id = 5
-        player_user_name = 'Fifi'
-        # to finish
+        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        player_user_id = user_info['user_id']
+        player_user_name = user_info['username']
 
         nickname = data.get('nickname', player_user_name)
         # check the player info
