@@ -15,23 +15,24 @@ from .tournament_logic import create_round_robin_matches
 import requests
 import os
 
-def __get_user_info(token, token42):
-    # Define the headers and cookies
+def utils_get_user_info(token, token42):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
-
-    # Use the appropriate token as a cookie based on the user type
+    # Use the appropriate token as a cookie
     if token42:
         cookies['42_access_token'] = token42
     else:
         cookies['token'] = token
     try:
         response = requests.get(
-            f'{os.getenv('AUTH_SERVICE_HOST', 'http://auth-service:8000')}/get_user/',
+            f"{os.getenv('AUTH_SERVICE_HOST', 'http://auth-service:8000')}/get_user/",
             headers=headers,
             cookies=cookies
         )
-        return response.json()
+        result = response.json()
+        if (result.get('success') == False):
+            return None
+        return result
     except requests.exceptions.RequestException as e:
         return None
 
@@ -41,12 +42,10 @@ def get_user_info(request):
     # Retrieve tokens from request data
     token = request.data.get('token')
     token42 = request.data.get('42_access_token')
-
     # Check if either token is present
     if not token and not token42:
         return JsonResponse({'error': 'Missing authentication token'}, status=400)
-
-    user_info = __get_user_info(token, token42)
+    user_info = utils_get_user_info(token, token42)
     return JsonResponse(user_info)
 
 
@@ -72,11 +71,18 @@ class GameCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        player1_user_id = ""
+        player1_user_name = ""
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
-        player1_user_id = user_info['user_id']
-        player1_user_name = user_info['username']
+        try:
+            player1_user_id = user_info.get('user_id')
+            player1_user_name = user_info.get('username')
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
         game_custom_name = request.data.get('game_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
@@ -223,7 +229,7 @@ class GameJoinView(APIView):
         # read the JSON file from the request
         data = request.data
         # get user_id and user_name from authentification app
-        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -317,7 +323,7 @@ class TournamentCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player1_user_id = user_info['user_id']
@@ -529,7 +535,7 @@ class TournamentJoinView(APIView):
         # read the JSON file from the request
         data = request.data
         # get user_id and user_name from authentification app
-        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']

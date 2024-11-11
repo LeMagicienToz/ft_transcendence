@@ -12,6 +12,32 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import sys # for loggin
+
+# for debug
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',  # Assurez-vous que le niveau est DEBUG pour capturer les messages de débogage
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,  # Envoie les logs à la sortie standard
+        },
+    },
+    'loggers': {
+        '': {  # Logger racine
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Niveau DEBUG pour voir les messages de tous les niveaux
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Niveau DEBUG pour le module django
+            'propagate': True,
+        },
+    },
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
