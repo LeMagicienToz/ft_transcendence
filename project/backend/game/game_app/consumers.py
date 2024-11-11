@@ -13,6 +13,7 @@ class Consumer(AsyncWebsocketConsumer):
     user_info = None
     game_id = None
     game = None
+    player = None
     async def connect(self):
         try:
             # Access the query string from the scope
@@ -37,15 +38,34 @@ class Consumer(AsyncWebsocketConsumer):
         if (self.pick_game_logic()) is False:
             return
         await self.game_logic.on_connect()
+        #assign the index of player, because a game has 2 or 4 player, we assign 1 to the first and so forth
+        if self.player.player_index is 0:
+            await sync_to_async(self.assign_player_index)()
         await self.listen()
 
+    def assign_player_index(self):
+        indexes = list(self.game.players.values_list('player_index', flat=True))
+        # Find the maximum value in the indexes list, defaulting to -1 if empty
+        max_index = max(indexes, default=0)
+        # Assign the next index to self.player.player_index
+        self.player.player_index = max_index + 1
+        # Save the updated player instance to the database
+        self.player.save()
+
+    # Check if player is in the game, if yes, get self.player
     def is_player_in_game(self):
         user_id = self.user_info.get('user_id')
         # Retrieve the list of user_ids from the players in this game
         player_ids = list(self.game.players.values_list('user_id', flat=True))
-
         # Check if the given user_id is in the list of player_ids
-        return user_id in player_ids
+        if user_id in player_ids:
+            # Assign self.player to the Player instance matching the user_id
+            self.player = self.game.players.get(user_id=user_id)
+            return True
+        else:
+            # Set self.player to None if the player is not in the game
+            self.player = None
+            return False
 
     async def get_game(self):
         # get game_id fron url

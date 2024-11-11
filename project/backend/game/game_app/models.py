@@ -6,6 +6,7 @@ class Player(models.Model):
     user_name = models.CharField(max_length=30)
     score = models.IntegerField(default=0)
     nickname = models.CharField(max_length=30)
+    player_index = models.IntegerField(default=0)
 
     def __str__(self):
         return (f'Player {self.nickname} (ID: {self.user_id}, Username: {self.user_name}, Score: {self.score})')
