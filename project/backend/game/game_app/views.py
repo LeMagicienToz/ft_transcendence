@@ -1,16 +1,54 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 from django.shortcuts import render, get_object_or_404
 from .models import Player, Game, Tournament
 from django.utils import timezone
 import json
 from django.views.decorators.http import require_POST
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .tournament_logic import create_round_robin_matches
+import requests
+import os
+
+def __get_user_info(token, token42):
+    # Define the headers and cookies
+    headers = {'Content-Type': 'application/json'}
+    cookies = {}
+
+    # Use the appropriate token as a cookie based on the user type
+    if token42:
+        cookies['42_access_token'] = token42
+    else:
+        cookies['token'] = token
+    try:
+        response = requests.get(
+            f'{os.getenv('AUTH_SERVICE_HOST', 'http://auth-service:8000')}/get_user/',
+            headers=headers,
+            cookies=cookies
+        )
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return None
+
+# keep this endpoint just for testing
+@api_view(['POST'])
+def get_user_info(request):
+    # Retrieve tokens from request data
+    token = request.data.get('token')
+    token42 = request.data.get('42_access_token')
+
+    # Check if either token is present
+    if not token and not token42:
+        return JsonResponse({'error': 'Missing authentication token'}, status=400)
+
+    user_info = __get_user_info(token, token42)
+    return JsonResponse(user_info)
+
 
 def ping(request):
         """
@@ -33,23 +71,12 @@ class GameCreateView(APIView):
     }
     """
     def post(self, request):
-        token = request.data.get('token')
-        token42 = request.data.get('42_acccess_token')
-        if not token and token42:
-            return JsonResponse({'error': 'Missing authentification token'}, status=400)
         # get user_id and user_name from authentification app
-        #user_info = self.get_info_from_token(token, token42)
-        #if not user_info:
-        #    return JsonResponse({'error': 'No info from token'}, status=401)
-
-        # get player 1 user_id and user_name
-        #try:
-        #    player1_user_id = int(user_info.get('user_id'))
-        #except (ValueError, TypeError):
-        #    return JsonResponse({'error': 'Invalid user ID'}, status=400)
-        #player1_user_name = user_info.get('user_name')
-        player1_user_id = 1
-        player1_user_name = 'Toto'
+        user_info = __get_user_info(request.data.get('token'), request.data.get('42_acccess_token'))
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        player1_user_id = user_info['user_id']
+        player1_user_name = user_info['username']
 
         game_custom_name = request.data.get('game_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
