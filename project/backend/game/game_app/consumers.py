@@ -4,30 +4,64 @@ from asgiref.sync import sync_to_async
 import json
 import asyncio
 from pong.game_logic import GameLogic as myPongGameLogic
-
+from .views import utils_get_user_info
+from urllib.parse import parse_qs
 import logging
 logger = logging.getLogger(__name__)
 
 class Consumer(AsyncWebsocketConsumer):
-    player_id = 0
+    user_info = None
+    game_id = None
+    game = None
     async def connect(self):
-        # import game_id from url, cast into int
-        if await self.get_game() == False:
-            await self.send(text_data=json.dumps({"error": "Game not found"}))
+        try:
+            # Access the query string from the scope
+            query_string = self.scope['query_string'].decode('utf-8')  # Decode from bytes type
+            # Parse the query string
+            params = parse_qs(query_string)
+            token = params.get('token', [None])[0]  # Get token, or None if not found
+            token42 = params.get('42_access_token', [None])[0]
+            self.user_info = utils_get_user_info(token, token42)
+        except:
             return
-        if (self.pick_game_logic()) == False:
-            await self.send(text_data=json.dumps({"error": "Invalid game type"}))
+        # check if user_info is caught
+        if self.user_info is None:
             return
-
-        # add the player if not yet here
-        #if not await sync_to_async(self.game.players.filter(id=self.player_id).exists)():
-        #    await sync_to_async(self.game.players.add)(self.player_id)
-
+        # import game_id from url, cast into int, and get Game instance
+        if await self.get_game() is False:
+            return
+        # check if the player is in the game
+        if await sync_to_async(self.is_player_in_game)() is False:
+            return
+        # pick game_logic
+        if (self.pick_game_logic()) is False:
+            return
         await self.game_logic.on_connect()
         await self.listen()
 
+    def is_player_in_game(self):
+        user_id = self.user_info.get('user_id')
+        # Retrieve the list of user_ids from the players in this game
+        player_ids = list(self.game.players.values_list('user_id', flat=True))
+
+        # Check if the given user_id is in the list of player_ids
+        return user_id in player_ids
+
+    async def get_game(self):
+        # get game_id fron url
+        try:
+            self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
+        except ValueError:
+            return False
+        # get game info
+        try:
+            self.game = await sync_to_async(Game.objects.get)(id=self.game_id)
+        except Game.DoesNotExist:
+            return False
+        return True
+
     def pick_game_logic(self):
-        # pick game_logic
+        # pick game_logic, can add any game here
         if self.game.game_type == "pong":
             self.game_logic = myPongGameLogic(self)
         #elif self.game.game_type == "snake":
@@ -45,24 +79,12 @@ class Consumer(AsyncWebsocketConsumer):
         )
         await self.accept()
 
-    async def get_game(self):
-        # get game_id fron url
-        try:
-            self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
-        except ValueError:
-            return False
-        # get game info
-        try:
-            self.game = await sync_to_async(Game.objects.get)(id=self.game_id)
-        except Game.DoesNotExist:
-            return False
-        return True
-
     async def disconnect(self, close_code):
-        await self.game_logic.end(close_code)
+        #await self.game_logic.end(close_code)
+        pass
 
     # I receive only text because json is only text
-    # ex: json is {"action" : "moveUp", "plyer_id": "1"}
+    # ex: json is {"action" : "moveUp", "player_id": "1"}
     async def receive(self, text_data):
         await self.game_logic.on_receiving_data(text_data)
 
@@ -70,7 +92,7 @@ class Consumer(AsyncWebsocketConsumer):
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
         self.game_logic.game_data = data_json.get("game_data")
-        # Convert str in int
+        # Convert str in int (because JSON gives only str)
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket
         await self.send(text_data=event["message"])
