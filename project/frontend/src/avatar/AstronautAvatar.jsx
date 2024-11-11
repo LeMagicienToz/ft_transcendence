@@ -37,7 +37,7 @@ function Show_Avatar() {
 					if (response.ok) {
 						const data = await response.json();
 						console.log(data);
-						setVisTexture(data.visTexture);
+						setVisTexture(data.visTexture ?? data.profile_picture_url ?? '');
 						setSuitColor(data.suitColor);
 						setVisColor(data.visColor);
 						setRingsColor(data.ringsColor);

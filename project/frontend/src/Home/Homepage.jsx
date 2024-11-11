@@ -105,23 +105,16 @@ const Homepage = () => {
 		setLogoMoved(true);
 		setTimeout(() => {
 			handleLogout(); // Logout after logo animation
-		}, 600);
+		}, 400);
 	};
 	return (
 		<>
 		{!closed_modal ? <Modal_composant onClosedModal={onClosedModal}>
 		{renderContent()}
 		</Modal_composant> : null}	
-		
 			<div className="Homebg">
-				<div className="logout-container">
-					<button type="button" className="logout-button" onClick={handleClick}>
-						<img src={logo} alt="Logo" className={`logout-logo ${logoMoved ? 'move-logo' : ''}`} />
-						Logout
-					</button>
-				</div>
 				<div className="left-container">
-					<Canvas style={{ touchAction: 'none' }}>
+					<Canvas style={{ position: 'relative', touchAction: 'none' }}>
 						<ambientLight intensity={0.5} />
 						<directionalLight position={[3, 3, 5]} />
 						<MaterialAvatar
@@ -142,17 +135,24 @@ const Homepage = () => {
 				</div>
 				<div className="menu-button-container">
 					<div className="title-game">Space 🚀 Pong</div>
-					<MyButton text="Create" onClick={() => {
+					<MyButton text="Create a game" onClick={() => {
 						setClosed_modal(false);
 						setValueModal(0);
 					}}/>
 					{/* </MyButton> */}
-					<MyButton text="Join" onClick={() => {
+					<MyButton text="Join a game" onClick={() => {
 						setClosed_modal(false);
 						setValueModal();
 					}}/>
 				</div>
-				<div className="right-container"></div>
+				<div className="right-container">
+					<div className="logout-container">
+						<button type="button" className="logout-button" onClick={handleClick}>
+							<img src={logo} alt="Logo" className={`logout-logo ${logoMoved ? 'move-logo' : ''}`} />
+							Logout
+						</button>
+					</div>
+				</div>
 			</div>
 		</>
 	);

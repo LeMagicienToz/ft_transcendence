@@ -222,6 +222,7 @@ def delete_account(request):
 def get_user(request):
     user = request.user
     username = user.username
+    email = user.email
     profile_picture_url = user.custom_user.profile_picture_url
     flatness = user.custom_user.flatness
     horizontalPosition = user.custom_user.horizontalPosition
@@ -234,7 +235,7 @@ def get_user(request):
     visColor = user.custom_user.visColor
     ringsColor = user.custom_user.ringsColor
     bpColor = user.custom_user.bpColor
-    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'visTexture': visTexture, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor}, status=200)
+    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'email': email, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'visTexture': visTexture, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor}, status=200)
 
 @request_from_42_or_regular_user
 @require_POST

@@ -13,15 +13,15 @@ function App() {
 	authorizeURL.searchParams.append("response_type", "code")
 	return (
 		<>
-			<div className="bg-container">	
+			<div className="bg-container">
 				<SpaceBackground/>
-					<div className="typewriter-container">
-						<Typewriter text="ft_transcendence"/>
-						<div className="button-placement">
-							<MyButton to="login" text="Login with username" />
-							<MyButton to={authorizeURL} text="Login with 42" href={true} />
-						</div>
+				<div className="typewriter-container">
+					<Typewriter text="ft_transcendence"/>
+					<div className="button-placement">
+						<MyButton to="login" text="Login with username" />
+						<MyButton to={authorizeURL} text="Login with 42" href={true} />
 					</div>
+				</div>
 			</div>
 		</>
 	);

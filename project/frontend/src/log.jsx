@@ -81,12 +81,12 @@ const LoginForm = () => {
 		<div>
 						<form onSubmit={handleLogin}>
 							<div className="case">
-								<label htmlFor="exampleInputUsername1">UserName </label>
+								<label htmlFor="exampleInputUsername1">Username </label>
 								<input
 									type="username"
 									className="case-input"
 									username="exampleInputUsername1"
-									placeholder="UserName"
+									placeholder="Username"
 									value={username}
 									onChange={(e) => setUserName(e.target.value)}
 									/>
@@ -97,7 +97,7 @@ const LoginForm = () => {
 									type="password"
 									className="case-input"
 									id="exampleInputPassword1"
-									placeholder="Password"
+									placeholder="••••••••"
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									/>
