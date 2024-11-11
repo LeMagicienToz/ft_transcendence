@@ -93,8 +93,8 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		self.game.status = "finished"
-		await sync_to_async(self.game.save)()
+		#self.game.status = "finished"
+		#await sync_to_async(self.game.save)()
 		await self.consumer.send(json.dumps({"action": "game_over", "winner": self.get_winner()}))
 
 	async def on_receiving_data(self, text_data):

@@ -97,6 +97,9 @@ class GameCreateView(APIView):
                        'nickname': nickname,
                        'score': 0}
         )
+        if not created:
+            player1.player_index = 0
+            player1.save()
         # if player allready exist and user_name is different, then update
         if not created and player1.user_name != player1_user_name:
             player1.user_name = player1_user_name
@@ -169,6 +172,7 @@ class GameListView(APIView):
                         'user_name': player.user_name,
                         'score': player.score,
                         'nickname': player.nickname,
+                        'player_index': player.player_index,
                     } for player in game.players.all()
                 ]
             } for game in games
@@ -198,6 +202,7 @@ class GameDetailView(APIView):
                     'user_name': player.user_name,
                     'score': player.score,
                     'nickname': player.nickname,
+                    'player_index': player.player_index,
                 } for player in game.players.all()
             ]
         }
@@ -247,6 +252,7 @@ class GameJoinView(APIView):
         )
         # update if needed
         if not created:
+            player.player_index = 0
             if player.user_name != player_user_name:
                 player.user_name = player_user_name
             if player.nickname != nickname:
@@ -283,8 +289,8 @@ class GameStartView(APIView):
         if player_user_id not in player_ids:
             return JsonResponse({'error': 'Only a player in the game can start'}, status=400)
         # check if game is waiting, then match type
-        if game.status != 'waiting':
-            return JsonResponse({'message': 'Game cannot be started'}, status=400)
+        #if game.status != 'waiting':
+        #    return JsonResponse({'message': 'Game cannot be started'}, status=400)
         if game.match_type not in ['1v1', '2v2']:
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # check if game is full : 2 players in 1v1 and 4 in 2v2
@@ -297,6 +303,7 @@ class GameStartView(APIView):
         game.status = 'playing'
         game.start_time = timezone.now()
         game.save()
+        # THIS PART DOES NOT WORK, START THE GAME BY MAKE USER MOVE
         # Send a message to the GameConsumer to start the game loop
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -442,6 +449,7 @@ class TournamentListView(APIView):
                             "user_name": player.user_name,
                             "score": player.score,
                             "nickname": player.nickname,
+                            "player_index": player.player_index,
                         }
                         for player in game.players.all()
                     ]
@@ -503,6 +511,7 @@ class TournamentDetailView(APIView):
                         "user_name": player.user_name,
                         "score": player.score,
                         "nickname": player.nickname,
+                        "player_index": player.player_index,
                     }
                     for player in game.players.all()
                 ]
