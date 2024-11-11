@@ -107,9 +107,7 @@ class GameCreateView(APIView):
             player1.save()
         # get game type (1 vs 1 or 2 vs 2)
         match_type = request.data.get('match_type')
-        if not match_type:
-            match_type = '1v1'
-        elif match_type not in ['1v1', '2v2']:
+        if match_type not in ['1v1', '2v2']:
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # get game name (pong or snake)
         game_type = request.data.get('game_type')
@@ -263,12 +261,27 @@ class GameStartView(APIView):
     """
     start a game
     the request must be POST
-    body = {}
+    body = {'token': type string,
+    '42_access_token': type string}
     the game_id is in the url
     """
     def post(self, request, game_id):
         # get game_id
         game = get_object_or_404(Game, id=game_id)
+        # get user_id from authentification app
+        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        try:
+            player_user_id = user_info.get('user_id')
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+        # check if the player is in the game
+        player_ids = list(game.players.values_list('user_id', flat=True))
+        if player_user_id not in player_ids:
+            return JsonResponse({'error': 'Only a player in the game can start'}, status=400)
         # check if game is waiting, then match type
         if game.status != 'waiting':
             return JsonResponse({'message': 'Game cannot be started'}, status=400)
@@ -326,8 +339,13 @@ class TournamentCreateView(APIView):
         user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
-        player1_user_id = user_info['user_id']
-        player1_user_name = user_info['username']
+        try:
+            player1_user_id = user_info.get('user_id')
+            player1_user_name = user_info.get('username')
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
         tournament_custom_name = request.data.get('tournament_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
@@ -385,8 +403,6 @@ class TournamentCreateView(APIView):
             status='waiting'
         )
         tournament.players.add(player1)
-
-        #create_round_robin_matches(tournament)
         return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
 
 class TournamentListView(APIView):
