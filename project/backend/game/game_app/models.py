@@ -6,6 +6,7 @@ class Player(models.Model):
     user_name = models.CharField(max_length=30)
     score = models.IntegerField(default=0)
     nickname = models.CharField(max_length=30)
+    player_index = models.IntegerField(default=0)
 
     def __str__(self):
         return (f'Player {self.nickname} (ID: {self.user_id}, Username: {self.user_name}, Score: {self.score})')
@@ -27,13 +28,24 @@ class Game(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[("waiting", "Waiting for all the players"),
-                  ("playing", "Game in progress"), ("finished", "Game finished")],
+                  ("playing", "Game in progress"), ("ready_to_play", "Ready to play"), ("finished", "Game finished")],
         default="waiting"
     )
     tournament_id = models.IntegerField(default = 0)
     creation_time = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+
+    def is_full(self):
+        indexes = list(self.players.values_list('player_index', flat=True))
+        # Count indexes that are not zero
+        joined_players_number = sum(1 for index in indexes if index != 0)
+
+        if (self.match_type == '1v1' and joined_players_number == 2):
+            return True
+        if (self.match_type == '2v2' and joined_players_number == 4):
+            return True
+        return False
 
     def __str__(self):
         return (f'Game {self.id} (Type: {self.game_type}, Match: {self.match_type}, Status: {self.status})')

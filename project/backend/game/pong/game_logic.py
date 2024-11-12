@@ -93,8 +93,8 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		self.game.status = "finished"
-		await sync_to_async(self.game.save)()
+		#self.game.status = "finished"
+		#await sync_to_async(self.game.save)()
 		await self.consumer.send(json.dumps({"action": "game_over", "winner": self.get_winner()}))
 
 	async def on_receiving_data(self, text_data):
@@ -105,18 +105,14 @@ class GameLogic():
 		action = data_json.get('action')
 		if action == "move":
 			direction = data_json.get('direction')
-			player_id = data_json.get('player_id')
-			if str(player_id) in map(str, self.game_data["player_positions"].keys()) and direction in ["up", "down"]:
-				await self.update_player_position(player_id, direction)
+			player_index = self.consumer.player.player_index
+			if str(player_index) in map(str, self.game_data["player_positions"].keys()) and direction in ["up", "down"]:
+				await self.update_player_position(player_index, direction)
 			else:
 				await self.consumer.send(json.dumps({
 					"action": "error",
 					"message": "Invalid player ID or direction"
 				}))
-		elif action == "start":
-			player_id = data_json.get('player_id')
-			self.consumer.player_id = player_id
-			await self.consumer.send(json.dumps({"action": "player_id assigned to server consumer instance"}))
 		elif action == "game over":
 			await self.end(close_code=1000)
 		elif action == "ping":
@@ -127,13 +123,13 @@ class GameLogic():
 				"message": "Unknown action"
 			}))
 
-	async def update_player_position(self, player_id, direction):
-		x, y = self.game_data["player_positions"][player_id]
+	async def update_player_position(self, player_index, direction):
+		x, y = self.game_data["player_positions"][player_index]
 		if direction == "up":
 			y = min(self.SCREEN_H - self.PADDLE_H - 1, y + self.PADDLE_SPEED)
 		elif direction == "down":
 			y = max(0, y - self.PADDLE_SPEED)
-		self.game_data["player_positions"][player_id] = [x, y]
+		self.game_data["player_positions"][player_index] = [x, y]
 		await self.send_game_state()
 
 	async def send_game_state(self):
@@ -181,6 +177,7 @@ class GameLogic():
 				self.game_data["scores"][4] += 1
 			if self.game_data["scores"][2] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
+			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			await self.send_game_state()
 			return
@@ -192,6 +189,7 @@ class GameLogic():
 				self.game_data["scores"][3] += 1
 			if self.game_data["scores"][1] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
+			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			await self.send_game_state()
 			return

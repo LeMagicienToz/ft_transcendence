@@ -25,13 +25,14 @@ const MyButton = ({ to, text, href, onClick}) => {
 			{text}
 			</a>
 		)
-	return (
-			<a
-				onClick={testos}
-				className={`btn btn-primary btn-one `}
-			>
-			{text}
-			</a>
+	else
+		return (
+				<a
+					onClick={testos}
+					className={`btn btn-primary btn-one `}
+				>
+				{text}
+				</a>
 		);
 };
 
