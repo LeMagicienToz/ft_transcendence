@@ -40,8 +40,8 @@ def utils_get_user_info(token, token42):
 @api_view(['POST'])
 def get_user_info(request):
     # Retrieve tokens from request data
-    token = request.headers.get('token')
-    token42 = request.headers.get('42_access_token')
+    token = request.COOKIES.get('token')
+    token42 = request.COOKIES.get('42_access_token')
     # Check if either token is present
     if not token and not token42:
         return JsonResponse({'error': 'Missing authentication token'}, status=400)
@@ -71,7 +71,9 @@ class GameCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
         player1_user_id = ""
         player1_user_name = ""
         if not user_info:
