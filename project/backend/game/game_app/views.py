@@ -59,14 +59,16 @@ class GameCreateView(APIView):
     """
     Create a new Game object
     the request must be POST
-    body = {'token': type string,
-    '42_access_token': type string,
+    body = {
     'game_custom_name': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
     'score_to_win': type int,
     'tournament_id': type int, 0 if not in a tournament,
+    }
+    cookie = {'token': type string,
+    '42_access_token': type string
     }
     """
     def post(self, request):
@@ -213,13 +215,30 @@ class GameJoinView(APIView):
     """
     this allow a player to join a game
     the request must be PUT
-    body = {'token': type string,
-    '42_access_token': type string,
+    body = {
     'nickname': type string,
+    }
+    cookie = {'token': type string,
+    '42_access_token': type string
     }
     the game_id is in the url
     """
     def put(self, request, game_id):
+        # get user_id and user_name from authentification app
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
+        player_user_id = ""
+        player_user_name = ""
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        try:
+            player_user_id = user_info.get('user_id')
+            player_user_name = user_info.get('username')
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
         # get game from id
         game = get_object_or_404(Game, id=game_id)
         # check if game is full
@@ -230,15 +249,8 @@ class GameJoinView(APIView):
         # tournament must be waiting
         if game.status != 'waiting':
             return JsonResponse({'error': 'Game has already started or finished or is full'}, status=400)
-        # read the JSON file from the request
+        # read the JSON file from the request and get nickname
         data = request.data
-        # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
-        if not user_info:
-            return JsonResponse({'error': 'Failed to get user info'}, status=400)
-        player_user_id = user_info['user_id']
-        player_user_name = user_info['username']
-
         nickname = data.get('nickname', player_user_name)
         # Player info validation
         if not player_user_id or not player_user_name:
