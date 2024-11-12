@@ -17,7 +17,7 @@ function Switch_button() {
 	};
 
 	return (
-		<div className="bg-container">	
+		<div className="bg-container">
 			<SpaceBackground/>
 				<div className="white-box">
 					{isLogin ? <h2 className="top-bg">Login</h2> : <h2 className="top-bg">Register</h2>}
@@ -77,7 +77,7 @@ const LoginForm = () => {
 
 	
 	return (
-		<>			
+		<>
 		<div>
 						<form onSubmit={handleLogin}>
 							<div className="case">

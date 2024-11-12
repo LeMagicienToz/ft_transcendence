@@ -250,7 +250,7 @@ def set_user_color(request):
     user.custom_user.flatness = data.get('flatness', 2.8)
     user.custom_user.horizontalPosition = data.get('horizontalPosition', 0.73)
     user.custom_user.verticalPosition = data.get('verticalPosition', 0.08)
-    user.custom_user.visTexture = data.get('visTexture', None)
+    user.custom_user.visTexture = data.get('visTexture', data.get('profile_picture_url', None))
     user.custom_user.save()
     user.save()
     return response
