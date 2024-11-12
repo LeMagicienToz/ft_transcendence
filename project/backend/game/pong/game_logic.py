@@ -177,6 +177,7 @@ class GameLogic():
 				self.game_data["scores"][4] += 1
 			if self.game_data["scores"][2] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
+			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			await self.send_game_state()
 			return
@@ -188,6 +189,7 @@ class GameLogic():
 				self.game_data["scores"][3] += 1
 			if self.game_data["scores"][1] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
+			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			await self.send_game_state()
 			return
