@@ -40,8 +40,8 @@ def utils_get_user_info(token, token42):
 @api_view(['POST'])
 def get_user_info(request):
     # Retrieve tokens from request data
-    token = request.data.get('token')
-    token42 = request.data.get('42_access_token')
+    token = request.headers.get('token')
+    token42 = request.headers.get('42_access_token')
     # Check if either token is present
     if not token and not token42:
         return JsonResponse({'error': 'Missing authentication token'}, status=400)
@@ -71,7 +71,7 @@ class GameCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
         player1_user_id = ""
         player1_user_name = ""
         if not user_info:
@@ -97,6 +97,7 @@ class GameCreateView(APIView):
                        'nickname': nickname,
                        'score': 0}
         )
+        # if player allready exist set index to 0
         if not created:
             player1.player_index = 0
             player1.save()
@@ -114,9 +115,7 @@ class GameCreateView(APIView):
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # get game name (pong or snake)
         game_type = request.data.get('game_type')
-        if not game_type:
-            game_type = 'pong'
-        elif game_type not in ['pong', 'snake']:
+        if game_type not in ['pong']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
         # Get score to win
         try:
@@ -146,8 +145,8 @@ class GameCreateView(APIView):
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
         return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
 
-    def get_info_from_token(self, token, token42):
-        pass
+    #def get_info_from_token(self, token, token42):
+    #    pass
 
 class GameListView(APIView):
     """
@@ -228,11 +227,11 @@ class GameJoinView(APIView):
             return JsonResponse({'message': 'Game is already full'}, status=400)
         # tournament must be waiting
         if game.status != 'waiting':
-            return JsonResponse({'error': 'Game has already started or finished'}, status=400)
+            return JsonResponse({'error': 'Game has already started or finished or is full'}, status=400)
         # read the JSON file from the request
         data = request.data
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -275,7 +274,7 @@ class GameStartView(APIView):
         # get game_id
         game = get_object_or_404(Game, id=game_id)
         # get user_id from authentification app
-        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         try:
@@ -343,7 +342,7 @@ class TournamentCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         try:
@@ -560,7 +559,7 @@ class TournamentJoinView(APIView):
         # read the JSON file from the request
         data = request.data
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.data.get('token'), request.data.get('42_access_token'))
+        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
