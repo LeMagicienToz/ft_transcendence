@@ -10,6 +10,10 @@
     border: 4mm ridge #d86e0bc4;
 }
 
+.btn-placement {
+    display: flex;
+}
+
 .title-gamemenu {
     position: absolute;
     top: 13%;

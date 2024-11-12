@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import MyButton from '../Theme/MyButton';
 
 // Game Mode Switcher Component
-const GameModeSwitcher = ({ gameMode, setGameMode }) => {
+const GameModeSwitcher = ({ match_type, setGameMode }) => {
 	// Switch to the previous mode
 	const handleLeftArrowClick = () => {
 		setGameMode((prevMode) => (prevMode === '1v1' ? '2v2' : '1v1'));
@@ -19,11 +19,10 @@ const GameModeSwitcher = ({ gameMode, setGameMode }) => {
 		<div className="game-mode-container">
 			<h2>Game Mode</h2>
 			<div className="game-mode-switcher">
-				<MyButton text="Create"></MyButton>
 				<button className="arrow-button" onClick={handleLeftArrowClick}>
 					←
 				</button>
-				<div className="game-mode-display">{gameMode}</div>
+				<div className="game-mode-display">{match_type}</div>
 				<button className="arrow-button" onClick={handleRightArrowClick}>
 					→
 				</button>
@@ -34,20 +33,22 @@ const GameModeSwitcher = ({ gameMode, setGameMode }) => {
 
 // Create Form Component
 
-const CreateForm = ({ gameMode }) => {
-	const [Rname, setRName] = useState('');
+const CreateForm = ({ match_type }) => {
+
+	const [game_type, setGameType] = useState('pong');
+	const [game_custom_name, setRName] = useState('');
 	const [nickname, setNickname] = useState('');
-	const [winPoints, setwinPoints] = useState('');
+	const [score_to_win, setwinPoints] = useState('');
 	const [tournament, setTournament] = useState(false);
-	const [numPlayers, setNumPlayers] = useState(gameMode === '1v1' ? 3 : 6);
+	const [numPlayers, setNumPlayers] = useState(match_type === '1v1' ? 3 : 6);
 	
 	// Determine the minimum number of players based on the game mode
-	const minPlayers = gameMode === '1v1' ? 3 : 6;
+	const minPlayers = match_type === '1v1' ? 3 : 6;
 	
 	// Update numPlayers when the game mode changes
 	useEffect(() => {
 		setNumPlayers(minPlayers);
-	}, [gameMode]);
+	}, [match_type]);
 	
 	// Toggle the tournament state
 	const handleTournamentChange = () => {
@@ -61,17 +62,43 @@ const CreateForm = ({ gameMode }) => {
 			setNumPlayers(value);
 		}
 	};
+
+	const handleClick = async (e) => {
+		e.preventDefault();
+
+		try {
+			const response = await fetch('/api/game/create/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ game_type, game_custom_name, score_to_win, nickname, match_type}),
+				credentials: 'include',
+			});
+
+			if (response.ok) {
+				// const data = await response.json();
+				console.log("OOOOOOOOOKKK");
+				// navigate('/waitingroom');
+			} else {
+				console.log("Non-200 response", response.status, response.statusText);
+			}
+		} catch (err) {
+			console.error("Fetch error:", err);
+		}
+	};
 	
 	return (
 		<>
-			<div className="title-gamemenu">Create Game ({gameMode})</div>
+			<div className="title-gamemenu">Create Game ({match_type})</div>
 			<div className="Create-gamemenu">
 				<div className="create-setting">
+					<MyButton onClick={handleClick} text="create"></MyButton>
 					<fieldset>
 						<input
 							type="text"
 							placeholder="Room Name"
-							value={Rname}
+							value={game_custom_name}
 							onChange={(e) => setRName(e.target.value)}
 						/>
 						<input
@@ -105,7 +132,7 @@ const CreateForm = ({ gameMode }) => {
 							placeholder="Points to Win"
 							min='1'
 							max='10'
-							value={winPoints}
+							value={score_to_win}
 							onChange={(e) => setwinPoints(e.target.value)}
 						/>
 						<small>Points: 1 to 10</small>
@@ -132,12 +159,12 @@ const JoinForm = () => {
 
 // Main Tableone Component
 const Tableone = ({create}) => {
-	const [gameMode, setGameMode] = useState('1v1');
+	const [match_type, setGameMode] = useState('1v1');
 
 	return (
 		<div className="Box-gamemenu">
-			<GameModeSwitcher gameMode={gameMode} setGameMode={setGameMode} />
-			{create ? <CreateForm gameMode={gameMode} /> : <JoinForm />}
+			<GameModeSwitcher match_type={match_type} setGameMode={setGameMode} />
+			{create ? <CreateForm match_type={match_type} /> : <JoinForm />}
 		</div>
 	);
 };
