@@ -133,7 +133,7 @@ class GameCreateView(APIView):
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, Tournament.DoesNotExist):
             tourn_id = 0
-        # Game init with pLayer 1
+        # Game init with player 1
         try:
             game = Game.objects.create(
                 game_custom_name=game_custom_name,
@@ -343,9 +343,8 @@ class GameDeleteView(APIView):
 class TournamentCreateView(APIView):
     """
     Create a tourament
-    the request must be DELETE
-    body = {'token': type string,
-    '42_access_token': type string,
+    the request must be POST
+    body = {
     'tournament_custom_name': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
@@ -353,10 +352,17 @@ class TournamentCreateView(APIView):
     'score_to_win': type int,
     'player_count': type int,
     }
+    cookie = {'token': type string,
+    '42_access_token': type string
+    }
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
+        player1_user_id = ""
+        player1_user_name = ""
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         try:
@@ -380,6 +386,10 @@ class TournamentCreateView(APIView):
                        'nickname': nickname,
                        'score': 0}
         )
+        # if player allready exist set index to 0
+        if not created:
+            player1.player_index = 0
+            player1.save()
         # if player allready exist and user_name is different, then update
         if not created and player1.user_name != player1_user_name:
             player1.user_name = player1_user_name
@@ -394,9 +404,7 @@ class TournamentCreateView(APIView):
             return JsonResponse({'error': 'Invalid match type'}, status=400)
         # get game type (pong or snake)
         tourn_game_type = request.data.get('game_type')
-        if not tourn_game_type:
-            tourn_game_type = 'pong'
-        elif tourn_game_type not in ['pong', 'snake']:
+        if tourn_game_type not in ['pong']:
             return JsonResponse({'error': 'Invalid game type'}, status=400)
         # Get score to win
         try:
@@ -406,23 +414,26 @@ class TournamentCreateView(APIView):
         # Get the number of players
         try:
             player_count = int(request.data.get('player_count'))
-            if player_count <= 1:
+            if player_count <= 2:
                 raise ValueError
-            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
+            if tourn_match_type == '2v2' and (player_count <= 4 or player_count % 2 != 0):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
         # create tournament
-        tournament = Tournament.objects.create(
-            tournament_custom_name=tournament_custom_name,
-            match_type=tourn_match_type,
-            game_type=tourn_game_type,
-            score_to_win=score_to_win,
-            player_count=player_count,
-            creation_time=timezone.now(),
-            status='waiting'
-        )
-        tournament.players.add(player1)
+        try:
+            tournament = Tournament.objects.create(
+                tournament_custom_name=tournament_custom_name,
+                match_type=tourn_match_type,
+                game_type=tourn_game_type,
+                score_to_win=score_to_win,
+                player_count=player_count,
+                creation_time=timezone.now(),
+                status='waiting'
+            )
+            tournament.players.add(player1)
+       except Exception as e:
+            return JsonResponse({'error': 'Error creating Tournament: {}'.format(str(e))}, status=500)
         return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
 
 class TournamentListView(APIView):
@@ -553,32 +564,41 @@ class TournamentJoinView(APIView):
     """
     this allow a player to join a tournament
     the request must be PUT
-    body = {'token': type string,
-    '42_access_token': type string,
+    body = {
     'nickname': type string,
+    }
+    cookie = {'token': type string,
+    '42_access_token': type string
     }
     'tournament_id' is in the url.
     """
     def put(self, request, tournament_id):
+        # get user_id and user_name from authentification app
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
+        player_user_id = ""
+        player_user_name = ""
+        if not user_info:
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        try:
+            player_user_id = user_info.get('user_id')
+            player_user_name = user_info.get('username')
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
         # get tournament
         tournament = get_object_or_404(Tournament, id=tournament_id)
         # check if tournament is full
         if tournament.players.count() >= tournament.player_count:
             return JsonResponse({'error': 'Tournament is already full'}, status=400)
-
         # tournament must be waiting
-        #if tournament.status != 'waiting':
-        #    return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
-
-        # read the JSON file from the request
+        if tournament.status != 'waiting':
+            return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
+        # read the JSON file from the request and get nickname
         data = request.data
-        # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.headers.get('token'), request.headers.get('42_access_token'))
-        if not user_info:
-            return JsonResponse({'error': 'Failed to get user info'}, status=400)
-        player_user_id = user_info['user_id']
-        player_user_name = user_info['username']
-
         nickname = data.get('nickname', player_user_name)
         # check the player info
         if not player_user_id or not player_user_name:
@@ -589,10 +609,14 @@ class TournamentJoinView(APIView):
         # get or create the player in database
         player, created = Player.objects.get_or_create(
             user_id=player_user_id,
-            defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
+            defaults={'user_id': player1_user_id,
+                       'user_name': player1_user_name,
+                       'nickname': nickname,
+                       'score': 0}
         )
         # update if needed
         if not created:
+            player1.player_index = 0
             if player.user_name != player_user_name:
                 player.user_name = player_user_name
             if player.nickname != nickname:
