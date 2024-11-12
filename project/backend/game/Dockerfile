@@ -8,6 +8,6 @@ COPY requirements.txt /app
 RUN apk add gcc musl-dev postgresql-client
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8000
+EXPOSE 8000 8001
 
 CMD ["sh", "migrate.sh"]

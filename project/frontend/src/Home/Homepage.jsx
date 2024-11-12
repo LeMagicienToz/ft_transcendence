@@ -75,8 +75,11 @@ const Homepage = () => {
 		switch (value_modal) {
 		  case 0:
 			return <Tableone create={true}/>;
+		  case 1:
+			return <Tableone create={false}/>;
 		  default:
-		  return <Tableone create={false}/>;
+			return 0;
+
 		}
 	  };
 
@@ -142,7 +145,7 @@ const Homepage = () => {
 					{/* </MyButton> */}
 					<MyButton text="Join a game" onClick={() => {
 						setClosed_modal(false);
-						setValueModal();
+						setValueModal(1);
 					}}/>
 				</div>
 				<div className="right-container">
