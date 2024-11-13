@@ -85,7 +85,7 @@ class Consumer(AsyncWebsocketConsumer):
             self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
         except ValueError:
             return False
-        # get game info
+        # get game instance
         try:
             self.game = await sync_to_async(Game.objects.get)(id=self.game_id)
         except Game.DoesNotExist:
