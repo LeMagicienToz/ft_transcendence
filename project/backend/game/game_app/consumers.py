@@ -39,18 +39,10 @@ class Consumer(AsyncWebsocketConsumer):
             return
         await self.game_logic.on_connect()
         #assign the index of player, because a game has 2 or 4 player, we assign 1 to the first and so forth
-        if self.player.player_index is 0:
+        if self.player.player_index == 0:
+            # check the status of the game
             await sync_to_async(self.assign_player_index)()
-        self.channel_layer.group_send(
-            f"game_{self.game.id}",
-            {
-                "type": "player_joined"
-            }
-        )
         await self.listen()
-
-    async def player_joined(self, event):
-        self.game.refresh_from_db()
 
     def assign_player_index(self):
         indexes = list(self.game.players.values_list('player_index', flat=True))
@@ -119,12 +111,12 @@ class Consumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         await self.game_logic.on_receiving_data(text_data)
         #if player start moving, and game is not start, start the game
+        if (self.game.status == 'waiting'):
+            await sync_to_async(self.game.refresh_from_db)()
         if (self.game.status == "ready_to_play"):
-            self.game.status = 'playing'
-            await sync_to_async(self.game.save)()
             # if player1 moves, it starts the game
             if (self.player.player_index == 1):
-                asyncio.create_task(self.start_game_loop()())
+                await self.start_game_loop({})
             # send a msg to everyone but the player who moved to tell game has atrted
             # if it's not the player 1 who moved, he'll start the game when receiving the msg
             await self.channel_layer.group_send(
@@ -152,3 +144,4 @@ class Consumer(AsyncWebsocketConsumer):
         self.game.status = "playing"
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
+            await sync_to_async(self.game.save)()
