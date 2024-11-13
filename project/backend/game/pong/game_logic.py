@@ -5,9 +5,9 @@ import asyncio
 import logging
 logger = logging.getLogger(__name__)
 
-class GameLogic(self):
+class GameLogic():
 	# Playing screen dimensions
-	SCREEN_X= 400
+	SCREEN_X = 400
 	SCREEN_Y = 300
 	# Paddle dimensions
 	PADDLE_DIM_X = SCREEN_X // 100
