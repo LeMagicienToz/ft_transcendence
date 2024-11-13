@@ -102,6 +102,7 @@ class GameCreateView(APIView):
         # if player allready exist set index to 0
         if not created:
             player1.player_index = 0
+            player1.score = 0
             player1.save()
         # if player allready exist and user_name is different, then update
         if not created and player1.user_name != player1_user_name:
@@ -254,6 +255,7 @@ class GameJoinView(APIView):
         # update if needed
         if not created:
             player.player_index = 0
+            player.score = 0
             if player.user_name != player_user_name:
                 player.user_name = player_user_name
             if player.nickname != nickname:

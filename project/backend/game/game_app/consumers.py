@@ -42,6 +42,9 @@ class Consumer(AsyncWebsocketConsumer):
         if self.player.player_index == 0:
             # check the status of the game
             await sync_to_async(self.assign_player_index)()
+        if self.game.status == 'waiting' and await sync_to_async(self.game.is_full)():
+            self.game.status = 'ready_to_play'
+            await sync_to_async(self.game.save)()
         await self.listen()
 
     def assign_player_index(self):
@@ -53,9 +56,6 @@ class Consumer(AsyncWebsocketConsumer):
         # Save the updated player instance to the database
         self.player.save()
         self.game.refresh_from_db()
-        if self.game.status == 'waiting' and self.game.is_full():
-            self.game.status = 'ready_to_play'
-            self.game.save()
 
     def is_player_in_game(self):
         user_id = self.user_info.get('user_id')

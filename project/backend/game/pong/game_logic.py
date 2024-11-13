@@ -70,7 +70,7 @@ class GameLogic():
 				1: [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
 				2: [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
 			}
-			self.game_data["scores"] = {1: 0, 2: 0}
+			self.game_data["scores"] = {'1': 0, '2': 0}
 		# Configuration for 2v2 match type
 		elif self.game.match_type == "2v2":
 			self.game_data["player_positions"] = {
@@ -79,7 +79,7 @@ class GameLogic():
 				3: [self.INITIAL_POSITIONS["player3"]["x"], self.INITIAL_POSITIONS["player3"]["y"]],
 				4: [self.INITIAL_POSITIONS["player4"]["x"], self.INITIAL_POSITIONS["player4"]["y"]],
 			}
-			self.game_data["scores"] = {1: 0, 2: 0, 3: 0, 4: 0}
+			self.game_data["scores"] = {'1': 0, '2': 0, '3': 0, '4': 0}
 
 	async def on_connect(self):
 		self.consumer.send(json.dumps({
@@ -147,8 +147,8 @@ class GameLogic():
 
 	async def update_ball_position(self):
 		# Convertir les clés de scores en entiers
-		if "scores" in self.game_data:
-			self.game_data["scores"] = {int(k): v for k, v in self.game_data["scores"].items()}
+		#if "scores" in self.game_data:
+		#	self.game_data["scores"] = {int(k): v for k, v in self.game_data["scores"].items()}
 		ball_x, ball_y = self.game_data["ball_position"]
 		dx, dy = self.BALL_SPEED_X, self.BALL_SPEED_Y
 
@@ -166,11 +166,12 @@ class GameLogic():
 
 		if ball_x <= 0:
 			if self.game.match_type == "1v1":
-				self.game_data["scores"][2] += 1
+				self.game_data["scores"]['2'] += 1
 			elif self.game.match_type == "2v2":
-				self.game_data["scores"][2] += 1
-				self.game_data["scores"][4] += 1
-			if self.game_data["scores"][2] >= self.SCORE_TO_WIN:
+				self.game_data["scores"]['2'] += 1
+				self.game_data["scores"]['4'] += 1
+			await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
+			if self.game_data["scores"]['2'] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
@@ -178,11 +179,12 @@ class GameLogic():
 			return
 		elif ball_x + self.BALL_SIZE >= self.SCREEN_X:
 			if self.game.match_type == "1v1":
-				self.game_data["scores"][1] += 1
+				self.game_data["scores"]['1'] += 1
 			elif self.game.match_type == "2v2":
-				self.game_data["scores"][1] += 1
-				self.game_data["scores"][3] += 1
-			if self.game_data["scores"][1] >= self.SCORE_TO_WIN:
+				self.game_data["scores"]['1'] += 1
+				self.game_data["scores"]['3'] += 1
+			await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
+			if self.game_data["scores"]['1'] >= self.SCORE_TO_WIN:
 				self.game.status = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
