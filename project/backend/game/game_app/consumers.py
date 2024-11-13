@@ -104,7 +104,8 @@ class Consumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.game_logic.end(close_code)
+        if (self.game_logic):
+            await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
     # ex: json is {"action" : "moveUp", "player_id": "1"}
@@ -131,6 +132,8 @@ class Consumer(AsyncWebsocketConsumer):
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
         self.game_logic.game_data = data_json.get("game_data")
+        if self.game_logic.game_data['status'] == "finished":
+            self.game.status = "finished"
         # Convert str in int (because JSON gives only str)
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket

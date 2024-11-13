@@ -19,7 +19,7 @@ class GameLogic():
 	BALL_SPEED_X = 2
 	BALL_SPEED_Y = 2
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 100
+	REFRESH_PER_SEC = 60
 	# Score to reach to win
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE) // 2 # ball position
@@ -60,7 +60,8 @@ class GameLogic():
 			"PADDLE_SPEED": self.PADDLE_SPEED,
 			"BALL_SPEED_X": self.BALL_SPEED_X,
 			"BALL_SPEED_Y": self.BALL_SPEED_Y,
-			"SCORE_TO_WIN": self.game.score_to_win
+			"SCORE_TO_WIN": self.game.score_to_win,
+			"status": self.game.status,
 		}
 		# Configuration for 1v1 match type
 		if self.game.match_type == "1v1":
@@ -86,9 +87,11 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		#self.game.status = "finished"
-		#await sync_to_async(self.game.save)()
-		await self.consumer.send(json.dumps({"action": "game_over", "winner": self.get_winner()}))
+		if (self.game.status == 'playing'):
+			self.game_data['status'] = 'finished'
+			self.game.status = 'finished'
+			await sync_to_async(self.game.save)()
+			await self.send_game_state()
 
 	async def on_receiving_data(self, text_data):
 		data_json = json.loads(text_data)
@@ -171,9 +174,9 @@ class GameLogic():
 			await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
 			if self.game_data["scores"]['2'] >= self.game.score_to_win:
 				self.game.status = "finished"
+				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
-			await self.send_game_state()
 			return
 		elif ball_x + self.BALL_SIZE >= self.SCREEN_X:
 			if self.game.match_type == "1v1":
@@ -184,9 +187,9 @@ class GameLogic():
 			await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
 			if self.game_data["scores"]['1'] >= self.game.score_to_win:
 				self.game.status = "finished"
+				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
-			await self.send_game_state()
 			return
 		else:
 			if self.game.match_type == "1v1":
