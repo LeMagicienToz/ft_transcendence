@@ -21,8 +21,6 @@ class GameLogic():
 	# Speed control by how many times the game refreshes per second
 	REFRESH_PER_SEC = 100
 	# Score to reach to win
-	SCORE_TO_WIN = 3
-	#SCORE_TO_WIN = self.game.score_to_win
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE) // 2
@@ -62,7 +60,7 @@ class GameLogic():
 			"PADDLE_SPEED": self.PADDLE_SPEED,
 			"BALL_SPEED_X": self.BALL_SPEED_X,
 			"BALL_SPEED_Y": self.BALL_SPEED_Y,
-			"SCORE_TO_WIN": self.SCORE_TO_WIN
+			"SCORE_TO_WIN": self.game.score_to_win
 		}
 		# Configuration for 1v1 match type
 		if self.game.match_type == "1v1":
@@ -171,7 +169,7 @@ class GameLogic():
 				self.game_data["scores"]['2'] += 1
 				self.game_data["scores"]['4'] += 1
 			await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
-			if self.game_data["scores"]['2'] >= self.SCORE_TO_WIN:
+			if self.game_data["scores"]['2'] >= self.game.score_to_win:
 				self.game.status = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
@@ -184,7 +182,7 @@ class GameLogic():
 				self.game_data["scores"]['1'] += 1
 				self.game_data["scores"]['3'] += 1
 			await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
-			if self.game_data["scores"]['1'] >= self.SCORE_TO_WIN:
+			if self.game_data["scores"]['1'] >= self.game.score_to_win:
 				self.game.status = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
@@ -233,4 +231,4 @@ class GameLogic():
 		return max(self.game_data["scores"], key=self.game_data["scores"].get)
 
 	def check_game_over(self):
-		return any(score >= self.SCORE_TO_WIN for score in self.game_data["scores"].values())
+		return any(score >= self.game.score_to_win for score in self.game_data["scores"].values())
