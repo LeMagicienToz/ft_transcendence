@@ -124,7 +124,7 @@ class Consumer(AsyncWebsocketConsumer):
             await sync_to_async(self.game.save)()
             # if player1 moves, it starts the game
             if (self.player.player_index == 1):
-                self.start_game_loop({})
+                asyncio.create_task(self.start_game_loop()())
             # send a msg to everyone but the player who moved to tell game has atrted
             # if it's not the player 1 who moved, he'll start the game when receiving the msg
             await self.channel_layer.group_send(
