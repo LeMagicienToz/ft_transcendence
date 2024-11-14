@@ -11,10 +11,11 @@ from django.conf import settings
 from django.shortcuts import redirect
 from .decorators import jwt_42_required
 from .decorators import request_from_42_or_regular_user, twoFA_status_check
-from .utils_views import utils_set_user_color, utils_set_username, utils_set_email, utils_delete_account, utils_send_twoFA_code, utils_reset_password
+from .utils_views import utils_upload_file, utils_set_user_color, utils_set_username, utils_set_email, utils_delete_account, utils_send_twoFA_code, utils_reset_password
 import os
 from django.core.mail import send_mail
 from .redis_client import r
+import uuid
 # mettre toute l'app asynchrone ???????????
 
 
@@ -81,6 +82,7 @@ def callback_42(request):
             custom_user.intra_id = intra_id
             custom_user.profile_picture_url = image_url
             custom_user.twoFA_enabled = False
+            custom_user.visTexture = image_url
         else:
             custom_user = CustomUser.objects.get(user=user)
             custom_user.profile_picture_url = image_url
@@ -255,7 +257,6 @@ def set_user_color(request):
     user.save()
     return response
 
-
 @request_from_42_or_regular_user
 @require_POST
 @twoFA_status_check
@@ -400,9 +401,45 @@ def get_friends_list(request):
     friends = [{'username': friend.user.username, 'profile_picture_url': friend.profile_picture_url} for friend in friends_list]
     return JsonResponse({'success': True, 'friends': friends}, status=200)
 
+# ADDITION: A VERIFIER
+@request_from_42_or_regular_user
+@require_POST
+@twoFA_status_check
+def upload_avatar(request):
+    user = request.user
+    if request.FILES.get('avatar', None):
+        file = request.FILES['avatar']
+        ext = os.path.splitext(file.name)[1] # Extension avec le '.'
+        if ext.lower() not in ['.png', '.jpg', '.jpeg']:
+            return JsonResponse({'success': False, 'message': 'Wrong file format.', 'user_id': user.id}, status=401)
+        new_name = f"{uuid.uuid4()}{ext}" # Nouveau nom {uuid}{ext}
+        utils_upload_file(file, new_name)
+        user.custom_user.profile_picture_url = f"/api/auth{settings.MEDIA_URL}{new_name}"
+        user.custom_user.visTexture = f"/api/auth{settings.MEDIA_URL}{new_name}"
+        user.custom_user.save()
+        user.save()
+        return JsonResponse({'success': True, 'message': 'Profil mis à jour avec succès', 'user_id': user.id, 'visTexture': user.custom_user.visTexture}, status=200)
+    return JsonResponse({'success': False, 'message': 'No file received.', 'user_id': user.id}, status=402)
 
-
-
+# ADDITION: A VERIFIER
+@request_from_42_or_regular_user
+@require_POST
+@twoFA_status_check
+def get_avatar(request):
+    user = request.user
+    if request.FILES.get('avatar', None):
+        file = request.FILES['avatar']
+        ext = os.path.splitext(file.name)[1] # Extension avec le '.'
+        if ext.lower() not in ['.png', '.jpg', '.jpeg']:
+            return JsonResponse({'success': False, 'message': 'Wrong file format.', 'user_id': user.id}, status=401)
+        new_name = f"{uuid.uuid4()}{ext}" # Nouveau nom {uuid}{ext}
+        utils_upload_file(file, new_name)
+        user.custom_user.profile_picture_url = f"/api/auth{settings.MEDIA_URL}{new_name}"
+        user.custom_user.visTexture = f"/api/auth{settings.MEDIA_URL}{new_name}"
+        user.custom_user.save()
+        user.save()
+        return JsonResponse({'success': True, 'message': 'Profil mis à jour avec succès', 'user_id': user.id, 'visTexture': user.custom_user.visTexture}, status=200)
+    return JsonResponse({'success': False, 'message': 'No file received.', 'user_id': user.id}, status=402)
 
 
     

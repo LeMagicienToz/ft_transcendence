@@ -23,6 +23,7 @@ services:
       - auth-db-service
     volumes:
       - ./backend/authentification:/auth
+      - auth:/app/static
     ports:
       - 8000:8000
     env_file:
@@ -118,3 +119,6 @@ networks:
   redis_network:
     driver: bridge
 
+volumes:
+
+  auth:

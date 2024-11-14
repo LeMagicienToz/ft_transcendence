@@ -9,6 +9,6 @@ RUN apk add gcc musl-dev postgresql-client
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install django-cors-headers
 
-EXPOSE 8000 
+EXPOSE 8000
 
 CMD ["sh", "migrate.sh"]

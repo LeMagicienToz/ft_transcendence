@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('login/', views.login_user, name='login'),
@@ -16,4 +18,7 @@ urlpatterns = [
     path('add_friend/', views.add_friend, name='add_friend'),
     path('remove_friend/', views.remove_friend, name='remove_friend'),
     path('get_friends_list/', views.get_friends_list, name='get_friends_list'),
+
+    path('avatar/upload', views.upload_avatar, name='upload_avatar'), # ADDITION: A VERIFIER
+    path('avatar/get', views.upload_avatar, name='get_avatar'), # ADDITION: A VERIFIER
 ]
