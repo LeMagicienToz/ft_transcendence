@@ -3,20 +3,75 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center vertically */
-    height: 50%; /* Full viewport height */
+    /* justify-content: center; Center vertically */
+    height: 60%; /* Full viewport height */
     width: 50%; /* Full viewport width */
     background-color: #1a6cdb;
     border: 4mm ridge #d86e0bc4;
 }
 
-.btn-placement {
+.button-style {
+    background-color: rgb(17 143 0);
+    color: rgb(255, 255, 255);
+    /* padding: 10px; */
+    border: 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    border: 2mm ridge #d86e0bc4;
+}
+
+.waiting-room {
     display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.container-waitingr{
+    display: flex;
+    position: fixed;
+    top: 40%;
+    width: 45%;
+}
+
+.btn-placement {
+    height: 100%;
+    width: 50%;
+    flex-direction: row;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    width: 100%;
+    height: 10%;
+    /* align-items: center; */
+    /* width: 20%;
+    height: 20%; */
+    /* font-size: large; */
+}
+
+.joinnavbar {
+    display: flex;
+    width: 100%;
+    margin: 4px;
+    gap: 10px;
+    
+}
+
+.joinnavbar .active {
+    background-color: #ae00ff;
+    color: #fff;
+    border: 1px solid #007bff;
 }
 
 .title-gamemenu {
     position: absolute;
-    top: 13%;
+    top: 6%;
     font-size: 50px;
     border: 4mm ridge #d86e0bc4;
     background-color: #1a6cdb;
