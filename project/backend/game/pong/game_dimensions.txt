@@ -1,0 +1,31 @@
+toutes les dimensions sont paramétrées, donc je peux les changer facilement
+
+L'ecran de jeu : 300 * 400, le point (0, 0) est en bas à gauche
+y=299
+   ^
+   |
+   |
+   |
+   |
+   |
+   |
+y=0+--------------------------------------------> x=399
+  x=0
+
+La dimension des raquettes : x=4 y=30
+	la position de la raquette est (p1x, p1y) pour le player 1
+	c'est le coin en bas a gauche qui est (p1x, p1y)
+	la raquette occupe la surface 	p1x < x < p1x + 4
+									p1y < y < p1y + 30
+	le rebond se fait sur le bord droit du joueur de gauche
+	ou le bord gauche du joueur de droite
+
+Le player de gauche peut evoluer entre x = 2 et x = 150
+Le player de gauche peut evoluer entre x = 249 et x = 397
+
+La dimension de la balle est un rond dans un carré 6x6
+	la position de la balle est (bx, by)
+	c'est le coin en bas a gauche qui est (bx, by)
+	la balle occupe la surface 	bx < x < bx + 6
+								by < y < by + 6
+

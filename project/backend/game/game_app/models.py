@@ -47,6 +47,28 @@ class Game(models.Model):
             return True
         return False
 
+    def update_player_two_score(self, score):
+        # Loop through all players in the game
+        players = self.players.all()
+        for player in players:
+            # Check if the player's index is even
+            if player.player_index % 2 == 0:
+                # Update the score
+                player.score = score
+                # Save the player object to the database
+                player.save()
+
+    def update_player_one_score(self, score):
+        # Loop through all players in the game
+        players = self.players.all()
+        for player in players:
+            # Check if the player's index is even
+            if player.player_index % 2 == 1:
+                # Update the score
+                player.score = score
+                # Save the player object to the database
+                player.save()
+
     def __str__(self):
         return (f'Game {self.id} (Type: {self.game_type}, Match: {self.match_type}, Status: {self.status})')
 

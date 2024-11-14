@@ -7,38 +7,31 @@ logger = logging.getLogger(__name__)
 
 class GameLogic():
 	# Playing screen dimensions
-	SCREEN_W = 400
-	SCREEN_H = 300
-
+	SCREEN_X = 400
+	SCREEN_Y = 300
 	# Paddle dimensions
-	PADDLE_W = SCREEN_W // 100
-	PADDLE_H = SCREEN_H // 10
-
+	PADDLE_DIM_X = SCREEN_X // 100
+	PADDLE_DIM_Y = SCREEN_Y // 10
 	# Ball dimensions
-	BALL_SIZE = SCREEN_W // 20
-
+	BALL_SIZE = 6
 	# Paddle and ball speed
-	PADDLE_SPEED = 7
+	PADDLE_SPEED = 8
 	BALL_SPEED_X = 2
 	BALL_SPEED_Y = 2
-
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 100
-
+	REFRESH_PER_SEC = 60
 	# Score to reach to win
-	SCORE_TO_WIN = 3
-
 	# Initial positions
-	bx = (SCREEN_W - BALL_SIZE) // 2 # ball position
-	by = (SCREEN_H - BALL_SIZE) // 2
+	bx = (SCREEN_X - BALL_SIZE) // 2 # ball position
+	by = (SCREEN_Y - BALL_SIZE) // 2
 	p1x = 0 # first player on the left
-	p1y = (SCREEN_H - PADDLE_H) // 2
-	p2x = SCREEN_W - PADDLE_W - 2 # first player on the right
-	p2y = (SCREEN_H - PADDLE_H) // 2
-	p3x = 1 + PADDLE_W + 1 # second player on the left
-	p3y = (SCREEN_H - PADDLE_H) // 2
-	p4x = SCREEN_W - (2 * PADDLE_W) - 2 # second player on the right
-	p4y = (SCREEN_H - PADDLE_H) // 2
+	p1y = (SCREEN_Y - PADDLE_DIM_Y) // 2
+	p2x = SCREEN_X - PADDLE_DIM_X - 2 # first player on the right
+	p2y = (SCREEN_Y - PADDLE_DIM_Y) // 2
+	p3x = 1 + PADDLE_DIM_X + 1 # second player on the left
+	p3y = (SCREEN_Y - PADDLE_DIM_Y) // 2
+	p4x = SCREEN_X - (2 * PADDLE_DIM_X) - 2 # second player on the right
+	p4y = (SCREEN_Y - PADDLE_DIM_Y) // 2
 	INITIAL_POSITIONS = {
 		"ball": {"x": bx, "y": by},
 		"player1": {"x": p1x, "y": p1y},
@@ -59,15 +52,16 @@ class GameLogic():
 			],
 			"player_positions": {},
 			#"scores": {1:0 , 2: 0, 3: 0, 4: 0},
-			"SCREEN_W": self.SCREEN_W,
-			"SCREEN_H": self.SCREEN_H,
-			"PADDLE_W": self.PADDLE_W,
-			"PADDLE_H": self.PADDLE_H,
+			"SCREEN_X": self.SCREEN_X,
+			"SCREEN_Y": self.SCREEN_Y,
+			"PADDLE_DIM_X": self.PADDLE_DIM_X,
+			"PADDLE_DIM_Y": self.PADDLE_DIM_Y,
 			"BALL_SIZE": self.BALL_SIZE,
 			"PADDLE_SPEED": self.PADDLE_SPEED,
 			"BALL_SPEED_X": self.BALL_SPEED_X,
 			"BALL_SPEED_Y": self.BALL_SPEED_Y,
-			"SCORE_TO_WIN": self.SCORE_TO_WIN
+			"SCORE_TO_WIN": self.game.score_to_win,
+			"status": self.game.status,
 		}
 		# Configuration for 1v1 match type
 		if self.game.match_type == "1v1":
@@ -75,7 +69,7 @@ class GameLogic():
 				1: [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
 				2: [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
 			}
-			self.game_data["scores"] = {1: 0, 2: 0}
+			self.game_data["scores"] = {'1': 0, '2': 0}
 		# Configuration for 2v2 match type
 		elif self.game.match_type == "2v2":
 			self.game_data["player_positions"] = {
@@ -84,7 +78,7 @@ class GameLogic():
 				3: [self.INITIAL_POSITIONS["player3"]["x"], self.INITIAL_POSITIONS["player3"]["y"]],
 				4: [self.INITIAL_POSITIONS["player4"]["x"], self.INITIAL_POSITIONS["player4"]["y"]],
 			}
-			self.game_data["scores"] = {1: 0, 2: 0, 3: 0, 4: 0}
+			self.game_data["scores"] = {'1': 0, '2': 0, '3': 0, '4': 0}
 
 	async def on_connect(self):
 		self.consumer.send(json.dumps({
@@ -93,9 +87,11 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		#self.game.status = "finished"
-		#await sync_to_async(self.game.save)()
-		await self.consumer.send(json.dumps({"action": "game_over", "winner": self.get_winner()}))
+		if (self.game.status == 'playing'):
+			self.game_data['status'] = 'finished'
+			self.game.status = 'finished'
+			await sync_to_async(self.game.save)()
+			await self.send_game_state()
 
 	async def on_receiving_data(self, text_data):
 		data_json = json.loads(text_data)
@@ -126,7 +122,7 @@ class GameLogic():
 	async def update_player_position(self, player_index, direction):
 		x, y = self.game_data["player_positions"][player_index]
 		if direction == "up":
-			y = min(self.SCREEN_H - self.PADDLE_H - 1, y + self.PADDLE_SPEED)
+			y = min(self.SCREEN_Y - self.PADDLE_DIM_Y - 1, y + self.PADDLE_SPEED)
 		elif direction == "down":
 			y = max(0, y - self.PADDLE_SPEED)
 		self.game_data["player_positions"][player_index] = [x, y]
@@ -152,56 +148,58 @@ class GameLogic():
 
 	async def update_ball_position(self):
 		# Convertir les clés de scores en entiers
-		if "scores" in self.game_data:
-			self.game_data["scores"] = {int(k): v for k, v in self.game_data["scores"].items()}
+		#if "scores" in self.game_data:
+		#	self.game_data["scores"] = {int(k): v for k, v in self.game_data["scores"].items()}
 		ball_x, ball_y = self.game_data["ball_position"]
 		dx, dy = self.BALL_SPEED_X, self.BALL_SPEED_Y
 
 		ball_x += dx
 		ball_y += dy
 
-		if ball_y <= 0 or ball_y + self.BALL_SIZE >= self.SCREEN_H:
+		if ball_y <= 0 or ball_y + self.BALL_SIZE >= self.SCREEN_Y:
 			dy = -dy
 			self.BALL_SPEED_Y = -self.BALL_SPEED_Y
 
 		if ball_y <= 0:
 			ball_y = 0
-		if ball_y + self.BALL_SIZE >= self.SCREEN_H:
-			ball_y = self.SCREEN_H - self.BALL_SIZE
+		if ball_y + self.BALL_SIZE >= self.SCREEN_Y:
+			ball_y = self.SCREEN_Y - self.BALL_SIZE
 
 		if ball_x <= 0:
 			if self.game.match_type == "1v1":
-				self.game_data["scores"][2] += 1
+				self.game_data["scores"]['2'] += 1
 			elif self.game.match_type == "2v2":
-				self.game_data["scores"][2] += 1
-				self.game_data["scores"][4] += 1
-			if self.game_data["scores"][2] >= self.SCORE_TO_WIN:
+				self.game_data["scores"]['2'] += 1
+				self.game_data["scores"]['4'] += 1
+			await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
+			if self.game_data["scores"]['2'] >= self.game.score_to_win:
 				self.game.status = "finished"
+				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
-			await self.send_game_state()
 			return
-		elif ball_x + self.BALL_SIZE >= self.SCREEN_W:
+		elif ball_x + self.BALL_SIZE >= self.SCREEN_X:
 			if self.game.match_type == "1v1":
-				self.game_data["scores"][1] += 1
+				self.game_data["scores"]['1'] += 1
 			elif self.game.match_type == "2v2":
-				self.game_data["scores"][1] += 1
-				self.game_data["scores"][3] += 1
-			if self.game_data["scores"][1] >= self.SCORE_TO_WIN:
+				self.game_data["scores"]['1'] += 1
+				self.game_data["scores"]['3'] += 1
+			await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
+			if self.game_data["scores"]['1'] >= self.game.score_to_win:
 				self.game.status = "finished"
+				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
-			await self.send_game_state()
 			return
 		else:
 			if self.game.match_type == "1v1":
 				p1_x, p1_y = self.game_data["player_positions"][1]
 				p2_x, p2_y = self.game_data["player_positions"][2]
 
-				if p1_x <= ball_x <= p1_x + self.PADDLE_W and p1_y <= ball_y <= p1_y + self.PADDLE_H:
+				if p1_x <= ball_x <= p1_x + self.PADDLE_DIM_X and p1_y <= ball_y <= p1_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_W and p2_y <= ball_y <= p2_y + self.PADDLE_H:
+				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_DIM_X and p2_y <= ball_y <= p2_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
 
@@ -211,16 +209,16 @@ class GameLogic():
 				p3_x, p3_y = self.game_data["player_positions"][3]
 				p4_x, p4_y = self.game_data["player_positions"][4]
 
-				if p1_x <= ball_x <= p1_x + self.PADDLE_W and p1_y <= ball_y <= p1_y + self.PADDLE_H:
+				if p1_x <= ball_x <= p1_x + self.PADDLE_DIM_X and p1_y <= ball_y <= p1_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_W and p2_y <= ball_y <= p2_y + self.PADDLE_H:
+				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_DIM_X and p2_y <= ball_y <= p2_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p3_x <= ball_x <= p3_x + self.PADDLE_W and p3_y <= ball_y <= p3_y + self.PADDLE_H:
+				elif p3_x <= ball_x <= p3_x + self.PADDLE_DIM_X and p3_y <= ball_y <= p3_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p4_x <= ball_x + self.BALL_SIZE <= p4_x + self.PADDLE_W and p4_y <= ball_y <= p4_y + self.PADDLE_H:
+				elif p4_x <= ball_x + self.BALL_SIZE <= p4_x + self.PADDLE_DIM_X and p4_y <= ball_y <= p4_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
 
@@ -236,4 +234,4 @@ class GameLogic():
 		return max(self.game_data["scores"], key=self.game_data["scores"].get)
 
 	def check_game_over(self):
-		return any(score >= self.SCORE_TO_WIN for score in self.game_data["scores"].values())
+		return any(score >= self.game.score_to_win for score in self.game_data["scores"].values())

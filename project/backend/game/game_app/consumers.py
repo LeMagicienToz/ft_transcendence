@@ -39,18 +39,13 @@ class Consumer(AsyncWebsocketConsumer):
             return
         await self.game_logic.on_connect()
         #assign the index of player, because a game has 2 or 4 player, we assign 1 to the first and so forth
-        if self.player.player_index is 0:
+        if self.player.player_index == 0:
+            # check the status of the game
             await sync_to_async(self.assign_player_index)()
-        self.channel_layer.group_send(
-            f"game_{self.game.id}",
-            {
-                "type": "player_joined"
-            }
-        )
+        if self.game.status == 'waiting' and await sync_to_async(self.game.is_full)():
+            self.game.status = 'ready_to_play'
+            await sync_to_async(self.game.save)()
         await self.listen()
-
-    async def player_joined(self, event):
-        self.game.refresh_from_db()
 
     def assign_player_index(self):
         indexes = list(self.game.players.values_list('player_index', flat=True))
@@ -61,9 +56,6 @@ class Consumer(AsyncWebsocketConsumer):
         # Save the updated player instance to the database
         self.player.save()
         self.game.refresh_from_db()
-        if self.game.status == 'waiting' and self.game.is_full():
-            self.game.status = 'ready_to_play'
-            self.game.save()
 
     def is_player_in_game(self):
         user_id = self.user_info.get('user_id')
@@ -85,7 +77,7 @@ class Consumer(AsyncWebsocketConsumer):
             self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
         except ValueError:
             return False
-        # get game info
+        # get game instance
         try:
             self.game = await sync_to_async(Game.objects.get)(id=self.game_id)
         except Game.DoesNotExist:
@@ -112,16 +104,22 @@ class Consumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.game_logic.end(close_code)
+        if (self.game_logic):
+            await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
     # ex: json is {"action" : "moveUp", "player_id": "1"}
     async def receive(self, text_data):
         await self.game_logic.on_receiving_data(text_data)
         #if player start moving, and game is not start, start the game
+        if (self.game.status == 'waiting'):
+            await sync_to_async(self.game.refresh_from_db)()
         if (self.game.status == "ready_to_play"):
-            self.game.status = 'playing'
-            await sync_to_async(self.game.save)()
+            # if player1 moves, it starts the game
+            if (self.player.player_index == 1):
+                await self.start_game_loop({})
+            # send a msg to everyone but the player who moved to tell game has atrted
+            # if it's not the player 1 who moved, he'll start the game when receiving the msg
             await self.channel_layer.group_send(
                 f"game_{self.game.id}",  # group name from the consumer
                 {
@@ -134,6 +132,8 @@ class Consumer(AsyncWebsocketConsumer):
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
         self.game_logic.game_data = data_json.get("game_data")
+        if self.game_logic.game_data['status'] == "finished":
+            self.game.status = "finished"
         # Convert str in int (because JSON gives only str)
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket
@@ -147,3 +147,4 @@ class Consumer(AsyncWebsocketConsumer):
         self.game.status = "playing"
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
+            await sync_to_async(self.game.save)()
