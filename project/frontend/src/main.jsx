@@ -13,7 +13,7 @@ import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
 const AppRouter = () => (
-  <AuthProvider>
+<AuthProvider>
     <Router>
       <Routes>
         <Route element={<StandardRoute />}>
