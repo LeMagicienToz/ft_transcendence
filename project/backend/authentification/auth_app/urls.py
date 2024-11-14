@@ -20,5 +20,4 @@ urlpatterns = [
     path('get_friends_list/', views.get_friends_list, name='get_friends_list'),
 
     path('avatar/upload', views.upload_avatar, name='upload_avatar'), # ADDITION: A VERIFIER
-    path('avatar/get', views.upload_avatar, name='get_avatar'), # ADDITION: A VERIFIER
 ]
