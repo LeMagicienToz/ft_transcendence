@@ -6,13 +6,14 @@ import Switch_button from "./log.jsx";
 import Show_Avatar from "./avatar/AstronautAvatar.jsx";
 import Homepage from "./Home/Homepage.jsx";
 import Profile from "./Home/Profile.jsx";
+import WaitingRoom from "./game/WaitingRoom.jsx";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AuthProvider } from './auth/AuthContext';
 import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
 const AppRouter = () => (
-  <AuthProvider>
+<AuthProvider>
     <Router>
       <Routes>
         <Route element={<StandardRoute />}>
@@ -24,6 +25,7 @@ const AppRouter = () => (
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/avatar" element={<Show_Avatar />} />
+          <Route path="/waitingroom" element={<WaitingRoom />} />
         </Route>
       </Routes>
     </Router>

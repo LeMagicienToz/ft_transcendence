@@ -6,6 +6,7 @@ from .redis_client import r
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+from os import path, makedirs
 
 
 def utils_set_user_color(data, user): # la fonction ne save pas l'objet user
@@ -36,7 +37,6 @@ def utils_set_user_color(data, user): # la fonction ne save pas l'objet user
     except CustomUser.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
     return JsonResponse({'success': True, 'message': 'Couleurs mises à jour avec succès', 'user_id': user.id}, status=200)
-
 
 def utils_set_username(data, user): # la fonction ne save pas l'objet user
     username = data.get('username')
@@ -108,3 +108,11 @@ def utils_reset_password(data, user): # la fonction ne save pas l'objet user
     user.save()
     return JsonResponse({'success': True, 'message': 'Mot de passe réinitialisé avec succès', 'user_id': user.id}, status=200)
 
+# ADDITION: A VERIFIER
+def utils_upload_file(file, new_name):
+    if not path.exists(settings.MEDIA_ROOT):
+        makedirs(settings.MEDIA_ROOT)
+    file_path = path.join(settings.MEDIA_ROOT, new_name)
+    with open(file_path, 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)

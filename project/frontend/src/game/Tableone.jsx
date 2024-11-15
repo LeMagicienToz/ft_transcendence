@@ -2,6 +2,8 @@ import './Tableone.css';
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MyButton from '../Theme/MyButton';
+import { useNavigate } from 'react-router-dom';
+import WaitingRoom from './WaitingRoom.jsx';
 
 // Game Mode Switcher Component
 const GameModeSwitcher = ({ match_type, setGameMode }) => {
@@ -35,6 +37,7 @@ const GameModeSwitcher = ({ match_type, setGameMode }) => {
 
 const CreateForm = ({ match_type }) => {
 
+	const navigate = useNavigate();
 	const [game_type, setGameType] = useState('pong');
 	const [game_custom_name, setRName] = useState('');
 	const [nickname, setNickname] = useState('');
@@ -79,7 +82,7 @@ const CreateForm = ({ match_type }) => {
 			if (response.ok) {
 				// const data = await response.json();
 				console.log("OOOOOOOOOKKK");
-				// navigate('/waitingroom');
+				navigate('/waitingroom');
 			} else {
 				console.log("Non-200 response", response.status, response.statusText);
 			}
@@ -145,33 +148,96 @@ const CreateForm = ({ match_type }) => {
 
 // Join Form Component
 const JoinForm = () => {
-	const data = fetchUserData();
-	return (
-		<div className="Join-gamemenu">
-			<h3>Join Game</h3>
-			<form>
-				<input type="text" placeholder="Search..." />
-				<button type="submit">Search</button>
-			</form>
-		</div>
-	);
+	const [numberplayer, setNumberplayer] = useState('1v1');
+    const [gameList, setGameList] = useState([]);
+
+    // Récupérer la liste des parties lors du montage du composant
+    useEffect(() => {
+        const getData = async () => {
+            const data = await fetchlist();
+            setGameList(data);
+        };
+        getData();
+    }, [fetchlist]);
+
+    // Filtrer les parties en fonction du type de match
+    const filteredGames = gameList.filter((game) => game.match_type === numberplayer);
+
+    // Fonction pour changer le mode de jeu
+    const handleGameModeChange = (mode) => {
+        setNumberplayer(mode);
+    };
+
+	const handleGameClick = (gameId) => {
+		console.log(`Jeu cliqué : ${gameId}`);
+		// Naviguer vers la page de détails du jeu ou effectuer une action spécifique
+	};
+
+    return (
+        // <div className="Join-gamemenu">
+		<>
+			<div className="title-gamemenu">Join Game</div>
+			<div className="navbar-container">
+            <div className="joinnavbar">
+					<button
+						className={`btn-placement ${numberplayer === '1v1' ? 'active' : ''}`}
+						onClick={() => handleGameModeChange('1v1')}
+						>
+						1v1
+					</button>
+					<button
+						className={`btn-placement ${numberplayer === '2v2' ? 'active' : ''}`}
+						onClick={() => handleGameModeChange('2v2')}
+						>
+						2v2
+					</button>
+				</div>
+					<div className="container-waitingr">
+
+					<div className="waiting-room">
+					{filteredGames.length > 0 ? (
+						<div>
+							{filteredGames.map((game) => (
+									<button
+										onClick={() => handleGameClick(game.id)}
+										className="button-style"
+									>
+										<strong>{game.game_custom_name}</strong> - {game.status}
+										<br />
+										Score à atteindre : {game.score_to_win}
+									</button>
+							))}
+						</div>
+						) : (
+							<p>Aucune partie disponible pour le mode {numberplayer}.</p>
+						)} 
+					</div>
+				</div>
+			</div>
+			</>
+
+        // {/* </div> */}
+    );
 };
+
 
 // Main Tableone Component
 const Tableone = ({create}) => {
 	const [match_type, setGameMode] = useState('1v1');
 
 	return (
-		<div className="Box-gamemenu">
-			<GameModeSwitcher match_type={match_type} setGameMode={setGameMode} />
-			{create ? <CreateForm match_type={match_type} /> : <JoinForm />}
-		</div>
-	);
+        <div className="Box-gamemenu">
+            {create && (
+                <GameModeSwitcher match_type={match_type} setGameMode={setGameMode} />
+            )}
+            {create ? <CreateForm match_type={match_type} /> : <JoinForm />}
+        </div>
+    );
 };
 
 
 
-const fetchUserData = async () => {
+const fetchlist = async () => {
 	try {
 	  const response = await fetch('/api/game/list/', {
 		method: 'GET',
@@ -183,7 +249,6 @@ const fetchUserData = async () => {
   
 	  if (response.ok) {
 		const data = await response.json();
-		console.log(data);
 		return(data);
 	  } else {
 		  const errorData = await response.json();
