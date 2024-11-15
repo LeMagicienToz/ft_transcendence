@@ -15,6 +15,14 @@ from .tournament_logic import create_round_robin_matches
 import requests
 import os
 
+# decorator.py line 38 to increase cookies life
+# auth/views.py 185 187
+
+import logging
+
+logger = logging.getLogger('game_app')
+
+
 def utils_get_user_info(token, token42):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
