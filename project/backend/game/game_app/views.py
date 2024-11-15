@@ -157,7 +157,10 @@ class GameCreateView(APIView):
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
-        return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
+        if token:
+            return JsonResponse({'message': 'Game created', 'game_id': game.id, 'token': token}, status=201)
+        elif token42:
+            return JsonResponse({'message': 'Game created', 'game_id': game.id, 'token42': token42}, status=201)
 
     #def get_info_from_token(self, token, token42):
     #    pass
@@ -246,7 +249,9 @@ class GameJoinView(APIView):
         if game.status != 'waiting':
             return JsonResponse({'error': 'Game has already started or finished or is full'}, status=400)
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.COOKIES.get('token'), request.COOKIES.get('42_access_token'))
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -278,7 +283,10 @@ class GameJoinView(APIView):
         # Assign new player
         game.players.add(player)
         game.save()
-        return JsonResponse({'message': 'Player joined', 'game_id': game.id})
+        if token:
+            return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token': token}, status=201)
+        elif token42:
+            return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token42': token42}, status=201)
 
 class GameStartView(APIView):
     """
