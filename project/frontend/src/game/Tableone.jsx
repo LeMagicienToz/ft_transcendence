@@ -80,9 +80,9 @@ const CreateForm = ({ match_type }) => {
 			});
 
 			if (response.ok) {
-				// const data = await response.json();
-				console.log("OOOOOOOOOKKK");
-				navigate('/waitingroom');
+				const data = await response.json();
+				console.log(data);
+				// navigate('/waitingroom', { state: { gameData: data } });
 			} else {
 				console.log("Non-200 response", response.status, response.statusText);
 			}
