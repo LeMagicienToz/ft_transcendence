@@ -3,35 +3,35 @@ import json
 import asyncio
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('myapp')
 
 class GameLogic():
 	# Playing screen dimensions
-	SCREEN_X = 400
-	SCREEN_Y = 300
+	SCREEN_X = 399 # 0 to 399 => 400 units
+	SCREEN_Y = 299
 	# Paddle dimensions
-	PADDLE_DIM_X = SCREEN_X // 100
+	PADDLE_DIM_X = 0 # SCREEN_X // 100
 	PADDLE_DIM_Y = SCREEN_Y // 10
 	# Ball dimensions
 	BALL_SIZE = 6
 	# Paddle and ball speed
 	PADDLE_SPEED = 8
-	BALL_SPEED_X = 2
-	BALL_SPEED_Y = 2
+	BALL_SPEED_X = 1
+	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 60
-	# Score to reach to win
+	REFRESH_PER_SEC = 150
+	# Score to reach to win got it from Game instance
 	# Initial positions
-	bx = (SCREEN_X - BALL_SIZE) // 2 # ball position
-	by = (SCREEN_Y - BALL_SIZE) // 2
+	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
+	by = (SCREEN_Y - BALL_SIZE + 1) // 2
 	p1x = 0 # first player on the left
-	p1y = (SCREEN_Y - PADDLE_DIM_Y) // 2
-	p2x = SCREEN_X - PADDLE_DIM_X - 2 # first player on the right
-	p2y = (SCREEN_Y - PADDLE_DIM_Y) // 2
-	p3x = 1 + PADDLE_DIM_X + 1 # second player on the left
-	p3y = (SCREEN_Y - PADDLE_DIM_Y) // 2
-	p4x = SCREEN_X - (2 * PADDLE_DIM_X) - 2 # second player on the right
-	p4y = (SCREEN_Y - PADDLE_DIM_Y) // 2
+	p1y = (SCREEN_Y - PADDLE_DIM_Y + 1) // 2
+	p2x = SCREEN_X # first player on the right
+	p2y = (SCREEN_Y - PADDLE_DIM_Y + 1) // 2
+	p3x = 0 # second player on the left
+	p3y = p1y // 2
+	p4x = SCREEN_X # second player on the right
+	p4y = p2y // 2
 	INITIAL_POSITIONS = {
 		"ball": {"x": bx, "y": by},
 		"player1": {"x": p1x, "y": p1y},
@@ -146,6 +146,60 @@ class GameLogic():
 			await self.update_ball_position()
 			await self.send_game_state()
 
+	def is_ball_touched_by_player(self):
+		ball_x, ball_y = self.game_data["ball_position"]
+		if self.game.match_type == "1v1":
+			p1_x, p1_y = self.game_data["player_positions"][1]
+			p2_x, p2_y = self.game_data["player_positions"][2]
+
+			if p1_y <= ball_y < p1_y + self.PADDLE_DIM_Y and p1_x == ball_x:
+				#logger.debug(f"Ball touched by Player 1 at ({p1_x}, {p1_y})")
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+			elif p2_y <= ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y and p2_x == ball_x + self.BALL_SIZE - 1:
+				#logger.debug(f"Ball touched by Player 2 at ({p2_x}, {p2_y})")
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+			"""
+			logger.debug(f"Ball not touched")
+			logger.debug(
+            f"Ball not touched xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+            f"--- Ball and Players Positions ---\n"
+            f"Ball Position: ({ball_x}, {ball_y})\n"
+            f"Player 1 Position: ({p1_x}, {p1_y}) | Player 2 Position: ({p2_x}, {p2_y})\n"
+            f"Paddle Dimensions: ({self.PADDLE_DIM_X}, {self.PADDLE_DIM_Y}) | Ball Size: {self.BALL_SIZE}\n"
+            f"--- Conditions for Player 1 ---\n"
+            f"p1_y <= ball_y: {p1_y} <= {ball_y} is {p1_y <= ball_y}\n"
+            f"ball_y < p1_y + PADDLE_DIM_Y: {ball_y} < {p1_y + self.PADDLE_DIM_Y} is {ball_y < p1_y + self.PADDLE_DIM_Y}\n"
+            f"p1_x == ball_x: {p1_x} == {ball_x} is {p1_x == ball_x}\n"
+            f"--- Conditions for Player 2 ---\n"
+            f"p2_y <= ball_y + BALL_SIZE: {p2_y} <= {ball_y + self.BALL_SIZE} is {p2_y <= ball_y + self.BALL_SIZE}\n"
+            f"ball_y + BALL_SIZE < p2_y + PADDLE_DIM_Y: {ball_y + self.BALL_SIZE} < {p2_y + self.PADDLE_DIM_Y} is {ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y}\n"
+            f"p2_x == ball_x + self.BALL_SIZE - 1: {p2_x} == {ball_x + self.BALL_SIZE - 1} is {p2_x == ball_x + self.BALL_SIZE - 1}\n"
+			)
+			"""
+		elif self.game.match_type == "2v2":
+			p1_x, p1_y = self.game_data["player_positions"][1]
+			p2_x, p2_y = self.game_data["player_positions"][2]
+			p3_x, p3_y = self.game_data["player_positions"][3]
+			p4_x, p4_y = self.game_data["player_positions"][4]
+
+			if p1_x <= ball_x < p1_x + self.PADDLE_DIM_X and p1_y == ball_y:
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+			elif p2_x <= ball_x + self.BALL_SIZE < p2_x + self.PADDLE_DIM_X and p2_y == ball_y:
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+			elif p3_x <= ball_x < p3_x + self.PADDLE_DIM_X and p3_y == ball_y:
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+			elif p4_x <= ball_x + self.BALL_SIZE < p4_x + self.PADDLE_DIM_X and p4_y == ball_y:
+				self.BALL_SPEED_X = -self.BALL_SPEED_X
+				return True
+		return False
+
+
+
 	async def update_ball_position(self):
 		# Convertir les clés de scores en entiers
 		#if "scores" in self.game_data:
@@ -156,16 +210,21 @@ class GameLogic():
 		ball_x += dx
 		ball_y += dy
 
-		if ball_y <= 0 or ball_y + self.BALL_SIZE >= self.SCREEN_Y:
+		if ball_y <= 0 or ball_y + self.BALL_SIZE > self.SCREEN_Y:
 			dy = -dy
 			self.BALL_SPEED_Y = -self.BALL_SPEED_Y
 
 		if ball_y <= 0:
 			ball_y = 0
-		if ball_y + self.BALL_SIZE >= self.SCREEN_Y:
-			ball_y = self.SCREEN_Y - self.BALL_SIZE
+		if ball_y + self.BALL_SIZE > self.SCREEN_Y + 1:
+			ball_y = self.SCREEN_Y - self.BALL_SIZE + 1
 
-		if ball_x <= 0:
+		self.game_data["ball_position"] = [ball_x, ball_y]
+
+		if ball_x <= 0 or ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
+			if self.is_ball_touched_by_player():
+				return
+		if ball_x <=0:
 			if self.game.match_type == "1v1":
 				self.game_data["scores"]['2'] += 1
 			elif self.game.match_type == "2v2":
@@ -178,7 +237,7 @@ class GameLogic():
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			return
-		elif ball_x + self.BALL_SIZE >= self.SCREEN_X:
+		elif ball_x + self.BALL_SIZE > self.SCREEN_X:
 			if self.game.match_type == "1v1":
 				self.game_data["scores"]['1'] += 1
 			elif self.game.match_type == "2v2":
@@ -191,15 +250,16 @@ class GameLogic():
 			await sync_to_async(self.game.save)()
 			self.reset_ball_position()
 			return
+		"""
 		else:
 			if self.game.match_type == "1v1":
 				p1_x, p1_y = self.game_data["player_positions"][1]
 				p2_x, p2_y = self.game_data["player_positions"][2]
 
-				if p1_x <= ball_x <= p1_x + self.PADDLE_DIM_X and p1_y <= ball_y <= p1_y + self.PADDLE_DIM_Y:
+				if p1_x <= ball_x < p1_x + self.PADDLE_DIM_X and p1_y <= ball_y <= p1_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_DIM_X and p2_y <= ball_y <= p2_y + self.PADDLE_DIM_Y:
+				elif p2_x <= ball_x + self.BALL_SIZE < p2_x + self.PADDLE_DIM_X and p2_y <= ball_y <= p2_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
 
@@ -209,19 +269,19 @@ class GameLogic():
 				p3_x, p3_y = self.game_data["player_positions"][3]
 				p4_x, p4_y = self.game_data["player_positions"][4]
 
-				if p1_x <= ball_x <= p1_x + self.PADDLE_DIM_X and p1_y <= ball_y <= p1_y + self.PADDLE_DIM_Y:
+				if p1_x <= ball_x < p1_x + self.PADDLE_DIM_X and p1_y <= ball_y < p1_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p2_x <= ball_x + self.BALL_SIZE <= p2_x + self.PADDLE_DIM_X and p2_y <= ball_y <= p2_y + self.PADDLE_DIM_Y:
+				elif p2_x <= ball_x + self.BALL_SIZE < p2_x + self.PADDLE_DIM_X and p2_y <= ball_y < p2_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p3_x <= ball_x <= p3_x + self.PADDLE_DIM_X and p3_y <= ball_y <= p3_y + self.PADDLE_DIM_Y:
+				elif p3_x <= ball_x < p3_x + self.PADDLE_DIM_X and p3_y <= ball_y < p3_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-				elif p4_x <= ball_x + self.BALL_SIZE <= p4_x + self.PADDLE_DIM_X and p4_y <= ball_y <= p4_y + self.PADDLE_DIM_Y:
+				elif p4_x <= ball_x + self.BALL_SIZE < p4_x + self.PADDLE_DIM_X and p4_y <= ball_y < p4_y + self.PADDLE_DIM_Y:
 					dx = -dx
 					self.BALL_SPEED_X = -self.BALL_SPEED_X
-
+		"""
 		self.game_data["ball_position"] = [ball_x, ball_y]
 
 	def reset_ball_position(self):
