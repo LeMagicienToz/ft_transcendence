@@ -4,7 +4,6 @@ import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Cookies from "js-cookie";
 
 const PlayerOne = () => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
@@ -76,7 +75,7 @@ const SockCreator = ({gameid, token, token42}) => {
 
 	useEffect(() => {
 		// Connexion au WebSocket
-		socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/${token}`);
+		socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
 
 		// Quand la connexion est ouverte
 		socket.onopen = () => {
