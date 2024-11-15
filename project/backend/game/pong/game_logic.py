@@ -152,11 +152,11 @@ class GameLogic():
 			p1_x, p1_y = self.game_data["player_positions"][1]
 			p2_x, p2_y = self.game_data["player_positions"][2]
 
-			if p1_y <= ball_y < p1_y + self.PADDLE_DIM_Y and p1_x == ball_x:
+			if p1_y <= ball_y + self.BALL_SIZE - 1 < p1_y + self.PADDLE_DIM_Y - 1 + self.BALL_SIZE - 1 and p1_x == ball_x + self.BALL_SIZE - 1:
 				#logger.debug(f"Ball touched by Player 1 at ({p1_x}, {p1_y})")
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
-			elif p2_y <= ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y and p2_x == ball_x + self.BALL_SIZE - 1:
+			elif p2_y <= ball_y + self.BALL_SIZE - 1 < p2_y + self.PADDLE_DIM_Y - 1 + self.BALL_SIZE - 1 and p2_x == ball_x + self.BALL_SIZE - 1:
 				#logger.debug(f"Ball touched by Player 2 at ({p2_x}, {p2_y})")
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
@@ -173,8 +173,8 @@ class GameLogic():
             f"ball_y < p1_y + PADDLE_DIM_Y: {ball_y} < {p1_y + self.PADDLE_DIM_Y} is {ball_y < p1_y + self.PADDLE_DIM_Y}\n"
             f"p1_x == ball_x: {p1_x} == {ball_x} is {p1_x == ball_x}\n"
             f"--- Conditions for Player 2 ---\n"
-            f"p2_y <= ball_y + BALL_SIZE: {p2_y} <= {ball_y + self.BALL_SIZE} is {p2_y <= ball_y + self.BALL_SIZE}\n"
-            f"ball_y + BALL_SIZE < p2_y + PADDLE_DIM_Y: {ball_y + self.BALL_SIZE} < {p2_y + self.PADDLE_DIM_Y} is {ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y}\n"
+            f"p2_y <= ball_y + BALL_SIZE -1: {p2_y} <= {ball_y + self.BALL_SIZE - 1} is {p2_y <= ball_y + self.BALL_SIZE}\n"
+            f"ball_y + BALL_SIZE - 1 < p2_y + PADDLE_DIM_Y + self.BALL_SIZE - 1: {ball_y + self.BALL_SIZE - 1} < {p2_y + self.PADDLE_DIM_Y + self.BALL_SIZE - 1} is {ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y}\n"
             f"p2_x == ball_x + self.BALL_SIZE - 1: {p2_x} == {ball_x + self.BALL_SIZE - 1} is {p2_x == ball_x + self.BALL_SIZE - 1}\n"
 			)
 			"""
