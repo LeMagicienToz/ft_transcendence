@@ -148,76 +148,88 @@ const CreateForm = ({ match_type }) => {
 
 // Join Form Component
 const JoinForm = () => {
-	const [numberplayer, setNumberplayer] = useState('1v1');
-    const [gameList, setGameList] = useState([]);
+	const [match_type, setGameMode] = useState('1v1');
+	const [gameList, setGameList] = useState([]);
+	const navigate = useNavigate();
 
-    // Récupérer la liste des parties lors du montage du composant
-    useEffect(() => {
-        const getData = async () => {
-            const data = await fetchlist();
-            setGameList(data);
-        };
-        getData();
-    }, [fetchlist]);
+	// Fetch the list of games when the component mounts
+	useEffect(() => {
+		const getData = async () => {
+			try {
+				const data = await fetchlist();
+				setGameList(data);
+			} catch (error) {
+				console.error('Error fetching game list:', error);
+			}
+		};
+		getData();
+	}, []);
 
-    // Filtrer les parties en fonction du type de match
-    const filteredGames = gameList.filter((game) => game.match_type === numberplayer);
+	// Filter games based on match type
+	const filteredGames = gameList.filter((game) => game.match_type === match_type);
 
-    // Fonction pour changer le mode de jeu
-    const handleGameModeChange = (mode) => {
-        setNumberplayer(mode);
-    };
+	// Handle game click to join the game
+	const handleGameClick = async (gameId) => {
+		try {
+			const response = await fetch(`/api/game/join/${gameId}/`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+			});
 
-	const handleGameClick = (gameId) => {
-		console.log(`Jeu cliqué : ${gameId}`);
-		// Naviguer vers la page de détails du jeu ou effectuer une action spécifique
+			if (response.ok) {
+				const data = await response.json();
+				navigate('/waitingroom', { state: { gameData: data } });
+			} else {
+				console.error('Non-200 response:', response.status, response.statusText);
+			}
+		} catch (err) {
+			console.error('Fetch error:', err);
+		}
 	};
 
-    return (
-        // <div className="Join-gamemenu">
+	return (
 		<>
 			<div className="title-gamemenu">Join Game</div>
 			<div className="navbar-container">
-            <div className="joinnavbar">
+				<div className="joinnavbar">
 					<button
-						className={`btn-placement ${numberplayer === '1v1' ? 'active' : ''}`}
-						onClick={() => handleGameModeChange('1v1')}
-						>
+						className={`btn-placement ${match_type === '1v1' ? 'active' : ''}`}
+						onClick={() => setGameMode('1v1')}
+					>
 						1v1
 					</button>
 					<button
-						className={`btn-placement ${numberplayer === '2v2' ? 'active' : ''}`}
-						onClick={() => handleGameModeChange('2v2')}
-						>
+						className={`btn-placement ${match_type === '2v2' ? 'active' : ''}`}
+						onClick={() => setGameMode('2v2')}
+					>
 						2v2
 					</button>
 				</div>
-					<div className="container-waitingr">
-
+				<div className="container-waitingr">
 					<div className="waiting-room">
-					{filteredGames.length > 0 ? (
-						<div>
-							{filteredGames.map((game) => (
-									<button
-										onClick={() => handleGameClick(game.id)}
-										className="button-style"
-									>
-										<strong>{game.game_custom_name}</strong> - {game.status}
-										<br />
-										Score à atteindre : {game.score_to_win}
-									</button>
-							))}
-						</div>
+						{filteredGames.length > 0 ? (
+							filteredGames.map((game) => (
+								<button
+									key={game.id}
+									onClick={() => handleGameClick(game.id)}
+									className="button-style"
+								>
+									<strong>{game.game_custom_name}</strong> - {game.status}
+									<br />
+									Score to reach: {game.score_to_win}
+								</button>
+							))
 						) : (
-							<p>Aucune partie disponible pour le mode {numberplayer}.</p>
-						)} 
+							<p>No games available for {match_type} mode.</p>
+						)}
 					</div>
 				</div>
 			</div>
-			</>
-
-        // {/* </div> */}
-    );
+		</>
+	);
 };
 
 

@@ -69,19 +69,39 @@ const Board = () => {
 	);
 };
 
-const SockCreator = ({gameid, token, token42}) => {
+const SockCreator = ({ gameid, token }) => {
+	const [message, setMessage] = useState('');
 	const [response, setResponse] = useState('');
-	let socket;
-
+	const socketRef = useRef(null);
+  
 	useEffect(() => {
-		// Connexion au WebSocket
-		socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
-
-		// Quand la connexion est ouverte
-		socket.onopen = () => {
-			console.log('WebSocket is open now.');
-		};
-	}, []);
+	  // Create WebSocket connection
+	  const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+	  socketRef.current = socket;  // Store WebSocket in ref
+  
+	  // Listen for messages from the server
+	  socket.onmessage = (event) => {
+		console.log('Message from server: ', event.data);
+		setResponse(event.data);  // Store response
+	  };
+  
+	  // When connection is open
+	  socket.onopen = () => {
+		console.log('WebSocket is open now.');
+	  };
+  
+	  // Handle any errors
+	  socket.onerror = (error) => {
+		console.error('WebSocket Error: ', error);
+	  };
+  
+	  // Cleanup on component unmount
+	  return () => {
+		if (socketRef.current) {
+		  socketRef.current.close();  // Close WebSocket connection on unmount
+		}
+	  };
+	}, [gameid, token]);  // Only re-run when gameid or token change
 }  
 
 const WaitingRoom = () => {
