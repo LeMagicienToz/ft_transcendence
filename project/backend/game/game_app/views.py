@@ -442,7 +442,10 @@ class TournamentCreateView(APIView):
             status='waiting'
         )
         tournament.players.add(player1)
-        return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
+        if token:
+            return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id, 'token': token}, status=201)
+        elif token42:
+            return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id, 'token42': token42}, status=201)
 
 class TournamentListView(APIView):
     """
@@ -591,7 +594,9 @@ class TournamentJoinView(APIView):
         if tournament.status != 'waiting':
             return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
         # get user_id and user_name from authentification app
-        user_info = utils_get_user_info(request.COOKIES.get('token'), request.COOKIES.get('42_access_token'))
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -623,7 +628,10 @@ class TournamentJoinView(APIView):
         # add the player
         tournament.players.add(player)
         tournament.save()
-        return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id}, status=200)
+        if token:
+            return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token': token}, status=201)
+        elif token42:
+            return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token42': token42}, status=201)
 
 class TournamentStartView(APIView):
     """
