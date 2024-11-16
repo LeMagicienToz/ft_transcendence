@@ -288,58 +288,6 @@ class GameJoinView(APIView):
         elif token42:
             return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token42': token42}, status=201)
 
-class GameStartView(APIView):
-    """
-    start a game
-    the request must be POST
-    body = {'token': type string,
-    '42_access_token': type string}
-    the game_id is in the url
-    """
-    def post(self, request, game_id):
-        # get game_id
-        game = get_object_or_404(Game, id=game_id)
-        # get user_id from authentification app
-        user_info = utils_get_user_info(request.COOKIES.get('token'), request.COOKIES.get('42_access_token'))
-        if not user_info:
-            return JsonResponse({'error': 'Failed to get user info'}, status=400)
-        try:
-            player_user_id = user_info.get('user_id')
-        except KeyError as e:
-            return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-        # check if the player is in the game
-        player_ids = list(game.players.values_list('user_id', flat=True))
-        if player_user_id not in player_ids:
-            return JsonResponse({'error': 'Only a player in the game can start'}, status=400)
-        # check if game is waiting, then match type
-        #if game.status != 'waiting':
-        #    return JsonResponse({'message': 'Game cannot be started'}, status=400)
-        if game.match_type not in ['1v1', '2v2']:
-            return JsonResponse({'error': 'Invalid match type'}, status=400)
-        # check if game is full : 2 players in 1v1 and 4 in 2v2
-        player_count = game.players.count()
-        if game.match_type == '1v1' and player_count != 2:
-            return JsonResponse({'error': 'A 1v1 game requires exactly 2 players'}, status=400)
-        elif game.match_type == '2v2' and player_count != 4:
-            return JsonResponse({'error': 'A 2v2 game requires exactly 4 players'}, status=400)
-        # Change status to playing and setup start_time
-        game.status = 'playing'
-        game.start_time = timezone.now()
-        game.save()
-        # THIS PART DOES NOT WORK, START THE GAME BY MAKE USER MOVE
-        # Send a message to the GameConsumer to start the game loop
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"game_{game.id}",  # group name from the consumer
-            {
-                "type": "start_game_loop",  # the custom type we'll handle in the consumer
-                "message": "start"
-            }
-        )
-        return JsonResponse({'message': 'Game started', 'game_id': game.id})
-
 class GameDeleteView(APIView):
     """
     Delete a game
@@ -632,43 +580,6 @@ class TournamentJoinView(APIView):
             return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token': token}, status=201)
         elif token42:
             return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token42': token42}, status=201)
-
-class TournamentStartView(APIView):
-    """
-    Start a tournament.
-    The request must be POST.
-    The tournament_id is in the URL.
-    """
-    def post(self, request, tournament_id):
-        # Get tournament
-        tournament = get_object_or_404(Tournament, id=tournament_id)
-
-        # Check if tournament is waiting
-        #if tournament.status != 'waiting':
-        #    return JsonResponse({'message': 'Tournament cannot be started'}, status=400)
-
-        # Check if the number of players matches the required player_count
-        player_count = tournament.players.count()
-        if player_count != tournament.player_count:
-            return JsonResponse({'error': f'Tournament requires exactly {tournament.player_count} players'}, status=400)
-        # Change tournament status to playing
-        tournament.status = 'playing'
-        tournament.start_time = timezone.now()
-        tournament.save()
-
-        # create the list of games
-        create_round_robin_matches(tournament)
-
-        # Send a message to the TournamentConsumer to start the tournament loop
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"tournament_{tournament.id}",
-            {
-                "type": "start_tournament_loop", # to do
-                "message": "start"
-            }
-        )
-        return JsonResponse({'message': 'Tournament started', 'tournament_id': tournament.id})
 
 class TournamentDeleteView(APIView):
     """
