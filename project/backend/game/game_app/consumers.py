@@ -42,10 +42,13 @@ class Consumer(AsyncWebsocketConsumer):
         if self.player.player_index == 0:
             # check the status of the game
             await sync_to_async(self.assign_player_index)()
+        await self.listen()
         if self.game.status == 'waiting' and await sync_to_async(self.game.is_full)():
             self.game.status = 'ready_to_play'
             await sync_to_async(self.game.save)()
-        await self.listen()
+            #tell eveyrone to update their game_data.status
+            self.game_logic.game_data['status'] = 'ready_to_play'
+            await self.game_logic.send_game_state()
 
     def assign_player_index(self):
         indexes = list(self.game.players.values_list('player_index', flat=True))
@@ -144,7 +147,10 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def start_game_loop(self, event):
         #game has started
-        self.game.status = "playing"
+        self.game.status = 'playing'
+        #tell eveyrone to update their game_data.status
+        self.game_logic.game_data['status'] = 'playing'
+        self.game_logic.send_game_state()
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
