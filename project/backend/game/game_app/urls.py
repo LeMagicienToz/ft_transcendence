@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
 from .views import (
-    GameCreateView, GameListView, GameDetailView, GameJoinView, GameStartView, GameDeleteView,
+    GameCreateView, GameListView, GameDetailView, GameJoinView, GameDeleteView,
 	TournamentCreateView, TournamentListView, TournamentDetailView, TournamentJoinView,
-	TournamentStartView, TournamentDeleteView
+	TournamentDeleteView
 )
 
 urlpatterns = [
