@@ -178,6 +178,9 @@ class GameListView(APIView):
                 'match_type': game.match_type,
                 'score_to_win': game.score_to_win,
                 'tournament_id': game.tournament_id,
+                'creation_time': game.creation_time,
+                'start_time': game.start_time,
+                'end_time': game.end_time,
                 'players': [
                     {
                         'user_id': player.user_id,
@@ -208,6 +211,9 @@ class GameDetailView(APIView):
             'match_type': game.match_type,
             'score_to_win': game.score_to_win,
             'tournament_id': game.tournament_id,
+            'creation_time': game.creation_time,
+            'start_time': game.start_time,
+            'end_time': game.end_time,
             'players': [
                 {
                     'user_id': player.user_id,
@@ -408,7 +414,8 @@ class TournamentListView(APIView):
                     "user_id": player.user_id,
                     "user_name": player.user_name,
                     "score": player.score,
-                    "nickname": player.nickname
+                    "nickname": player.nickname,
+                    "player_index": player.player_index
                 }
                 for player in tournament.players.all()
             ]
@@ -429,7 +436,7 @@ class TournamentListView(APIView):
                             "user_name": player.user_name,
                             "score": player.score,
                             "nickname": player.nickname,
-                            "player_index": player.player_index,
+                            "player_index": player.player_index
                         }
                         for player in game.players.all()
                     ]
@@ -469,7 +476,8 @@ class TournamentDetailView(APIView):
                 "user_id": player.user_id,
                 "user_name": player.user_name,
                 "score": player.score,
-                "nickname": player.nickname
+                "nickname": player.nickname,
+                "player_index": player.player_index
             }
             for player in tournament.players.all()
         ]

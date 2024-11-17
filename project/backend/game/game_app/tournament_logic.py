@@ -5,7 +5,7 @@ def create_round_robin_matches(tournament):
     # Récupère les informations nécessaires du tournoi
     players = list(tournament.players.all())
     game_custom_name = "Game in " + tournament.tournament_custom_name
-    tournament_id = 100 + tournament.id
+    tournament_id = tournament.id
     score_to_win = tournament.score_to_win
     match_type = tournament.match_type
     game_type = tournament.game_type
