@@ -20,7 +20,7 @@ import os
 
 import logging
 
-logger = logging.getLogger('game_app')
+logger = logging.getLogger('myapp')
 
 
 def utils_get_user_info(token, token42):
@@ -110,18 +110,14 @@ class GameCreateView(APIView):
                        'nickname': nickname,
                        'score': 0}
         )
-        # if player allready exist set index to 0
+        # update if needed
         if not created:
             player1.player_index = 0
             player1.score = 0
-            player1.save()
-        # if player allready exist and user_name is different, then update
-        if not created and player1.user_name != player1_user_name:
-            player1.user_name = player1_user_name
-            player1.save()
-        # if player allready exist and nickname is different, then update
-        if not created and player1.nickname != nickname:
-            player1.nickname = nickname
+            if player1.user_name != player1_user_name:
+                player1.user_name = player1_user_name
+            if player1.nickname != nickname:
+                player1.nickname = nickname
             player1.save()
         # get game type (1 vs 1 or 2 vs 2)
         match_type = request.data.get('match_type')
@@ -347,13 +343,14 @@ class TournamentCreateView(APIView):
                        'nickname': nickname,
                        'score': 0}
         )
-        # if player allready exist and user_name is different, then update
-        if not created and player1.user_name != player1_user_name:
-            player1.user_name = player1_user_name
-            player1.save()
-        # if player allready exist and nickname is different, then update
-        if not created and player1.nickname != nickname:
-            player1.nickname = nickname
+        # update if needed
+        if not created:
+            player1.player_index = 0
+            player1.score = 0
+            if player1.user_name != player1_user_name:
+                player1.user_name = player1_user_name
+            if player1.nickname != nickname:
+                player1.nickname = nickname
             player1.save()
         # get game type (1 vs 1 or 2 vs 2)
         tourn_match_type = request.data.get('match_type')
@@ -533,6 +530,42 @@ class TournamentJoinView(APIView):
     'tournament_id' is in the url.
     """
     def put(self, request, tournament_id):
+        """
+        logger.info("Received PUT request to join tournament with ID: %s", tournament_id)
+
+        # Get tournament
+        logger.debug("Attempting to retrieve tournament with ID: %s", tournament_id)
+        tournament = get_object_or_404(Tournament, id=tournament_id)
+        logger.info("Tournament retrieved: %s", tournament)
+
+        # Check if tournament is full
+        player_count = tournament.players.count()
+        logger.debug("Tournament player count: %d, Max players allowed: %d", player_count, tournament.player_count)
+        if player_count >= tournament.player_count:
+            logger.warning("Tournament is already full. Current players: %d", player_count)
+            return JsonResponse({'error': 'Tournament is already full'}, status=400)
+
+        # Tournament must be waiting
+        logger.debug("Tournament status: %s", tournament.status)
+        if tournament.status != 'waiting':
+            logger.warning("Tournament is not in 'waiting' status. Current status: %s", tournament.status)
+            return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
+
+        # Get user_id and user_name from authentication app
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        logger.debug("Tokens retrieved from cookies. Token: %s, 42_access_token: %s", token, token42)
+
+        logger.debug("Attempting to retrieve user info with provided tokens.")
+        user_info = utils_get_user_info(token, token42)
+        if not user_info:
+            logger.error("Failed to retrieve user info using provided tokens.")
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+
+        logger.info("User info retrieved successfully: %s", user_info)
+
+        return JsonResponse({'success': 'Joined the tournament successfully'})
+        """
         # get tournament
         tournament = get_object_or_404(Tournament, id=tournament_id)
         # check if tournament is full
@@ -547,6 +580,7 @@ class TournamentJoinView(APIView):
         user_info = utils_get_user_info(token, token42)
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
+
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
 
@@ -576,6 +610,25 @@ class TournamentJoinView(APIView):
         # add the player
         tournament.players.add(player)
         tournament.save()
+
+        # Check if the number of players matches the required player_count
+        player_count = tournament.players.count()
+        if player_count == tournament.player_count:
+            # Change tournament status to playing
+            tournament.status = 'Tournament_full'
+            tournament.start_time = timezone.now()
+            tournament.save()
+            # create the list of games
+            create_round_robin_matches(tournament)
+            # Send a message to the TournamentConsumer to start the tournament loop
+            #channel_layer = get_channel_layer()
+            #async_to_sync(channel_layer.group_send)(
+            #    f"tournament_{tournament.id}",
+            #    {
+            #        "type": "start_tournament_loop", # to do
+            #        "message": "start"
+            #    }
+            #)
         if token:
             return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token': token}, status=201)
         elif token42:

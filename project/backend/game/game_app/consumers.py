@@ -137,6 +137,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.game_logic.game_data = data_json.get("game_data")
         if self.game_logic.game_data['status'] == "finished":
             self.game.status = "finished"
+            # todo check if the tournament to check if tournament finished
         # Convert str in int (because JSON gives only str)
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket

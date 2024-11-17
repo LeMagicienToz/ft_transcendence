@@ -4,6 +4,9 @@ from django.utils import timezone
 def create_round_robin_matches(tournament):
     # Récupère les informations nécessaires du tournoi
     players = list(tournament.players.all())
+    game_custom_name = "Game in " + tournament.tournament_custom_name
+    tournament_id = 100 + tournament.id
+    score_to_win = tournament.score_to_win
     match_type = tournament.match_type
     game_type = tournament.game_type
     games = []
@@ -14,8 +17,11 @@ def create_round_robin_matches(tournament):
         for i in range(len(players)):
             for j in range(i + 1, len(players)):
                 game = Game(
+                    game_custom_name=game_custom_name,
                     match_type=match_type,
                     game_type=game_type,
+                    score_to_win=score_to_win,
+                    tournament_id=tournament_id,
                     status='waiting'
                 )
                 game.save()
@@ -34,8 +40,11 @@ def create_round_robin_matches(tournament):
         for i in range(len(teams)):
             for j in range(i + 1, len(teams)):
                 game = Game(
+                    game_custom_name=game_custom_name,
                     match_type=match_type,
                     game_type=game_type,
+                    score_to_win=score_to_win,
+                    tournament_id=tournament_id,
                     status='waiting'
                 )
                 game.save()
