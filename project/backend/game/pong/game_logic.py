@@ -102,7 +102,7 @@ class GameLogic():
 		if action == "move":
 			direction = data_json.get('direction')
 			player_index = self.consumer.player.player_index
-			if str(player_index) in map(str, self.game_data["player_positions"].keys()) and direction in ["up", "down"]:
+			if str(player_index) in map(str, self.game_data["player_positions"].keys()) and direction in ["left", "right"]:
 				await self.update_player_position(player_index, direction)
 			else:
 				await self.consumer.send(json.dumps({
@@ -121,9 +121,9 @@ class GameLogic():
 
 	async def update_player_position(self, player_index, direction):
 		x, y = self.game_data["player_positions"][player_index]
-		if direction == "up":
+		if direction == "left":
 			y = min(self.SCREEN_Y - self.PADDLE_DIM_Y - 1, y + self.PADDLE_SPEED)
-		elif direction == "down":
+		elif direction == "right":
 			y = max(0, y - self.PADDLE_SPEED)
 		self.game_data["player_positions"][player_index] = [x, y]
 		await self.send_game_state()
@@ -153,31 +153,46 @@ class GameLogic():
 			p2_x, p2_y = self.game_data["player_positions"][2]
 
 			if p1_y <= ball_y + self.BALL_SIZE - 1 < p1_y + self.PADDLE_DIM_Y - 1 + self.BALL_SIZE - 1 and p1_x == ball_x + self.BALL_SIZE - 1:
-				#logger.debug(f"Ball touched by Player 1 at ({p1_x}, {p1_y})")
+				logger.debug(
+					f"Ball touched by Player 1!\n"
+					f"--- Interaction Details ---\n"
+					f"Player 1 Position: x={p1_x}, y range=[{p1_y}, {p1_y + self.PADDLE_DIM_Y - 1}]\n"
+					f"Ball Position: x range=[{ball_x}, {ball_x + self.BALL_SIZE - 1}], y range=[{ball_y}, {ball_y + self.BALL_SIZE - 1}]\n"
+					f"Paddle Dimensions: Width={self.PADDLE_DIM_X}, Height={self.PADDLE_DIM_Y}\n"
+					f"Ball Size: {self.BALL_SIZE}\n"
+					f"Ball Speed X reversed to: {-self.BALL_SPEED_X}\n"
+				)
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
 			elif p2_y <= ball_y + self.BALL_SIZE - 1 < p2_y + self.PADDLE_DIM_Y - 1 + self.BALL_SIZE - 1 and p2_x == ball_x + self.BALL_SIZE - 1:
-				#logger.debug(f"Ball touched by Player 2 at ({p2_x}, {p2_y})")
+				logger.debug(
+					f"Ball touched by Player 2!\n"
+					f"--- Interaction Details ---\n"
+					f"Player 2 Position: x={p2_x}, y range=[{p2_y}, {p2_y + self.PADDLE_DIM_Y - 1}]\n"
+					f"Ball Position: x range=[{ball_x}, {ball_x + self.BALL_SIZE - 1}], y range=[{ball_y}, {ball_y + self.BALL_SIZE - 1}]\n"
+					f"Paddle Dimensions: Width={self.PADDLE_DIM_X}, Height={self.PADDLE_DIM_Y}\n"
+					f"Ball Size: {self.BALL_SIZE}\n"
+					f"Ball Speed X reversed to: {-self.BALL_SPEED_X}\n"
+				)
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
-			"""
-			logger.debug(f"Ball not touched")
+
 			logger.debug(
-            f"Ball not touched xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
-            f"--- Ball and Players Positions ---\n"
-            f"Ball Position: ({ball_x}, {ball_y})\n"
-            f"Player 1 Position: ({p1_x}, {p1_y}) | Player 2 Position: ({p2_x}, {p2_y})\n"
-            f"Paddle Dimensions: ({self.PADDLE_DIM_X}, {self.PADDLE_DIM_Y}) | Ball Size: {self.BALL_SIZE}\n"
-            f"--- Conditions for Player 1 ---\n"
-            f"p1_y <= ball_y: {p1_y} <= {ball_y} is {p1_y <= ball_y}\n"
-            f"ball_y < p1_y + PADDLE_DIM_Y: {ball_y} < {p1_y + self.PADDLE_DIM_Y} is {ball_y < p1_y + self.PADDLE_DIM_Y}\n"
-            f"p1_x == ball_x: {p1_x} == {ball_x} is {p1_x == ball_x}\n"
-            f"--- Conditions for Player 2 ---\n"
-            f"p2_y <= ball_y + BALL_SIZE -1: {p2_y} <= {ball_y + self.BALL_SIZE - 1} is {p2_y <= ball_y + self.BALL_SIZE}\n"
-            f"ball_y + BALL_SIZE - 1 < p2_y + PADDLE_DIM_Y + self.BALL_SIZE - 1: {ball_y + self.BALL_SIZE - 1} < {p2_y + self.PADDLE_DIM_Y + self.BALL_SIZE - 1} is {ball_y + self.BALL_SIZE < p2_y + self.PADDLE_DIM_Y}\n"
-            f"p2_x == ball_x + self.BALL_SIZE - 1: {p2_x} == {ball_x + self.BALL_SIZE - 1} is {p2_x == ball_x + self.BALL_SIZE - 1}\n"
+				f"Ball not touched by any player\n"
+				f"--- Ball and Players Positions ---\n"
+				f"Ball Position: ({ball_x}, {ball_y})\n"
+				f"Player 1 Position: ({p1_x}, {p1_y}) | Player 2 Position: ({p2_x}, {p2_y})\n"
+				f"Paddle Dimensions: ({self.PADDLE_DIM_X}, {self.PADDLE_DIM_Y}) | Ball Size: {self.BALL_SIZE}\n"
+				f"--- Player 1 Conditions ---\n"
+				f"p1_y <= ball_y + BALL_SIZE - 1: {p1_y} <= {ball_y + self.BALL_SIZE - 1} is {p1_y <= ball_y + self.BALL_SIZE - 1}\n"
+				f"ball_y + BALL_SIZE - 1 < p1_y + PADDLE_DIM_Y: {ball_y + self.BALL_SIZE - 1} < {p1_y + self.PADDLE_DIM_Y} is {ball_y + self.BALL_SIZE - 1 < p1_y + self.PADDLE_DIM_Y}\n"
+				f"p1_x == ball_x + BALL_SIZE - 1: {p1_x} == {ball_x + self.BALL_SIZE - 1} is {p1_x == ball_x + self.BALL_SIZE - 1}\n"
+				f"--- Player 2 Conditions ---\n"
+				f"p2_y <= ball_y + BALL_SIZE - 1: {p2_y} <= {ball_y + self.BALL_SIZE - 1} is {p2_y <= ball_y + self.BALL_SIZE - 1}\n"
+				f"ball_y + BALL_SIZE - 1 < p2_y + PADDLE_DIM_Y: {ball_y + self.BALL_SIZE - 1} < {p2_y + self.PADDLE_DIM_Y} is {ball_y + self.BALL_SIZE - 1 < p2_y + self.PADDLE_DIM_Y}\n"
+				f"p2_x == ball_x + BALL_SIZE - 1: {p2_x} == {ball_x + self.BALL_SIZE - 1} is {p2_x == ball_x + self.BALL_SIZE - 1}\n"
 			)
-			"""
+
 		elif self.game.match_type == "2v2":
 			p1_x, p1_y = self.game_data["player_positions"][1]
 			p2_x, p2_y = self.game_data["player_positions"][2]
