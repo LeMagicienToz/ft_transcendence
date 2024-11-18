@@ -6,6 +6,8 @@ import asyncio
 from pong.game_logic import GameLogic as myPongGameLogic
 from .views import utils_get_user_info
 from urllib.parse import parse_qs
+from django.utils import timezone
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -137,6 +139,10 @@ class Consumer(AsyncWebsocketConsumer):
         self.game_logic.game_data = data_json.get("game_data")
         if self.game_logic.game_data['status'] == "finished":
             self.game.status = "finished"
+            self.game_logic.game_data['end_time'] = timezone.now().isoformat()
+            self.game.end_time = self.game_logic.game_data['end_time']
+            if self.is_player_1():
+                await sync_to_async(self.game.save)()
             # todo check if the tournament to check if tournament finished
         # Convert str in int (because JSON gives only str)
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
@@ -149,8 +155,10 @@ class Consumer(AsyncWebsocketConsumer):
     async def start_game_loop(self, event):
         #game has started
         self.game.status = 'playing'
+        self.game.start_time = timezone.now().isoformat()
         #tell eveyrone to update their game_data.status
         self.game_logic.game_data['status'] = 'playing'
+        self.game_logic.game_data['start_time'] = self.game.start_time
         self.game_logic.send_game_state()
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())

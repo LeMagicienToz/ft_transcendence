@@ -1,6 +1,7 @@
 from asgiref.sync import sync_to_async
 import json
 import asyncio
+from django.utils import timezone
 
 import logging
 logger = logging.getLogger('myapp')
@@ -90,6 +91,8 @@ class GameLogic():
 		if (self.game.status == 'playing'):
 			self.game_data['status'] = 'finished'
 			self.game.status = 'finished'
+			self.game_data['end_time'] = timezone.now().isoformat()
+			self.game.end_time = self.game_data['end_time']
 			await sync_to_async(self.game.save)()
 			await self.send_game_state()
 
