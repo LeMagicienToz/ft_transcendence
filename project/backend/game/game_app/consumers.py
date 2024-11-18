@@ -107,7 +107,7 @@ class Consumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        if (self.game_logic):
+        if hasattr(self, 'game_logic') and self.game_logic:
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
