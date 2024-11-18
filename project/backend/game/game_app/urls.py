@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from .views import (
-    GameCreateView, GameListView, GameDetailView, GameJoinView, GameDeleteView,
+    GameCreateView, GameListView, GameDetailView, GameJoinView, GameUserHistoryView, GameDeleteView,
 	TournamentCreateView, TournamentListView, TournamentDetailView, TournamentJoinView,
 	TournamentDeleteView
 )
@@ -13,6 +13,7 @@ urlpatterns = [
     path("list/", GameListView.as_view(), name="game-list"),                # List all games
     path("game-details/<int:game_id>/", GameDetailView.as_view(), name="game-detail"),   # Detail one game
     path("join/<int:game_id>/", GameJoinView.as_view(), name="game-join"),  # Join a game
+    path("user-history/<int:user_id>/", GameUserHistoryView.as_view(), name="user-histoty"),   # list of games played by user_id
     #path("start/<int:game_id>/", GameStartView.as_view(), name="game-start"), # Start a game
     path("delete/<int:game_id>/", GameDeleteView.as_view(), name="game-delete"),   # Delete one game
     path("tournament/create/", TournamentCreateView.as_view(), name="tournament-create"),   # Create tournament

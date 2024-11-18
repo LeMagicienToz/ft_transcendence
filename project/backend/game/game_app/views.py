@@ -275,6 +275,74 @@ class GameJoinView(APIView):
         elif token42:
             return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token42': token42}, status=201)
 
+
+class GameUserHistoryView(APIView):
+    """
+    Return the list of games for a specific user,
+    the request must be GET and look like
+    body = {}
+    The user_id is in the URL.
+    """
+    def get(self, request, user_id):
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid user_id. Must be an integer.'}, status=400)
+        # Filter games where used_id is in
+        games = Game.objects.filter(players__user_id=user_id)
+        game_details_list = []
+        for game in games:
+            players = game.players.all()
+            has_won = False
+            # Determine if the user won based on the match type
+            if game.match_type == '1v1':
+                user_score = None
+                opponent_score = None
+                for player in players:
+                    if player.user_id == user_id:
+                        user_score = player.score
+                    else:
+                        opponent_score = player.score
+                if user_score is not None and opponent_score is not None:
+                    has_won = user_score >= opponent_score
+            elif game.match_type == '2v2':
+                user_score = None
+                highest_opponent_score = None
+                for player in players:
+                    if player.user_id == user_id:
+                        user_score = player.score
+                    else:
+                        if highest_opponent_score is None or player.score > highest_opponent_score:
+                            highest_opponent_score = player.score
+                if user_score is not None and highest_opponent_score is not None:
+                    has_won = user_score >= (highest_opponent_score or 0)
+            # Build the game details
+            game_details = {
+                'id': game.id,
+                'game_custom_name': game.game_custom_name,
+                'status': game.status,
+                'game_type': game.game_type,
+                'match_type': game.match_type,
+                'score_to_win': game.score_to_win,
+                'tournament_id': game.tournament_id,
+                'creation_time': game.creation_time,
+                'start_time': game.start_time,
+                'end_time': game.end_time,
+                'has_won': has_won,
+                'players': [
+                    {
+                        'user_id': player.user_id,
+                        'user_name': player.user_name,
+                        'score': player.score,
+                        'nickname': player.nickname,
+                        'player_index': player.player_index,
+                    } for player in players
+                ]
+            }
+            game_details_list.append(game_details)
+
+        return JsonResponse(game_details_list, safe=False)
+
 class GameDeleteView(APIView):
     """
     Delete a game
