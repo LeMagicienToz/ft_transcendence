@@ -102,23 +102,14 @@ class GameCreateView(APIView):
         # Data validation
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
-        # get or create the player
-        player1, created = Player.objects.get_or_create(
+        # create Player
+        player1 = Player.objects.create(
             user_id=player1_user_id,
-            defaults={'user_id': player1_user_id,
-                       'user_name': player1_user_name,
-                       'nickname': nickname,
-                       'score': 0}
+            user_name=player1_user_name,
+            score=0,
+            nickname=nickname,
+            player_index=0
         )
-        # update if needed
-        if not created:
-            player1.player_index = 0
-            player1.score = 0
-            if player1.user_name != player1_user_name:
-                player1.user_name = player1_user_name
-            if player1.nickname != nickname:
-                player1.nickname = nickname
-            player1.save()
         # get game type (1 vs 1 or 2 vs 2)
         match_type = request.data.get('match_type')
         if match_type not in ['1v1', '2v2']:
@@ -268,20 +259,14 @@ class GameJoinView(APIView):
         # Check if player allready in game
         if game.players.filter(user_id=player_user_id).exists():
             return JsonResponse({'error': 'Player has already joined the game'}, status=400)
-        # get or create the player from database
-        player, created = Player.objects.get_or_create(
+        # create Player
+        player = Player.objects.create(
             user_id=player_user_id,
-            defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
+            user_name=player_user_name,
+            score=0,
+            nickname=nickname,
+            player_index=0
         )
-        # update if needed
-        if not created:
-            player.player_index = 0
-            player.score = 0
-            if player.user_name != player_user_name:
-                player.user_name = player_user_name
-            if player.nickname != nickname:
-                player.nickname = nickname
-            player.save()
         # Assign new player
         game.players.add(player)
         game.save()
@@ -341,23 +326,14 @@ class TournamentCreateView(APIView):
         # Data validation
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
-        # get or create the player
-        player1, created = Player.objects.get_or_create(
+        # create Player
+        player1 = Player.objects.create(
             user_id=player1_user_id,
-            defaults={'user_id': player1_user_id,
-                       'user_name': player1_user_name,
-                       'nickname': nickname,
-                       'score': 0}
+            user_name=player1_user_name,
+            score=0,
+            nickname=nickname,
+            player_index=0
         )
-        # update if needed
-        if not created:
-            player1.player_index = 0
-            player1.score = 0
-            if player1.user_name != player1_user_name:
-                player1.user_name = player1_user_name
-            if player1.nickname != nickname:
-                player1.nickname = nickname
-            player1.save()
         # get game type (1 vs 1 or 2 vs 2)
         tourn_match_type = request.data.get('match_type')
         if tourn_match_type not in ['1v1', '2v2']:
@@ -540,42 +516,6 @@ class TournamentJoinView(APIView):
     'tournament_id' is in the url.
     """
     def put(self, request, tournament_id):
-        """
-        logger.info("Received PUT request to join tournament with ID: %s", tournament_id)
-
-        # Get tournament
-        logger.debug("Attempting to retrieve tournament with ID: %s", tournament_id)
-        tournament = get_object_or_404(Tournament, id=tournament_id)
-        logger.info("Tournament retrieved: %s", tournament)
-
-        # Check if tournament is full
-        player_count = tournament.players.count()
-        logger.debug("Tournament player count: %d, Max players allowed: %d", player_count, tournament.player_count)
-        if player_count >= tournament.player_count:
-            logger.warning("Tournament is already full. Current players: %d", player_count)
-            return JsonResponse({'error': 'Tournament is already full'}, status=400)
-
-        # Tournament must be waiting
-        logger.debug("Tournament status: %s", tournament.status)
-        if tournament.status != 'waiting':
-            logger.warning("Tournament is not in 'waiting' status. Current status: %s", tournament.status)
-            return JsonResponse({'error': 'Tournament has already started or finished'}, status=400)
-
-        # Get user_id and user_name from authentication app
-        token = request.COOKIES.get('token')
-        token42 = request.COOKIES.get('42_access_token')
-        logger.debug("Tokens retrieved from cookies. Token: %s, 42_access_token: %s", token, token42)
-
-        logger.debug("Attempting to retrieve user info with provided tokens.")
-        user_info = utils_get_user_info(token, token42)
-        if not user_info:
-            logger.error("Failed to retrieve user info using provided tokens.")
-            return JsonResponse({'error': 'Failed to get user info'}, status=400)
-
-        logger.info("User info retrieved successfully: %s", user_info)
-
-        return JsonResponse({'success': 'Joined the tournament successfully'})
-        """
         # get tournament
         tournament = get_object_or_404(Tournament, id=tournament_id)
         # check if tournament is full
@@ -603,20 +543,14 @@ class TournamentJoinView(APIView):
         # Check if player allready in tournament
         if tournament.players.filter(user_id=player_user_id).exists():
             return JsonResponse({'error': 'Player has already joined the tournament'}, status=400)
-        # get or create the player from database
-        player, created = Player.objects.get_or_create(
+        # create Player
+        player = Player.objects.create(
             user_id=player_user_id,
-            defaults={'user_name': player_user_name, 'nickname': nickname, 'score': 0}
+            user_name=player_user_name,
+            score=0,
+            nickname=nickname,
+            player_index=0
         )
-        # update if needed
-        if not created:
-            player.player_index = 0
-            player.score = 0
-            if player.user_name != player_user_name:
-                player.user_name = player_user_name
-            if player.nickname != nickname:
-                player.nickname = nickname
-            player.save()
         # add the player
         tournament.players.add(player)
         tournament.save()
@@ -630,15 +564,6 @@ class TournamentJoinView(APIView):
             tournament.save()
             # create the list of games
             create_round_robin_matches(tournament)
-            # Send a message to the TournamentConsumer to start the tournament loop
-            #channel_layer = get_channel_layer()
-            #async_to_sync(channel_layer.group_send)(
-            #    f"tournament_{tournament.id}",
-            #    {
-            #        "type": "start_tournament_loop", # to do
-            #        "message": "start"
-            #    }
-            #)
         if token:
             return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token': token}, status=201)
         elif token42:
