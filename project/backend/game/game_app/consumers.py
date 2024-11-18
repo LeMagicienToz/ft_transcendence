@@ -1,5 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Game
+from .models import Game, Tournament
 from asgiref.sync import sync_to_async
 import json
 import asyncio
@@ -143,8 +143,16 @@ class Consumer(AsyncWebsocketConsumer):
             self.game.end_time = self.game_logic.game_data['end_time']
             if self.is_player_1():
                 await sync_to_async(self.game.save)()
-            # todo check if the tournament to check if tournament finished
+                if self.game.tournament_id != 0:
+                    tournament = await sync_to_async(Tournament.objects.get)(id=self.game.tournament_id)
+                    finished_games = await sync_to_async(tournament.games.filter)(status='finished')
+                    tournament_count = await sync_to_async(tournament.games.count)()
+                    finished_count = await sync_to_async(finished_games.count)()
+                    if finished_count == tournament_count:
+                        tournament.status = "finished"
+                        await sync_to_async(tournament.save)()
         # Convert str in int (because JSON gives only str)
+        # todo test without converting
         self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket
         await self.send(text_data=event["message"])
