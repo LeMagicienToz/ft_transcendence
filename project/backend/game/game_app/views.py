@@ -275,10 +275,9 @@ class GameJoinView(APIView):
         elif token42:
             return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token42': token42}, status=201)
 
-
 class GameUserHistoryView(APIView):
     """
-    Return the list of games for a specific user,
+    Return the list of games for a specific user, with status = finished
     the request must be GET and look like
     body = {}
     The user_id is in the URL.
@@ -289,7 +288,7 @@ class GameUserHistoryView(APIView):
         except ValueError:
             return JsonResponse({'error': 'Invalid user_id. Must be an integer.'}, status=400)
         # Filter games where used_id is in
-        games = Game.objects.filter(players__user_id=user_id)
+        games = Game.objects.filter(players__user_id=user_id, status='finished')
         game_details_list = []
         for game in games:
             players = game.players.all()
