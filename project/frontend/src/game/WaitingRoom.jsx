@@ -26,7 +26,6 @@ const PlayerOne = () => {
 	);
 };
 
-
 const PlayerTwo = () => {
 	const { scene } = useGLTF('/gltf_files/playertwo.gltf');
 	const avatarRef = useRef();
@@ -43,10 +42,10 @@ const PlayerTwo = () => {
 
 	return (
 		<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
-		<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
-			<primitive ref={avatarRef} object={scene} />
-		</Stage>
-	</PresentationControls>
+			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
+				<primitive ref={avatarRef} object={scene} />
+			</Stage>
+		</PresentationControls>
 	);
 };
 
@@ -68,59 +67,75 @@ const Board = () => {
 		</PresentationControls>
 	);
 };
-
 const SockCreator = ({ gameid, token }) => {
-	const [message, setMessage] = useState('');
-	const [response, setResponse] = useState('');
 	const socketRef = useRef(null);
-  
+
 	useEffect(() => {
-	  // Create WebSocket connection
-	  const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
-	  socketRef.current = socket;  // Store WebSocket in ref
-  
-	  // Listen for messages from the server
-	  socket.onmessage = (event) => {
-		console.log('Message from server: ', event.data);
-		setResponse(event.data);  // Store response
-	  };
-  
-	  // When connection is open
-	  socket.onopen = () => {
-		console.log('WebSocket is open now.');
-	  };
-  
-	  // Handle any errors
-	  socket.onerror = (error) => {
-		console.error('WebSocket Error: ', error);
-	  };
-  
-	  // Cleanup on component unmount
-	  return () => {
-		if (socketRef.current) {
-		  socketRef.current.close();  // Close WebSocket connection on unmount
+		// Create WebSocket connection
+		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+		socketRef.current = socket;
+
+		// Listen for messages from the server
+		socket.onmessage = (event) => {
+			console.log('Message from server: ', event.data);
+		};
+
+		// Cleanup on component unmount
+		return () => {
+			if (socketRef.current) {
+				socketRef.current.close(); // Close WebSocket connection on unmount
+			}
+		};
+	}, [gameid, token]);
+
+	// Function to send movement messages
+	const sendMovement = (direction) => {
+		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+			const message = JSON.stringify({
+				action: 'move',
+				direction,
+			});
+			socketRef.current.send(message);
+			console.log('Sent message:', message); // Log the message sent to the socket
 		}
-	  };
-	}, [gameid, token]);  // Only re-run when gameid or token change
-}  
+	};
+
+	// Handle keyboard input
+	useEffect(() => {
+		const handleKeyDown = (event) => {
+			if (event.key === 'ArrowRight') {
+				console.log('Player pressed: ArrowRight'); // Log when the right arrow is pressed
+				sendMovement('right');
+			} else if (event.key === 'ArrowLeft') {
+				console.log('Player pressed: ArrowLeft'); // Log when the left arrow is pressed
+				sendMovement('left');
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, []);
+
+	return null; // No UI for this component
+};
+
 
 const WaitingRoom = () => {
 	const location = useLocation();
 	const gameData = location.state?.gameData;
-	// console.log(gameData);
-	// console.log("dwadwa");
-
-	// toke42={gameData.token42}
 
 	return (
 		<div className="game-container">
 			<Canvas style={{ touchAction: 'none' }}>
 				<ambientLight intensity={0.5} />
 				<directionalLight position={[5, 5, 5]} />
-				<SockCreator gameid={gameData.game_id} token={gameData.token}/>
+				<SockCreator gameid={gameData.game_id} token={gameData.token} />
 				<PlayerOne />
-				<PlayerTwo/>
-				<Board/>
+				<PlayerTwo />
+				<Board />
 			</Canvas>
 		</div>
 	);
