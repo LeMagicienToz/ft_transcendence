@@ -87,9 +87,9 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		if (self.game.status == 'playing'):
-			self.game_data['status'] = 'finished'
-			self.game.status = 'finished'
+		if (self.game.status == "playing"):
+			self.game_data["status"] = "finished"
+			self.game.status = "finished"
 			self.game_data['end_time'] = timezone.now().isoformat()
 			self.game.end_time = self.game_data['end_time']
 			await sync_to_async(self.game.save)()

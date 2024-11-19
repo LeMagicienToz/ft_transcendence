@@ -138,8 +138,8 @@ class Consumer(AsyncWebsocketConsumer):
         self.game_logic.game_data = data_json.get("game_data")
         if self.game_logic.game_data['status'] == "finished":
             self.game.status = "finished"
-            self.game_logic.game_data['end_time'] = timezone.now().isoformat()
-            self.game.end_time = self.game_logic.game_data['end_time']
+            self.game_logic.game_data["end_time"] = timezone.now().isoformat()
+            self.game.end_time = self.game_logic.game_data["end_time"]
             if self.is_player_1():
                 await sync_to_async(self.game.save)()
                 if self.game.tournament_id != 0:
@@ -149,6 +149,7 @@ class Consumer(AsyncWebsocketConsumer):
                     finished_count = await sync_to_async(finished_games.count)()
                     if finished_count == tournament_count:
                         tournament.status = "finished"
+                        tournament.end_time = timezone.now().isoformat()
                         await sync_to_async(tournament.save)()
         # Convert str in int (because JSON gives only str)
         # todo test without converting
