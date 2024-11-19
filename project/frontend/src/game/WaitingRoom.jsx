@@ -4,15 +4,30 @@ import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import * as THREE from 'three';
 
 const PlayerOne = ({ position }) => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
 	const avatarRef = useRef();
 
-	// Appliquez la position à chaque mise à jour
+	// Stocke la position actuelle
+	const currentPosition = useRef(new THREE.Vector3(...position));
+
 	useEffect(() => {
 		if (avatarRef.current) {
-			avatarRef.current.position.set(...position);
+			const targetPosition = new THREE.Vector3(...position);
+
+			// Animation frame loop pour interpoler la position
+			const updatePosition = () => {
+				// Lerp vers la nouvelle position
+				currentPosition.current.lerp(targetPosition, 0.1);
+				avatarRef.current.position.copy(currentPosition.current);
+
+				// Continue le rendu
+				requestAnimationFrame(updatePosition);
+			};
+
+			updatePosition();
 		}
 	}, [position]);
 
@@ -30,11 +45,27 @@ const PlayerTwo = ({ position }) => {
 	const avatarRef = useRef();
 	const initialRotation = [0, Math.PI, 0];
 
-	// Appliquez la position à chaque mise à jour
+	// Stocke la position actuelle
+	const currentPosition = useRef(new THREE.Vector3(...position));
+
 	useEffect(() => {
 		if (avatarRef.current) {
-			avatarRef.current.position.set(...position);
+			// Initialise la rotation
 			avatarRef.current.rotation.set(...initialRotation);
+
+			const targetPosition = new THREE.Vector3(...position);
+
+			// Animation frame loop pour interpoler la position
+			const updatePosition = () => {
+				// Lerp vers la nouvelle position
+				currentPosition.current.lerp(targetPosition, 0.1);
+				avatarRef.current.position.copy(currentPosition.current);
+
+				// Continue le rendu
+				requestAnimationFrame(updatePosition);
+			};
+
+			updatePosition();
 		}
 	}, [position]);
 
@@ -46,6 +77,7 @@ const PlayerTwo = ({ position }) => {
 		</PresentationControls>
 	);
 };
+
 
 const Board = () => {
 	const { scene } = useGLTF('/gltf_files/onlyboardfinished.gltf');
@@ -77,7 +109,6 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 				direction,
 			});
 			socketRef.current.send(message);
-			console.log('Sent message:', message); // Log the message sent to the socket
 		}
 	};
 
@@ -85,10 +116,8 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 	useEffect(() => {
 		const handleKeyDown = (event) => {
 			if (event.key === 'ArrowRight') {
-				console.log('Player pressed: ArrowRight'); // Log when the right arrow is pressed
 				sendMovement('right');
 			} else if (event.key === 'ArrowLeft') {
-				console.log('Player pressed: ArrowLeft'); // Log when the left arrow is pressed
 				sendMovement('left');
 			}
 		};
@@ -112,13 +141,12 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 
 			// Vérifiez si le message contient des positions
 			if (data.game_data?.status === 'playing') {
-				console.log('Message from server: ', data);
 
 				const playerPositions = data.game_data.player_positions;
 				if (playerPositions) {
 					// Met à jour les positions des joueurs
-					setPlayerOnePosition([playerPositions['1'][1] / 11.6 - 11.5, 0.3, -21]);
-					setPlayerTwoPosition([playerPositions['2'][1] / 11.6 - 11.5, 0.3, 7.4]);
+					setPlayerOnePosition([playerPositions['1'][1] / 11.7 - 11.5, 0.3, -21]);
+					setPlayerTwoPosition([playerPositions['2'][1] / 11.7 - 11.5, 0.3, 7.4]);
 				}
 			}
 		};

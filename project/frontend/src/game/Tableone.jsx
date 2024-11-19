@@ -166,7 +166,9 @@ const JoinForm = () => {
 	}, []);
 
 	// Filter games based on match type
-	const filteredGames = gameList.filter((game) => game.match_type === match_type);
+	const filteredGames = gameList
+    .filter((game) => game.match_type === match_type) // Filtrage par type de match
+    .filter((game) => game.status === 'waiting'); // Filtrage par statut "waiting"
 
 	// Handle game click to join the game
 	const handleGameClick = async (gameId) => {
