@@ -20,7 +20,7 @@ class GameLogic():
 	BALL_SPEED_X = 1
 	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 150
+	REFRESH_PER_SEC = 100
 	# Score to reach to win got it from Game instance
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
