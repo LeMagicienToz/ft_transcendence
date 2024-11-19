@@ -5,12 +5,11 @@ import { Canvas } from '@react-three/fiber';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const PlayerOne = () => {
+const PlayerOne = ({ position }) => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
 	const avatarRef = useRef();
-	const [position, setPosition] = useState([0, 0.3, -21]);
 
-	// Appliquer la position initiale au modèle GLTF
+	// Appliquez la position à chaque mise à jour
 	useEffect(() => {
 		if (avatarRef.current) {
 			avatarRef.current.position.set(...position);
@@ -26,13 +25,12 @@ const PlayerOne = () => {
 	);
 };
 
-const PlayerTwo = () => {
+const PlayerTwo = ({ position }) => {
 	const { scene } = useGLTF('/gltf_files/playertwo.gltf');
 	const avatarRef = useRef();
-	const [position, setPosition] = useState([0, 0.3, 7.4]);
 	const initialRotation = [0, Math.PI, 0];
 
-	// Appliquer la position initiale au modèle GLTF
+	// Appliquez la position à chaque mise à jour
 	useEffect(() => {
 		if (avatarRef.current) {
 			avatarRef.current.position.set(...position);
@@ -67,28 +65,11 @@ const Board = () => {
 		</PresentationControls>
 	);
 };
-const SockCreator = ({ gameid, token }) => {
+
+const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition }) => {
 	const socketRef = useRef(null);
 
-	useEffect(() => {
-		// Create WebSocket connection
-		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
-		socketRef.current = socket;
-
-		// Listen for messages from the server
-		socket.onmessage = (event) => {
-			console.log('Message from server: ', event.data);
-		};
-
-		// Cleanup on component unmount
-		return () => {
-			if (socketRef.current) {
-				socketRef.current.close(); // Close WebSocket connection on unmount
-			}
-		};
-	}, [gameid, token]);
-
-	// Function to send movement messages
+	// Fonction pour envoyer les commandes de mouvement
 	const sendMovement = (direction) => {
 		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
 			const message = JSON.stringify({
@@ -100,7 +81,7 @@ const SockCreator = ({ gameid, token }) => {
 		}
 	};
 
-	// Handle keyboard input
+	// Gestion des événements clavier
 	useEffect(() => {
 		const handleKeyDown = (event) => {
 			if (event.key === 'ArrowRight') {
@@ -119,23 +100,66 @@ const SockCreator = ({ gameid, token }) => {
 		};
 	}, []);
 
-	return null; // No UI for this component
+	// Gestion des WebSocket
+	useEffect(() => {
+		// Création de la connexion WebSocket
+		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+		socketRef.current = socket;
+
+		// Gestion des messages reçus
+		socket.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+
+			// Vérifiez si le message contient des positions
+			if (data.game_data?.status === 'playing') {
+				console.log('Message from server: ', data);
+
+				const playerPositions = data.game_data.player_positions;
+				if (playerPositions) {
+					// Met à jour les positions des joueurs
+					setPlayerOnePosition([playerPositions['1'][1] / 11.6 - 11.5, 0.3, -21]);
+					setPlayerTwoPosition([playerPositions['2'][1] / 11.6 - 11.5, 0.3, 7.4]);
+				}
+			}
+		};
+
+		// Gestion des erreurs de WebSocket
+		socket.onerror = (error) => {
+			console.error('WebSocket Error: ', error);
+		};
+
+		// Nettoyage lors du démontage du composant
+		return () => {
+			if (socketRef.current) {
+				socketRef.current.close(); // Ferme la connexion WebSocket
+			}
+		};
+	}, [gameid, token, setPlayerOnePosition, setPlayerTwoPosition]);
+
+	return null; // Pas d'interface utilisateur pour ce composant
 };
 
 
 const WaitingRoom = () => {
 	const location = useLocation();
 	const gameData = location.state?.gameData;
+	const [playerOnePosition, setPlayerOnePosition] = useState([0, 0.3, -21]);
+	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, 0.3, 7.4]);
 
 	return (
 		<div className="game-container">
 			<Canvas style={{ touchAction: 'none' }}>
 				<ambientLight intensity={0.5} />
 				<directionalLight position={[5, 5, 5]} />
-				<SockCreator gameid={gameData.game_id} token={gameData.token} />
-				<PlayerOne />
-				<PlayerTwo />
-				<Board />
+				<SockCreator 
+					gameid={gameData.game_id} 
+					token={gameData.token}
+					setPlayerOnePosition={setPlayerOnePosition}
+					setPlayerTwoPosition={setPlayerTwoPosition}
+				/>
+				<PlayerOne position={playerOnePosition} />
+				<PlayerTwo position={playerTwoPosition} />
+				<Board/>
 			</Canvas>
 		</div>
 	);
