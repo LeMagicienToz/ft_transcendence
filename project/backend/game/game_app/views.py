@@ -22,11 +22,12 @@ import logging
 
 logger = logging.getLogger('myapp')
 
-
 def utils_get_user_info(token, token42):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
     # Use the appropriate token as a cookie
+    if not token and not token42:
+        return JsonResponse({'error': 'No authentication token received'}, status=401)
     if token42:
         cookies['42_access_token'] = token42
     else:
@@ -42,7 +43,11 @@ def utils_get_user_info(token, token42):
             return None
         return result
     except requests.exceptions.RequestException as e:
-        return None
+        # Log the detailed error
+        return {
+            'error': 'An error occurred while connecting to the authentication service.',
+            'details': str(e)
+        }
 
 # keep this endpoint just for testing
 @api_view(['POST'])
