@@ -162,22 +162,22 @@ CHANNEL_LAYERS = {
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,  # Assurez-vous que les loggers par défaut sont activés
+    'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'DEBUG',  # Le niveau DEBUG permettra de voir les print
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Assurez-vous que le logger django utilise le handler console
+            'level': 'DEBUG',
             'propagate': False,
         },
         'myapp': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Utilisez DEBUG pour voir les print de votre app
+            'level': 'DEBUG',
             'propagate': False,
         },
     },

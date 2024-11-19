@@ -149,9 +149,6 @@ class GameCreateView(APIView):
         elif token42:
             return JsonResponse({'message': 'Game created', 'game_id': game.id, 'token42': token42}, status=201)
 
-    #def get_info_from_token(self, token, token42):
-    #    pass
-
 class GameListView(APIView):
     """
     Return the list of the games
@@ -339,7 +336,6 @@ class GameUserHistoryView(APIView):
                 ]
             }
             game_details_list.append(game_details)
-
         return JsonResponse(game_details_list, safe=False)
 
 class GameDeleteView(APIView):
@@ -387,7 +383,6 @@ class TournamentCreateView(APIView):
             return JsonResponse({'error': f'Missing key in user_info: {str(e)}'}, status=400)
         except Exception as e:
             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-
         tournament_custom_name = request.data.get('tournament_custom_name')
         nickname = request.data.get('nickname', player1_user_name)
         # Data validation
@@ -450,7 +445,6 @@ class TournamentListView(APIView):
     def get(self, request):
         tournaments = Tournament.objects.all()
         tournament_list = []
-
         for tournament in tournaments:
             players = [
                 {
@@ -502,7 +496,6 @@ class TournamentListView(APIView):
                 "games": games
             }
             tournament_list.append(tournament_data)
-
         return Response(tournament_list, status=200)
 
 class TournamentDetailView(APIView):
@@ -514,7 +507,6 @@ class TournamentDetailView(APIView):
     """
     def get(self, request, tournament_id):
         tournament = get_object_or_404(Tournament, id=tournament_id)
-
         players = [
             {
                 "user_id": player.user_id,
@@ -525,7 +517,6 @@ class TournamentDetailView(APIView):
             }
             for player in tournament.players.all()
         ]
-
         games = [
             {
                 "id": game.id,
@@ -551,7 +542,6 @@ class TournamentDetailView(APIView):
             }
             for game in tournament.games.all()
         ]
-
         tournament_data = {
             "id": tournament.id,
             "tournament_custom_name": tournament.tournament_custom_name,
@@ -566,7 +556,6 @@ class TournamentDetailView(APIView):
             "players": players,
             "games": games
         }
-
         return Response(tournament_data, status=200)
 
 class TournamentJoinView(APIView):
@@ -597,10 +586,8 @@ class TournamentJoinView(APIView):
         user_info = utils_get_user_info(token, token42)
         if not user_info:
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
-
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
-
         # read the JSON file from the request
         data = request.data
         nickname = data.get('nickname', player_user_name)
@@ -621,7 +608,6 @@ class TournamentJoinView(APIView):
         # add the player
         tournament.players.add(player)
         tournament.save()
-
         # Check if the number of players matches the required player_count
         player_count = tournament.players.count()
         if player_count == tournament.player_count:

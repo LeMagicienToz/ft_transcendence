@@ -40,7 +40,7 @@ class Consumer(AsyncWebsocketConsumer):
         if (self.pick_game_logic()) is False:
             return
         await self.game_logic.on_connect()
-        #assign the index of player, because a game has 2 or 4 player, we assign 1 to the first and so forth
+        #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
         if self.player.player_index == 0:
             # check the status of the game
             await sync_to_async(self.assign_player_index)()
@@ -113,7 +113,6 @@ class Consumer(AsyncWebsocketConsumer):
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
-    # ex: json is {"action" : "moveUp", "player_id": "1"}
     async def receive(self, text_data):
         await self.game_logic.on_receiving_data(text_data)
         #if player start moving, and game is not start, start the game

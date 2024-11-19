@@ -14,13 +14,11 @@ urlpatterns = [
     path("game-details/<int:game_id>/", GameDetailView.as_view(), name="game-detail"),   # Detail one game
     path("join/<int:game_id>/", GameJoinView.as_view(), name="game-join"),  # Join a game
     path("user-history/<int:user_id>/", GameUserHistoryView.as_view(), name="user-histoty"),   # list of games played by user_id
-    #path("start/<int:game_id>/", GameStartView.as_view(), name="game-start"), # Start a game
     path("delete/<int:game_id>/", GameDeleteView.as_view(), name="game-delete"),   # Delete one game
     path("tournament/create/", TournamentCreateView.as_view(), name="tournament-create"),   # Create tournament
     path("tournament/details/<int:tournament_id>/", TournamentDetailView.as_view(), name="tournament-detail"),   # List all tournaments
     path("tournament/list/", TournamentListView.as_view(), name="tournament-list"),   # List all tournaments
     path("tournament/join/<int:tournament_id>/", TournamentJoinView.as_view(), name="tournament-join"),  # Join a tournament
-    #path("tournament/start/<int:tournament_id>/", TournamentStartView.as_view(), name="tournament-start"), # Start a tournament
     path("tournament/delete/<int:tournament_id>/", TournamentDeleteView.as_view(), name="tournament-delete"),   # Delete a tournament
 ]
 # use {% url 'game-join' id=12 %} in html

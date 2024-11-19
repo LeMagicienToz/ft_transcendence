@@ -44,7 +44,6 @@ class GameLogic():
 	def __init__(self, consumer):
 		self.consumer = consumer
 		self.game = consumer.game
-
 		# Initialize positions and scores based on match type
 		self.game_data = {
 			"ball_position": [
@@ -98,9 +97,6 @@ class GameLogic():
 
 	async def on_receiving_data(self, text_data):
 		data_json = json.loads(text_data)
-		# Convertir les clés de scores en entiers
-		#if "scores" in data_json:
-		#	data_json["scores"] = {int(k): v for k, v in data_json["scores"].items()}
 		action = data_json.get('action')
 		if action == "move":
 			direction = data_json.get('direction')
@@ -154,7 +150,6 @@ class GameLogic():
 		if self.game.match_type == "1v1":
 			p1_x, p1_y = self.game_data["player_positions"][1]
 			p2_x, p2_y = self.game_data["player_positions"][2]
-
 			if p1_y <= ball_y + self.BALL_SIZE - 1 and p1_y + self.PADDLE_DIM_Y - 1 >= ball_y and p1_x == ball_x:
 				"""
 				logger.debug(
@@ -204,7 +199,6 @@ class GameLogic():
 			p2_x, p2_y = self.game_data["player_positions"][2]
 			p3_x, p3_y = self.game_data["player_positions"][3]
 			p4_x, p4_y = self.game_data["player_positions"][4]
-
 			if p1_x <= ball_x < p1_x + self.PADDLE_DIM_X and p1_y == ball_y:
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
@@ -219,18 +213,11 @@ class GameLogic():
 				return True
 		return False
 
-
-
 	async def update_ball_position(self):
-		# Convertir les clés de scores en entiers
-		#if "scores" in self.game_data:
-		#	self.game_data["scores"] = {int(k): v for k, v in self.game_data["scores"].items()}
 		ball_x, ball_y = self.game_data["ball_position"]
 		dx, dy = self.BALL_SPEED_X, self.BALL_SPEED_Y
-
 		ball_x += dx
 		ball_y += dy
-
 		if ball_y <= 0 or ball_y + self.BALL_SIZE > self.SCREEN_Y:
 			"""
 			logger.debug(
@@ -241,14 +228,11 @@ class GameLogic():
 			"""
 			dy = -dy
 			self.BALL_SPEED_Y = -self.BALL_SPEED_Y
-
 		if ball_y <= 0:
 			ball_y = 0
 		if ball_y + self.BALL_SIZE > self.SCREEN_Y + 1:
 			ball_y = self.SCREEN_Y - self.BALL_SIZE + 1
-
 		self.game_data["ball_position"] = [ball_x, ball_y]
-
 		if ball_x <= 0 or ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player():
 				return
@@ -285,9 +269,3 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
-
-	def get_winner(self):
-		return max(self.game_data["scores"], key=self.game_data["scores"].get)
-
-	def check_game_over(self):
-		return any(score >= self.game.score_to_win for score in self.game_data["scores"].values())
