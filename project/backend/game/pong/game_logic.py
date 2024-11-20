@@ -20,7 +20,7 @@ class GameLogic():
 	BALL_SPEED_X = 1
 	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 100
+	REFRESH_PER_SEC = 50
 	# Score to reach to win got it from Game instance
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
@@ -51,16 +51,15 @@ class GameLogic():
 				self.INITIAL_POSITIONS["ball"]["y"]
 			],
 			"player_positions": {},
-			#"scores": {1:0 , 2: 0, 3: 0, 4: 0},
-			"SCREEN_X": self.SCREEN_X,
-			"SCREEN_Y": self.SCREEN_Y,
-			"PADDLE_DIM_X": self.PADDLE_DIM_X,
-			"PADDLE_DIM_Y": self.PADDLE_DIM_Y,
-			"BALL_SIZE": self.BALL_SIZE,
-			"PADDLE_SPEED": self.PADDLE_SPEED,
-			"BALL_SPEED_X": self.BALL_SPEED_X,
-			"BALL_SPEED_Y": self.BALL_SPEED_Y,
-			"SCORE_TO_WIN": self.game.score_to_win,
+			#"SCREEN_X": self.SCREEN_X,
+			#"SCREEN_Y": self.SCREEN_Y,
+			#"PADDLE_DIM_X": self.PADDLE_DIM_X,
+			#"PADDLE_DIM_Y": self.PADDLE_DIM_Y,
+			#"BALL_SIZE": self.BALL_SIZE,
+			#"PADDLE_SPEED": self.PADDLE_SPEED,
+			#"BALL_SPEED_X": self.BALL_SPEED_X,
+			#"BALL_SPEED_Y": self.BALL_SPEED_Y,
+			#"SCORE_TO_WIN": self.game.score_to_win,
 			"status": self.game.status,
 		}
 		# Configuration for 1v1 match type
