@@ -29,7 +29,7 @@ const fetchUserData = async () => {
 				},
 				credentials: 'include'
 			});
-	
+
 			if (response.ok) {
 				return await response.json();
 			} else {
@@ -53,23 +53,23 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 				texture.repeat.set(2, flatness); // augmente le deuxieme pour applatir la texture
 				texture.wrapS = THREE.RepeatWrapping; // Permet à la texture de se répéter horizontalement
 				texture.wrapT = THREE.RepeatWrapping; // Permet à la texture de se répéter verticalement
-			
+
 				texture.rotation = -Math.PI / 2; // 90 degrés en radians
 				texture.center.set(0.5, 0.5); // Centre de rotation pour éviter un décalage
 				texture.offset.set(horizontalPosition, verticalPosition); // change plutot ca pour decaler la texture ( augmente le premier pour aller a gauche, augmente le deuxieme pour aller en bas)
 			texture.image.onload = () => {
 				const textureWidth = texture.image.width;
 				const textureHeight = texture.image.height;
-		
+
 				// Ajuster la taille et centrer la texture
 				adjustTextureSizeAndPosition(child, textureWidth, textureHeight);
 				};
-			});		
+			});
 		}
-	
-	
+
+
 	scene.traverse((child) => {
-			if (child.isMesh) 
+			if (child.isMesh)
 				{
 					// console.log("Player Two : ", child.name)
 					if (child.name.includes('Cube002')) // Object_4 = suit
@@ -84,10 +84,10 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 								{
 									child.material.map = visTexture;
 									child.material.needsUpdate = true;
-							
+
 									child.material.metalness = 0;
 									child.material.roughness = 1;
-								}	
+								}
 							child.material.color.setRGB(visColor[0], visColor[1], visColor[2]);
 						}
 					}
@@ -96,13 +96,13 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 						if (child.material instanceof THREE.MeshStandardMaterial) {
 							child.material.color.setRGB(ringsColor[0], ringsColor[1], ringsColor[2]);
 						}
-					}  
+					}
 					if (child.name.includes('Cube007')) //Object_20 backpack
 					{
 						if (child.material instanceof THREE.MeshStandardMaterial) {
 							child.material.color.setRGB(bpColor[0], bpColor[1], bpColor[2]);
 						}
-					} 
+					}
 				}
 			});
 	const avatarRef = useRef();
@@ -147,23 +147,23 @@ const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 				texture.repeat.set(2, flatness); // augmente le deuxieme pour applatir la texture
 				texture.wrapS = THREE.RepeatWrapping; // Permet à la texture de se répéter horizontalement
 				texture.wrapT = THREE.RepeatWrapping; // Permet à la texture de se répéter verticalement
-			
+
 				texture.rotation = -Math.PI / 2; // 90 degrés en radians
 				texture.center.set(0.5, 0.5); // Centre de rotation pour éviter un décalage
 				texture.offset.set(horizontalPosition, verticalPosition); // change plutot ca pour decaler la texture ( augmente le premier pour aller a gauche, augmente le deuxieme pour aller en bas)
 			texture.image.onload = () => {
 				const textureWidth = texture.image.width;
 				const textureHeight = texture.image.height;
-		
+
 				// Ajuster la taille et centrer la texture
 				adjustTextureSizeAndPosition(child, textureWidth, textureHeight);
 				};
-			});		
+			});
 		}
-	
-	
+
+
 	scene.traverse((child) => {
-			if (child.isMesh) 
+			if (child.isMesh)
 				{
 					// console.log("Player Two : ", child.name)
 					if (child.name.includes('Cube002')) // Object_4 = suit
@@ -178,10 +178,10 @@ const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 								{
 									child.material.map = visTexture;
 									child.material.needsUpdate = true;
-							
+
 									child.material.metalness = 0;
 									child.material.roughness = 1;
-								}	
+								}
 							child.material.color.setRGB(visColor[0], visColor[1], visColor[2]);
 						}
 					}
@@ -190,13 +190,13 @@ const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 						if (child.material instanceof THREE.MeshStandardMaterial) {
 							child.material.color.setRGB(ringsColor[0], ringsColor[1], ringsColor[2]);
 						}
-					}  
+					}
 					if (child.name.includes('Cube007')) //Object_20 backpack
 					{
 						if (child.material instanceof THREE.MeshStandardMaterial) {
 							child.material.color.setRGB(bpColor[0], bpColor[1], bpColor[2]);
 						}
-					} 
+					}
 				}
 			});
 	const avatarRef = useRef();
@@ -337,7 +337,7 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 				const ballPosition = data.game_data.ball_position;
 				if (playerPositions) {
 					// Met à jour les positions des joueurs
-					setBallPosition([ballPosition[1] / 11.7 - 11.5, 1.2, ballPosition[0] / 11.7 - 11.5])//ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+					setBallPosition([ballPosition[1] / 11.7 - 11.5, 1.2, ballPosition[0] / 9.95 - 19.8])//ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 					setPlayerOnePosition([playerPositions['1'][1] / 11.7 - 11.5, 0.3, -21]);
 					setPlayerTwoPosition([playerPositions['2'][1] / 11.7 - 11.5, 0.3, 7.4]);
 				}
@@ -387,25 +387,25 @@ const WaitingRoom = () => {
 				setError("Erreur lors de la récupération des données utilisateur");
 			}
 		};
-		
+
 		getUserData(); // Appel de la fonction pour récupérer les données utilisateur
 	}, [isCreator]); // Réexécutez ce useEffect si isCreator change
-	
+
 	return (
 		<div className="game-container">
 		<Canvas style={{ touchAction: 'none' }}>
 		  <ambientLight intensity={0.5} />
 		  <directionalLight position={[5, 5, 5]} />
-		  <SockCreator 
-			gameid={gameData.game_id} 
+		  <SockCreator
+			gameid={gameData.game_id}
 			token={gameData.token}
 			setPlayerOnePosition={setPlayerOnePosition}
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}
 			/>
-		  
+
 		  {/* Rendre les deux avatars dans le même Canvas */}
-		  <PlayerOne 
+		  <PlayerOne
 			position={playerOnePosition}
 			suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
 			visColor={hexToRgb(userData?.visColor || '#FFFFFF')}
@@ -416,8 +416,8 @@ const WaitingRoom = () => {
 			verticalPosition={userData?.verticalPosition || 0.08}
 			visTexture={userData?.visTexture || null}
 			/>
-		  
-		  <PlayerTwo 
+
+		  <PlayerTwo
 			position={playerTwoPosition}
 			suitColor={hexToRgb(userDataTwo?.suitColor || '#FFFFFF')}
 			visColor={hexToRgb(userDataTwo?.visColor || '#FFFFFF')}
