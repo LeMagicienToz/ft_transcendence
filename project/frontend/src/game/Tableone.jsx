@@ -82,7 +82,12 @@ const CreateForm = ({ match_type }) => {
 			if (response.ok) {
 				const data = await response.json();
 				console.log(data);
-				navigate('/waitingroom', { state: { gameData: data } });
+				if (data.message === "Game created") {
+					// Si le jeu est créé, l'utilisateur est le créateur (premier joueur)
+					navigate('/waitingroom', { state: { gameData: data, isCreator: true } });
+				} else {
+					navigate('/waitingroom', { state: { gameData: data, isCreator: false } });
+				}
 			} else {
 				console.log("Non-200 response", response.status, response.statusText);
 			}

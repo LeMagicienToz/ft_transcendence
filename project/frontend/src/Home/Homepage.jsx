@@ -1,7 +1,6 @@
 import './Homepage.css';
 import React, { useContext, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import Avatarhp from './Avatarhp';
 import MyButton from '../Theme/MyButton';
 import logo from '../../public/logout.svg';
 import { useNavigate } from "react-router-dom";
