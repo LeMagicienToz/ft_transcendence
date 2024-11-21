@@ -38,6 +38,7 @@ def callback_42(request):
     token_response = requests.post(url=os.getenv('TOKEN_URL'), data=token_data)
     token_json = token_response.json()
     access_token = token_json.get('access_token')
+    expires_in_seconds = token_json.get('expires_in_seconds')
 
     if access_token:
         headers = {'Authorization': f'Bearer {access_token}'}
@@ -100,7 +101,8 @@ def callback_42(request):
         else:
             response = redirect(f'/home')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
-        r.setex(f'user_{user.custom_user.intra_id}_42_access_token', 60 * 60 * 24 * 7, access_token)
+        r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
+        r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id)
         return response
     return JsonResponse({'success': False, 'error': 'Échec de l\'authentification'}, status=400)
 
