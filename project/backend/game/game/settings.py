@@ -170,11 +170,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
+        #'django': {
+        #    'handlers': ['console'],
+        #    'level': 'DEBUG',
+        #    'propagate': False,
+        #},
         'myapp': {
             'handlers': ['console'],
             'level': 'DEBUG',
