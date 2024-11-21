@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import render, get_object_or_404
 from .models import Player, Game, Tournament
@@ -19,7 +19,6 @@ import os
 # auth/views.py 185 187
 
 import logging
-
 logger = logging.getLogger('myapp')
 
 def utils_get_user_info(token, token42):
@@ -113,7 +112,8 @@ class GameCreateView(APIView):
             user_name=player1_user_name,
             score=0,
             nickname=nickname,
-            player_index=0
+            player_index=0,
+            user_info=user_info,
         )
         # get game type (1 vs 1 or 2 vs 2)
         match_type = request.data.get('match_type')
@@ -144,7 +144,7 @@ class GameCreateView(APIView):
                 score_to_win=score_to_win,
                 tournament_id=tourn_id,
                 creation_time=timezone.now(),
-                status='waiting'
+                status='waiting',
             )
             game.players.add(player1)
         except Exception as e:
@@ -181,6 +181,7 @@ class GameListView(APIView):
                         'score': player.score,
                         'nickname': player.nickname,
                         'player_index': player.player_index,
+                        'user_info': player.user_info,
                     } for player in game.players.all()
                 ]
             } for game in games
@@ -214,6 +215,7 @@ class GameDetailView(APIView):
                     'score': player.score,
                     'nickname': player.nickname,
                     'player_index': player.player_index,
+                    'user_info': player.user_info,
                 } for player in game.players.all()
             ]
         }
@@ -267,7 +269,8 @@ class GameJoinView(APIView):
             user_name=player_user_name,
             score=0,
             nickname=nickname,
-            player_index=0
+            player_index=0,
+            user_info=user_info,
         )
         # Assign new player
         game.players.add(player)
@@ -399,7 +402,8 @@ class TournamentCreateView(APIView):
             user_name=player1_user_name,
             score=0,
             nickname=nickname,
-            player_index=0
+            player_index=0,
+            user_info=user_info,
         )
         # get game type (1 vs 1 or 2 vs 2)
         tourn_match_type = request.data.get('match_type')
@@ -433,7 +437,7 @@ class TournamentCreateView(APIView):
             score_to_win=score_to_win,
             player_count=player_count,
             creation_time=timezone.now(),
-            status='waiting'
+            status='waiting',
         )
         tournament.players.add(player1)
         if token:
@@ -457,7 +461,8 @@ class TournamentListView(APIView):
                     "user_name": player.user_name,
                     "score": player.score,
                     "nickname": player.nickname,
-                    "player_index": player.player_index
+                    "player_index": player.player_index,
+                    'user_info': player.user_info,
                 }
                 for player in tournament.players.all()
             ]
@@ -479,7 +484,8 @@ class TournamentListView(APIView):
                             "user_name": player.user_name,
                             "score": player.score,
                             "nickname": player.nickname,
-                            "player_index": player.player_index
+                            "player_index": player.player_index,
+                            'user_info': player.user_info,
                         }
                         for player in game.players.all()
                     ]
@@ -518,7 +524,8 @@ class TournamentDetailView(APIView):
                 "user_name": player.user_name,
                 "score": player.score,
                 "nickname": player.nickname,
-                "player_index": player.player_index
+                "player_index": player.player_index,
+                'user_info': player.user_info,
             }
             for player in tournament.players.all()
         ]
@@ -541,6 +548,7 @@ class TournamentDetailView(APIView):
                         "score": player.score,
                         "nickname": player.nickname,
                         "player_index": player.player_index,
+                        'user_info': player.user_info,
                     }
                     for player in game.players.all()
                 ]
@@ -559,7 +567,7 @@ class TournamentDetailView(APIView):
             "start_time": tournament.start_time,
             "end_time": tournament.end_time,
             "players": players,
-            "games": games
+            "games": games,
         }
         return Response(tournament_data, status=200)
 
@@ -608,7 +616,8 @@ class TournamentJoinView(APIView):
             user_name=player_user_name,
             score=0,
             nickname=nickname,
-            player_index=0
+            player_index=0,
+            user_info=user_info,
         )
         # add the player
         tournament.players.add(player)

@@ -12,7 +12,7 @@ class GameLogic():
 	SCREEN_Y = 299
 	# Paddle dimensions
 	PADDLE_DIM_X = 0 # SCREEN_X // 100
-	PADDLE_DIM_Y = SCREEN_Y // 10
+	PADDLE_DIM_Y = 29 #SCREEN_Y // 10
 	# Ball dimensions
 	BALL_SIZE = 6
 	# Paddle and ball speed
