@@ -1,7 +1,7 @@
 import './WaitingRoom.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useGLTF, PresentationControls, Stage } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from "@react-three/fiber";
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import * as THREE from 'three';
@@ -19,6 +19,24 @@ const hexToRgb = (hex) => {
 		return [1, 1, 1]; // Valeur par défaut pour éviter les erreurs
 	}
 };
+
+
+const CameraControl = ({ isCreator }) => {
+	const { camera } = useThree();
+  
+	useEffect(() => {
+	  // Adjust camera position when `isCreator` changes
+	  if (isCreator) { 
+		camera.position.set(0, 2.5, -16); // Position when user is creator
+		camera.rotation.y = 90 * Math.PI / 180;
+	  } else {
+		camera.position.set(0, 2.5, 12.4); // Position when user is not creator
+	  }
+	  camera.updateProjectionMatrix(); // Update projection matrix after changing position
+	}, [isCreator, camera]);
+  
+	return null;
+  };
 
 const fetchUserData = async () => {
 		try {
@@ -42,6 +60,8 @@ const fetchUserData = async () => {
 			return null;
 		}
 };
+
+//IS CREATOR == TRUE
 
 const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
@@ -129,11 +149,11 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 	}, [position]);
 
 	return (
-		<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
+		//<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
 			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={avatarRef} object={scene} />
 			</Stage>
-		</PresentationControls>
+		//</PresentationControls>
 	);
 };
 
@@ -227,11 +247,11 @@ const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 	}, [position]);
 
 	return (
-		<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
+		//<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
 			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={avatarRef} object={scene} />
 			</Stage>
-		</PresentationControls>
+		//</PresentationControls>
 	);
 };
 
@@ -260,16 +280,16 @@ const Ball= ({position}) => {
 	}, [position]);
 
 	return (
-		<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
+		// <PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
 			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={ballRef} object={scene} />
 			</Stage>
-		</PresentationControls>
+		//</PresentationControls>
 	);
 };
 
 
-const Board = () => {
+const Board = ({isCreator}) => {
 	const { scene } = useGLTF('/gltf_files/onlyboardfinished.gltf');
 	const boardRef = useRef();
 
@@ -280,11 +300,11 @@ const Board = () => {
 	}, []);
 
 	return (
-		<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
+		// <PresentationControls speed={1.5} global zoom={0.7} polar={isCreator ? [-0.1, -Math.PI / 4] : [-0.1, Math.PI / 4]}>
 			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={boardRef} object={scene} />
 			</Stage>
-		</PresentationControls>
+		//</PresentationControls>
 	);
 };
 const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
@@ -395,43 +415,48 @@ const WaitingRoom = () => {
 	const [ballPosition, setBallPosition] = useState([0, 1.2, 0]);
 	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, 0.3, 7.4]);
 	const { gameData, isCreator } = location.state;
-
+  
 	useEffect(() => {
-		const getUserData = async () => {
-			try {
-				const data = await fetchUserData();
-				if (data) {
-					if (isCreator) {
-						setUserData(data); // Si le joueur est le créateur
-					} else {
-						setUserDataTwo(data); // Si ce n'est pas le créateur
-					}
-				} else {
-					setError("Impossible de récupérer les données utilisateur");
-				}
-			} catch (error) {
-				setError("Erreur lors de la récupération des données utilisateur");
+	  const getUserData = async () => {
+		try {
+		  const data = await fetchUserData();
+		  if (data) {
+			if (isCreator) {
+			  setUserData(data); // If the player is the creator
+			} else {
+			  setUserDataTwo(data); // If not the creator
 			}
-		};
-
-		getUserData(); // Appel de la fonction pour récupérer les données utilisateur
-	}, [isCreator]); // Réexécutez ce useEffect si isCreator change
-
+		  } else {
+			setError("Impossible de récupérer les données utilisateur");
+		  }
+		} catch (error) {
+		  setError("Erreur lors de la récupération des données utilisateur");
+		}
+	  };
+  
+	  getUserData();
+	}, [isCreator]);
+  
 	return (
-		<div className="game-container">
+	  <div className="game-container">
 		<Canvas style={{ touchAction: 'none' }}>
+		  <CameraControl isCreator={isCreator} />
+  
 		  <ambientLight intensity={0.5} />
 		  <directionalLight position={[5, 5, 5]} />
+  
 		  <SockCreator
-		  	p1={isCreator}
+			p1={isCreator}
 			gameid={gameData.game_id}
 			token={gameData.token}
 			setPlayerOnePosition={setPlayerOnePosition}
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}
-			/>
+		  />
+  
+		  {/* Render both avatars in the same Canvas */}
 
-		  {/* Rendre les deux avatars dans le même Canvas */}
+		<PresentationControls speed={1.5} global zoom={0.7} polar={isCreator ? [0, 0] : [0, 0]}>
 		  <PlayerOne
 			position={playerOnePosition}
 			suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
@@ -443,7 +468,7 @@ const WaitingRoom = () => {
 			verticalPosition={userData?.verticalPosition || 0.08}
 			visTexture={userData?.visTexture || null}
 			/>
-
+  
 		  <PlayerTwo
 			position={playerTwoPosition}
 			suitColor={hexToRgb(userDataTwo?.suitColor || '#FFFFFF')}
@@ -455,12 +480,15 @@ const WaitingRoom = () => {
 			verticalPosition={userDataTwo?.verticalPosition || 0.08}
 			visTexture={userDataTwo?.visTexture || null}
 			/>
+		  
 		  <Ball position={ballPosition} />
-		  <Board />
+		  <Board isCreator={isCreator} />
+		</PresentationControls>
+
 		</Canvas>
 	  </div>
 	);
-};
+  };
 
 export default WaitingRoom;
 useGLTF.preload('/gltf_files/onlyboardfinished.gltf');
