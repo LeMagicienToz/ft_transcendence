@@ -287,7 +287,7 @@ const Board = () => {
 		</PresentationControls>
 	);
 };
-const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
+const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
 	const navigate = useNavigate();
 
@@ -304,10 +304,21 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 	// Gestion des événements clavier
 	useEffect(() => {
 		const handleKeyDown = (event) => {
-			if (event.key === 'ArrowRight') {
-				sendMovement('left');
-			} else if (event.key === 'ArrowLeft') {
-				sendMovement('right');
+			if(p1)
+			{
+				if (event.key === 'ArrowRight') {
+					sendMovement('right');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('left');
+				}
+			}
+			else
+			{
+				if (event.key === 'ArrowRight') {
+					sendMovement('left');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('right');
+				}
 			}
 		};
 
@@ -329,7 +340,7 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-			// console.log(data);
+			console.log(data);
 
 			// Vérifiez le statut de la partie
 			if (data.game_data?.status) {
@@ -412,6 +423,7 @@ const WaitingRoom = () => {
 		  <ambientLight intensity={0.5} />
 		  <directionalLight position={[5, 5, 5]} />
 		  <SockCreator
+		  	p1={isCreator}
 			gameid={gameData.game_id}
 			token={gameData.token}
 			setPlayerOnePosition={setPlayerOnePosition}
