@@ -166,7 +166,7 @@ class Consumer(AsyncWebsocketConsumer):
         self.game.start_time = timezone.now().isoformat()
         #tell eveyrone to update their game_data.status
         self.game_logic.game_data['status'] = 'playing'
-        self.game_logic.game_data['start_time'] = self.game.start_time
+        #self.game_logic.game_data['start_time'] = self.game.start_time
         self.game_logic.send_game_state()
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
