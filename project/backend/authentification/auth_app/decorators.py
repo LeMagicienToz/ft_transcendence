@@ -59,13 +59,17 @@ def jwt_42_required(view_func):
             token_data = response.json()
             expires_in_seconds = token_data.get('expires_in_seconds')
 
+            intra_id = r.get(f'42_access_token_{access_token}')
+
             if expires_in_seconds is None or expires_in_seconds <= 0:
                 return JsonResponse({'success': False, 'error': 'Access token 42 expire'}, status=400)
 
-            user_info_response = requests.get(url=os.getenv('USER_URL'), headers=headers)
-            user_data = user_info_response.json()
-            # username = user_data.get('login') + '#42'
-            intra_id = user_data.get('id')
+            if not intra_id:
+                user_info_response = requests.get(url=os.getenv('USER_URL'), headers=headers)
+                user_data = user_info_response.json()
+                intra_id = user_data.get('id')
+                user = User.objects.filter(custom_user__intra_id=intra_id).first()
+                
             user = User.objects.filter(custom_user__intra_id=intra_id).first()
             # user = User.objects.filter(username=username).first()
 
