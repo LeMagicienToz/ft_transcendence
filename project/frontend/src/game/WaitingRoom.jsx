@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import * as THREE from 'three';
-import Stats from 'three/examples/jsm/libs/stats.module'; // Import the stats library
+import { useNavigate } from 'react-router-dom';
 
 
 const hexToRgb = (hex) => {
@@ -287,11 +287,10 @@ const Board = () => {
 		</PresentationControls>
 	);
 };
-
 const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
+	const navigate = useNavigate();
 
-	// Fonction pour envoyer les commandes de mouvement
 	const sendMovement = (direction) => {
 		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
 			const message = JSON.stringify({
@@ -321,45 +320,61 @@ const SockCreator = ({ gameid, token, setPlayerOnePosition, setPlayerTwoPosition
 
 	// Gestion des WebSocket
 	useEffect(() => {
-		// Création de la connexion WebSocket
 		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
 		socketRef.current = socket;
 
-		// Gestion des messages reçus
+		socket.onopen = () => {
+			console.log('WebSocket connected');
+		};
+
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-			console.log(data);
+			// console.log(data);
 
-			// Vérifiez si le message contient des positions
-			if (data.game_data?.status === 'playing') {
+			// Vérifiez le statut de la partie
+			if (data.game_data?.status) {
+				const gameStatus = data.game_data.status;
 
-				const playerPositions = data.game_data.player_positions;
-				const ballPosition = data.game_data.ball_position;
-				if (playerPositions) {
-					// Met à jour les positions des joueurs
-					setBallPosition([ballPosition[1] / 10.1 - 14.5, 1.2, ballPosition[0] / 9.95 - 19.8])//ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-					setPlayerOnePosition([playerPositions['1'][1] / 11.7 - 11.5, 0.3, -21]);
-					setPlayerTwoPosition([playerPositions['2'][1] / 11.7 - 11.5, 0.3, 7.4]);
+				if (gameStatus === 'finished') {
+					console.log('Game finished, closing WebSocket...');
+					socket.close();
+					return; // Sortir pour éviter toute gestion supplémentaire après la fermeture
+				}
+
+				if (gameStatus === 'playing') {
+					const playerPositions = data.game_data.player_positions;
+					const ballPosition = data.game_data.ball_position;
+					if (playerPositions) {
+						// Met à jour les positions des joueurs et de la balle
+						setBallPosition([ballPosition[1] / 10.1 - 14.5, 1.2, ballPosition[0] / 9.95 - 19.8]);
+						setPlayerOnePosition([playerPositions['1'][1] / 11.7 - 11.5, 0.3, -21]);
+						setPlayerTwoPosition([playerPositions['2'][1] / 11.7 - 11.5, 0.3, 7.4]);
+					}
 				}
 			}
 		};
 
-		// Gestion des erreurs de WebSocket
 		socket.onerror = (error) => {
 			console.error('WebSocket Error: ', error);
 		};
 
-		// Nettoyage lors du démontage du composant
+		socket.onclose = () => {
+			console.log('WebSocket closed');
+			setTimeout(() => {
+				navigate('/homepage');
+			}, 5000); // 2000 ms = 2 secondes
+		};
+
+		// Nettoyage lors du démontage
 		return () => {
 			if (socketRef.current) {
-				socketRef.current.close(); // Ferme la connexion WebSocket
+				socketRef.current.close();
 			}
 		};
 	}, [gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
 
 	return null; // Pas d'interface utilisateur pour ce composant
 };
-
 
 const WaitingRoom = () => {
 	const location = useLocation();
