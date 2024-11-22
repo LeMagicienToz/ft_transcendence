@@ -353,7 +353,7 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 					const ballPosition = data.game_data.ball_position;
 					if (playerPositions) {
 						// Met à jour les positions des joueurs et de la balle
-						setBallPosition([ballPosition[1] / 9.55 - 15.2, 0.2, ballPosition[0] / 9.65 - 20.2]);
+						setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.2, ballPosition[0] / 9.9 - 20.2 + 0.5]);
 						setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]);//21
 						setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, 20.2]);//7.4
 					}
