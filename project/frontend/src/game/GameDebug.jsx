@@ -2,7 +2,7 @@ import './GameDebug.css';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SockCreator = ({ p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition, setPlayerOneScore, setPlayerTwoScore }) => {
+const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition, setPlayerOneScore, setPlayerTwoScore, setGameStatus }) => {
 	const socketRef = useRef(null);
 
 	const sendMovement = (direction) => {
@@ -56,34 +56,25 @@ const SockCreator = ({ p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosi
 
 			// Vérifiez le statut de la partie
 			if (data.game_data?.status) {
-				const gameStatus = data.game_data.status;
-
-				if (gameStatus === 'finished') {
-					console.log('Game finished, closing WebSocket...');
-					socket.close();
-					return; // Sortir pour éviter toute gestion supplémentaire après la fermeture
+				const playerPositions = data.game_data.player_positions;
+				const ballPosition = data.game_data.ball_position;
+				if (playerPositions) {
+					setBallPosition({
+						x: ballPosition[0],
+						y: ballPosition[1],
+					});
+					setPlayerOnePosition({
+						x: playerPositions['1'][0],
+						y: playerPositions['1'][1],
+					});
+					setPlayerTwoPosition({
+						x: playerPositions['2'][0],
+						y: playerPositions['2'][1],
+					});
+					setPlayerOneScore(data.game_data.scores['1'])
+					setPlayerTwoScore(data.game_data.scores['2'])
 				}
-
-				if (gameStatus === 'playing') {
-					const playerPositions = data.game_data.player_positions;
-					const ballPosition = data.game_data.ball_position;
-					if (playerPositions) {
-						setBallPosition({
-							x: ballPosition[0],
-							y: ballPosition[1],
-						});
-						setPlayerOnePosition({
-							x: playerPositions['1'][0],
-							y: playerPositions['1'][1],
-						});
-						setPlayerTwoPosition({
-							x: playerPositions['2'][0],
-							y: playerPositions['2'][1],
-						});
-						setPlayerOneScore(data.game_data.scores['1'])
-						setPlayerTwoScore(data.game_data.scores['2'])
-					}
-				}
+				setGameStatus(data.game_data.status)
 			}
 		};
 
@@ -93,18 +84,21 @@ const SockCreator = ({ p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosi
 
 		socket.onclose = () => {
 			console.log('WebSocket closed');
-			// setTimeout(() => {
-			// 	navigate('/homepage');
-			// }, 5000); // 2000 ms = 2 secondes
 		};
 
-		// Nettoyage lors du démontage
 		return () => {
 			if (socketRef.current) {
 				socketRef.current.close();
 			}
 		};
 	}, [gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
+
+	useEffect(() => {
+		if (gameStatus === 'finished' && socketRef.current) {
+			socketRef.current.close();
+			return;
+		}
+	}, [gameStatus])
 
 	return null; // Pas d'interface utilisateur pour ce composant
 };
@@ -115,11 +109,12 @@ const GameDebug = () => {
 	const paddleSize = 70;
 	const ballSize = 10;
 	const location = useLocation();
-	const [playerOnePosition, setPlayerOnePosition] = useState({x:0, y:(boardHeight / 2 - paddleSize / 2)});
-	const [ballPosition, setBallPosition] = useState({x:boardWidth / 2, y:boardHeight / 2});
-	const [playerTwoPosition, setPlayerTwoPosition] = useState({x:boardWidth - 1, y:(boardHeight / 2 - paddleSize / 2)});
+	const [playerOnePosition, setPlayerOnePosition] = useState({ x: 0, y: (boardHeight / 2 - paddleSize / 2) });
+	const [ballPosition, setBallPosition] = useState({ x: boardWidth / 2, y: boardHeight / 2 });
+	const [playerTwoPosition, setPlayerTwoPosition] = useState({ x: boardWidth - 1, y: (boardHeight / 2 - paddleSize / 2) });
 	const [playerOneScore, setPlayerOneScore] = useState(0);
 	const [playerTwoScore, setPlayerTwoScore] = useState(0);
+	const [gameStatus, setGameStatus] = useState("waiting");
 	const { gameData, isCreator } = location.state;
 
 	const getHorizontalPercentage = (x) => {
@@ -133,6 +128,7 @@ const GameDebug = () => {
 		<div className="game-debug-container">
 			<SockCreator
 				p1={isCreator}
+				gameStatus={gameStatus}
 				gameid={gameData.game_id}
 				token={gameData.token}
 				setPlayerOnePosition={setPlayerOnePosition}
@@ -140,10 +136,14 @@ const GameDebug = () => {
 				setBallPosition={setBallPosition}
 				setPlayerOneScore={setPlayerOneScore}
 				setPlayerTwoScore={setPlayerTwoScore}
+				setGameStatus={setGameStatus}
 			/>
 			<div className="game-debug-board">
 				<div className="game-debug-player-score">
 					{playerOneScore}
+				</div>
+				<div className="game-debug-game-status">
+					{gameStatus}
 				</div>
 				<div className="game-debug-player-score player-two">
 					{playerTwoScore}

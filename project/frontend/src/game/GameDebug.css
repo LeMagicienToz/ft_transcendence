@@ -49,3 +49,14 @@
 	right: 25%;
 	left: unset;
 }
+
+.game-debug-game-status {
+	width: 100%;
+	position: absolute;
+	left: 0;
+	top: 3%;
+	text-transform: capitalize;
+	text-align: center;
+	color: white;
+	font-size: 20px;
+}
