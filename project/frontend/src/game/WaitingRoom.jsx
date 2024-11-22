@@ -238,14 +238,19 @@ const Ball= ({position}) => {
 
 	// Stocke la position actuelle
 	const currentPosition = useRef(new THREE.Vector3(...position));
-
+	const distance = position[2] - currentPosition.z;
 	useEffect(() => {
 		if (ballRef.current) {
 			const targetPosition = new THREE.Vector3(...position);
 			// Animation frame loop pour interpoler la position
 			const updatePosition = () => {
 				// Lerp vers la nouvelle position
-				currentPosition.current.lerp(targetPosition, 0.1);
+				if (distance < 10) {
+					currentPosition.current.lerp(targetPosition, 0.1);
+				} else {
+					//no animation when distance is very big (most likely reset initial position)
+					currentPosition.current = targetPosition;
+				}
 				ballRef.current.position.copy(currentPosition.current);
 
 				// Continue le rendu
