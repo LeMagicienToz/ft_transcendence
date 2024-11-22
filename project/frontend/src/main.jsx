@@ -11,9 +11,10 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AuthProvider } from './auth/AuthContext';
 import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
+import GameDebug from "./game/GameDebug.jsx";
 
 const AppRouter = () => (
-<AuthProvider>
+  <AuthProvider>
     <Router>
       <Routes>
         <Route element={<StandardRoute />}>
@@ -25,13 +26,14 @@ const AppRouter = () => (
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/avatar" element={<Show_Avatar />} />
-          <Route path="/waitingroom" element={<WaitingRoom />} />
+          {window.isDebug ? <Route path="/waitingroom" element={<GameDebug />} /> : <Route path="/waitingroom" element={<WaitingRoom />} />}
         </Route>
       </Routes>
     </Router>
   </AuthProvider>
 );
 
+window.isDebug = (new URLSearchParams(window.location.search)).get("debug") === "1";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppRouter />
