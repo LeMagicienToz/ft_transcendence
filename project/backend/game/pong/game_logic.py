@@ -14,9 +14,9 @@ class GameLogic():
 	PADDLE_DIM_X = 0
 	PADDLE_DIM_Y = 70
 	# Ball dimensions
-	BALL_SIZE = 6
+	BALL_SIZE = 20
 	# Paddle and ball speed
-	PADDLE_SPEED = 8
+	PADDLE_SPEED = 4
 	BALL_SPEED_X = 1
 	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
