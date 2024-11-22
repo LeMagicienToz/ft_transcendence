@@ -23,10 +23,10 @@ const hexToRgb = (hex) => {
 
 const CameraControl = ({ isCreator }) => {
 	const { camera } = useThree();
-  
+
 	useEffect(() => {
 	  // Adjust camera position when `isCreator` changes
-	  if (isCreator) { 
+	  if (isCreator) {
 		camera.position.set(0, 0.8, -16); // Position when user is creator
 		camera.rotation.y = 90 * Math.PI / 180;
 	  } else {
@@ -34,7 +34,7 @@ const CameraControl = ({ isCreator }) => {
 	  }
 	  camera.updateProjectionMatrix(); // Update projection matrix after changing position
 	}, [isCreator, camera]);
-  
+
 	return null;
   };
 
@@ -132,13 +132,13 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 				// Directly set the position once when the component mounts
 				avatarRef.current.position.set(position[0], -1, -20.2);
 			  }
-			}, [position]); // Re-run if the position prop changes		  
-		  
+			}, [position]); // Re-run if the position prop changes
+
 			return (
 				<primitive ref={avatarRef} object={scene}/>
 			);
 		  };
-			
+
 const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
 	if (visTexture)
@@ -265,14 +265,14 @@ const Ball= ({position}) => {
 const Board = ({ isCreator }) => {
 	const { scene } = useGLTF('/gltf_files/onlyboardfinished.gltf');
 	const boardRef = useRef();
-  
+
 	useEffect(() => {
 	  // Ensure that the ref is properly initialized before setting the position
 	  if (boardRef.current) {
 		boardRef.current.position.set(0, 0, 0); // Set position to (0, 0, 0)
 	  }
 	}, []); // Empty dependency array to run only once after the initial render
-  
+
 	return (
 		<primitive ref={boardRef} object={scene} />
 	);
@@ -348,9 +348,9 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 					const ballPosition = data.game_data.ball_position;
 					if (playerPositions) {
 						// Met à jour les positions des joueurs et de la balle
-						setBallPosition([ballPosition[1] / 10.1 - 14.5, 0.2, ballPosition[0] / 9.95 - 19.8]);
-						setPlayerOnePosition([playerPositions['1'][1] / 10 - 15, -1, -20.2]);//21
-						setPlayerTwoPosition([playerPositions['2'][1] / 10 - 15, -1, 20.2]);//7.4
+						setBallPosition([ballPosition[1] / 9.55 - 15.2, 0.2, ballPosition[0] / 9.65 - 20.2]);
+						setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]);//21
+						setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, 20.2]);//7.4
 					}
 				}
 			}
@@ -386,7 +386,7 @@ const WaitingRoom = () => {
 	const [ballPosition, setBallPosition] = useState([0, 0.2, 0]);
 	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, 20.2]);
 	const { gameData, isCreator } = location.state;
-  
+
 	useEffect(() => {
 	  const getUserData = async () => {
 		try {
@@ -404,18 +404,18 @@ const WaitingRoom = () => {
 		  setError("Erreur lors de la récupération des données utilisateur");
 		}
 	  };
-  
+
 	  getUserData();
 	}, [isCreator]);
-  
+
 	return (
 	  <div className="game-container">
 		<Canvas style={{ touchAction: 'none' }}>
 		  <CameraControl isCreator={isCreator} />
-  
+
 		  <ambientLight intensity={0.5} />
 		  <directionalLight position={[5, 5, 5]} />
-  
+
 		  <SockCreator
 			p1={isCreator}
 			gameid={gameData.game_id}
@@ -424,7 +424,7 @@ const WaitingRoom = () => {
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}
 		  />
-  
+
 		  {/* Render both avatars in the same Canvas */}
 
 		<PresentationControls speed={1.5} global zoom={0.7} polar={[0, 0]}>
@@ -440,7 +440,7 @@ const WaitingRoom = () => {
 					verticalPosition={userData?.verticalPosition || 0.08}
 					visTexture={userData?.visTexture || null}
 					/>
-		
+
 				<PlayerTwo
 					position={playerTwoPosition}
 					suitColor={hexToRgb(userDataTwo?.suitColor || '#FFFFFF')}
@@ -452,7 +452,7 @@ const WaitingRoom = () => {
 					verticalPosition={userDataTwo?.verticalPosition || 0.08}
 					visTexture={userDataTwo?.visTexture || null}
 					/>
-				
+
 				<Ball position={ballPosition} />
 				<Board isCreator={isCreator} />
 			</Stage>
