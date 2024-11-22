@@ -11,9 +11,11 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AuthProvider } from './auth/AuthContext';
 import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
+import { AuthWebSocketProvider } from './auth/AuthWebSocketContext';
 
 const AppRouter = () => (
 <AuthProvider>
+  <AuthWebSocketProvider>
     <Router>
       <Routes>
         <Route element={<StandardRoute />}>
@@ -29,7 +31,8 @@ const AppRouter = () => (
         </Route>
       </Routes>
     </Router>
-  </AuthProvider>
+  </AuthWebSocketProvider>
+</AuthProvider>
 );
 
 ReactDOM.createRoot(document.getElementById("root")).render(

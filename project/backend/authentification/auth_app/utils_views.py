@@ -1,12 +1,13 @@
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-import json
 from .models import CustomUser
 from .redis_client import r
 import random
 from django.core.mail import send_mail
 from django.conf import settings
 from os import path, makedirs
+import requests, jwt
+
 
 
 def utils_set_user_color(data, user): # la fonction ne save pas l'objet user
@@ -116,3 +117,60 @@ def utils_upload_file(file, new_name):
     with open(file_path, 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
+
+
+def utils_get_user(token, refresh_token, token42):
+    if token:
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            if user_id:
+                user = User.objects.get(id=user_id)
+                redis_token = r.get(f'user_{user.id}_token')
+                if redis_token and redis_token.decode() != token:
+                    return None
+                return user
+            else:
+                return None
+        except jwt.ExpiredSignatureError:
+            pass
+        except jwt.InvalidTokenError:
+            return None
+    
+    if refresh_token:
+        try:
+            refresh_payload = jwt.decode(refresh_token, settings.REFRESH_TOKEN_SECRET, algorithms=['HS256'])
+            user_id = refresh_payload.get('user_id')
+            if user_id:
+                user = User.objects.get(id=user_id)
+                redis_refresh_token = r.get(f'user_{user.id}_refresh_token')
+                if redis_refresh_token and redis_refresh_token.decode() != refresh_token:
+                    return None
+                return user
+            else:
+                return None
+        except jwt.ExpiredSignatureError:
+            return None
+
+    if token42:
+        try:
+            headers = {'Authorization': f'Bearer {token42}'}
+            response = requests.get(url="https://api.intra.42.fr/oauth/token/info", headers=headers)
+            token_data = response.json()
+            expires_in_seconds = token_data.get('expires_in_seconds')
+            if expires_in_seconds is None or expires_in_seconds <= 0:
+                return None
+            user_info_response = requests.get(url=os.getenv('USER_URL'), headers=headers)
+            user_data = user_info_response.json()
+            intra_id = user_data.get('id')
+            user = User.objects.filter(custom_user__intra_id=intra_id).first()
+            if not user:
+                return None
+            redis_42_token = r.get(f'user_{user.custom_user.intra_id}_42_access_token')
+            if redis_42_token and redis_42_token.decode() != token42:
+                return None
+            return user
+        except requests.RequestException:
+            return None
+    return None
+
