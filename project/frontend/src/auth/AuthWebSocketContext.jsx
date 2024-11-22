@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthWebSocketContext = createContext(null);
 
-export const WebSocketProvider = ({ children }) => {
+export const AuthWebSocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [friends, setFriends] = useState([]);
 
