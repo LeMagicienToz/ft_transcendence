@@ -110,10 +110,14 @@ const SockCreator = ({ p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosi
 };
 
 const GameDebug = () => {
+	const boardWidth = 400;
+	const boardHeight = 300;
+	const paddleSize = 70;
+	const ballSize = 10;
 	const location = useLocation();
-	const [playerOnePosition, setPlayerOnePosition] = useState([0, -1, -20.2]);
-	const [ballPosition, setBallPosition] = useState([0, 0.2, 0]);
-	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, 20.2]);
+	const [playerOnePosition, setPlayerOnePosition] = useState({x:0, y:(boardHeight / 2 - paddleSize / 2)});
+	const [ballPosition, setBallPosition] = useState({x:boardWidth / 2, y:boardHeight / 2});
+	const [playerTwoPosition, setPlayerTwoPosition] = useState({x:boardWidth - 1, y:(boardHeight / 2 - paddleSize / 2)});
 	const [playerOneScore, setPlayerOneScore] = useState(0);
 	const [playerTwoScore, setPlayerTwoScore] = useState(0);
 	const { gameData, isCreator } = location.state;
@@ -147,19 +151,19 @@ const GameDebug = () => {
 				<div className="game-debug-ball" style={{
 					left: getHorizontalPercentage(ballPosition.x),
 					bottom: getVerticalPercentage(ballPosition.y),
-					height: getVerticalPercentage(10),
-					width: getHorizontalPercentage(10),
+					height: getVerticalPercentage(ballSize),
+					width: getHorizontalPercentage(ballSize),
 				}}></div>
 				<div className="game-debug-player" style={{
 					left: getHorizontalPercentage(playerOnePosition.x),
 					bottom: getVerticalPercentage(playerOnePosition.y),
-					height: getVerticalPercentage(70),
+					height: getVerticalPercentage(paddleSize),
 					width: getHorizontalPercentage(1),
 				}}></div>
 				<div className="game-debug-player" style={{
 					left: getHorizontalPercentage(playerTwoPosition.x),
 					bottom: getVerticalPercentage(playerTwoPosition.y),
-					height: getVerticalPercentage(70),
+					height: getVerticalPercentage(paddleSize),
 					width: getHorizontalPercentage(1),
 				}}></div>
 			</div>
