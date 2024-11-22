@@ -261,20 +261,19 @@ class GameJoinView(APIView):
         if not player_user_id or not player_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
         # Check if player allready in game
-        if game.players.filter(user_id=player_user_id).exists():
-            return JsonResponse({'error': 'Player has already joined the game'}, status=400)
-        # create Player
-        player = Player.objects.create(
-            user_id=player_user_id,
-            user_name=player_user_name,
-            score=0,
-            nickname=nickname,
-            player_index=0,
-            user_info=user_info,
-        )
-        # Assign new player
-        game.players.add(player)
-        game.save()
+        if game.players.filter(user_id=player_user_id).exists() == False:
+            # create Player
+            player = Player.objects.create(
+                user_id=player_user_id,
+                user_name=player_user_name,
+                score=0,
+                nickname=nickname,
+                player_index=0,
+                user_info=user_info,
+            )
+            # Assign new player
+            game.players.add(player)
+            game.save()
         if token:
             return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token': token}, status=201)
         elif token42:
