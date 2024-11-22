@@ -52,7 +52,7 @@ export const AuthWebSocketProvider = ({ children }) => {
     };
 
     return (
-        <AuthWebSocketContext.Provider value={{ socket, friends, sendMessage, WebSocketHandleLogout }}>
+        <AuthWebSocketContext.Provider value={{ socket, friends, WebSocketHandleLogout }}>
             {children}
         </AuthWebSocketContext.Provider>
     );
