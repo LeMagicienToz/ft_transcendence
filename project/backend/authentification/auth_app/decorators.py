@@ -8,6 +8,7 @@ from .redis_client import r
 import time
 import os
 import time
+from django.core.exceptions import ObjectDoesNotExist
 
 def jwt_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
@@ -23,6 +24,8 @@ def jwt_required(view_func):
                     return JsonResponse({'success': False, 'error': 'Access token révoqué'}, status=401)
                 return view_func(request, *args, **kwargs)
 
+            except ObjectDoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
             except jwt.ExpiredSignatureError:
                 pass
             except jwt.InvalidTokenError:
@@ -40,6 +43,8 @@ def jwt_required(view_func):
                 response.set_cookie('token', new_access_token, max_age=60*5, httponly=True, secure=True, samesite='Strict')
                 return response
 
+            except ObjectDoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
             except jwt.ExpiredSignatureError:
                 return JsonResponse({'success': False, 'error': 'Refresh token expiré'}, status=401)
             except jwt.InvalidTokenError:

@@ -8,7 +8,7 @@ export const AuthWebSocketProvider = ({ children }) => {
     const [friends, setFriends] = useState([]);
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:8000/ws/user_connection/');
+        const socket = new WebSocket('wss://localhost:8443/ws/user_connection/');
         setSocket(socket);
 
         socket.onopen = () => {
@@ -26,6 +26,10 @@ export const AuthWebSocketProvider = ({ children }) => {
         socket.onclose = () => {
             console.log('WebSocket closed'); // est ce que je redirige vers la page de login ?
         };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        }
 
         return () => {
             socket.close(); // detecte fermeture onglet/fenetre sur l'ensemble de l'app

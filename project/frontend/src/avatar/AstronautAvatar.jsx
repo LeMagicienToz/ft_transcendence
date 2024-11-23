@@ -4,7 +4,7 @@ import "./AstronautAvatar.css";
 import { useNavigate } from 'react-router-dom';
 import MaterialAvatar from './MaterialAvatar.jsx';
 import MyButton from '../Theme/MyButton.jsx';
-
+import { useContext } from 'react';
 
 //set_user_color
 // Utility function to convert hex color to RGB array
@@ -28,6 +28,8 @@ function Show_Avatar() {
 		const [verticalPosition, setVerticalPosition] = useState(0.08);
 
 		React.useEffect(() => {
+
+			const { socket } = useContext(AuthWebSocketContext);
 			const fetchData = async () => {
 				try {
 					const response = await fetch('/api/auth/get_user/', {

@@ -5,6 +5,7 @@ import Earth from './Home/Earth.jsx';
 import './Home/Earth.css';
 import Spaceship from './Home/Spaceship.jsx';
 import { AuthWebSocketContext } from './auth/AuthWebSocketContext.jsx';
+import { useContext } from 'react';
 
 function Home() {
 	const { socket } = useContext(AuthWebSocketContext);

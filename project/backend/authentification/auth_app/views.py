@@ -38,7 +38,7 @@ def callback_42(request):
     token_response = requests.post(url=os.getenv('TOKEN_URL'), data=token_data)
     token_json = token_response.json()
     access_token = token_json.get('access_token')
-    expires_in_seconds = token_json.get('expires_in_seconds')
+    expires_in_seconds = token_json.get('expires_in')
 
     if access_token:
         headers = {'Authorization': f'Bearer {access_token}'}

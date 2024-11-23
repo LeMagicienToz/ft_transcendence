@@ -15,14 +15,17 @@ import { AuthWebSocketProvider } from './auth/AuthWebSocketContext.jsx';
 
 const AppRouter = () => (
 <AuthProvider>
-  <AuthWebSocketProvider>
     <Router>
       <Routes>
         <Route element={<StandardRoute />}>
           <Route path="/" element={<App />} />
           <Route path="/login" element={<Switch_button />} />
         </Route>
-        <Route element={<ProtectedRoute />}>
+        <Route element={
+          <AuthWebSocketProvider>
+            <ProtectedRoute />
+          </AuthWebSocketProvider>
+          }>
           <Route path="/home" element={<Home />} />
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/profile" element={<Profile />} />
@@ -31,7 +34,6 @@ const AppRouter = () => (
         </Route>
       </Routes>
     </Router>
-  </AuthWebSocketProvider>
 </AuthProvider>
 );
 
