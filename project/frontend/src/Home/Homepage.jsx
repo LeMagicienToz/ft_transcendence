@@ -8,6 +8,7 @@ import Modal_composant from "../Theme/modal_composant/Modal_composant.jsx";
 import Tableone from "../game/Tableone.jsx";
 import { AuthContext } from '../auth/AuthContext';
 import MaterialAvatar from '../avatar/MaterialAvatar.jsx';
+import { AuthWebSocketContext } from '../auth/AuthWebSocketContext.jsx';
 
 const hexToRgb = (hex) => {
 	if (typeof hex === 'string') {
@@ -53,6 +54,7 @@ const Homepage = () => {
 	const [closed_modal, setClosed_modal] = useState(true);
 	const [value_modal, setValueModal] = useState(0);
 	const { logout } = useContext(AuthContext);
+	const { WebSocketHandleLogout } = useContext(AuthWebSocketContext);
 
 	const onClosedModal = () => {
 		setClosed_modal(true);
@@ -92,6 +94,7 @@ const Homepage = () => {
 
 			if (response.ok) {
 				logout();
+				WebSocketHandleLogout();
 				navigate('/');
 			} else {
 				const errorData = await response.json();

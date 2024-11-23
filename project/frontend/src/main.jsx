@@ -11,31 +11,36 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AuthProvider } from './auth/AuthContext';
 import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
-import GameDebug from "./game/GameDebug.jsx";
+import { AuthWebSocketProvider } from './auth/AuthWebSocketContext.jsx';
 
 const AppRouter = () => (
   <AuthProvider>
-    <Router>
-      <Routes>
-        <Route element={<StandardRoute />}>
-          <Route path="/" element={<App />} />
-          <Route path="/login" element={<Switch_button />} />
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/homepage" element={<Homepage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/avatar" element={<Show_Avatar />} />
-          {window.isDebug ? <Route path="/waitingroom" element={<GameDebug />} /> : <Route path="/waitingroom" element={<WaitingRoom />} />}
-        </Route>
-      </Routes>
-    </Router>
+      <Router>
+        <Routes>
+          <Route element={<StandardRoute />}>
+            <Route path="/" element={<App />} />
+            <Route path="/login" element={<Switch_button />} />
+          </Route>
+          <Route element={
+          <AuthWebSocketProvider>
+            <ProtectedRoute />
+          </AuthWebSocketProvider>
+          }>
+            <Route path="/home" element={<Home />} />
+            <Route path="/homepage" element={<Homepage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/avatar" element={<Show_Avatar />} />
+            {window.isDebug ? <Route path="/waitingroom" element={<GameDebug />} /> : <Route path="/waitingroom" element={<WaitingRoom />} />}
+          </Route>
+        </Routes>
+      </Router>
   </AuthProvider>
-);
-
-window.isDebug = (new URLSearchParams(window.location.search)).get("debug") === "1";
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AppRouter />
-  </React.StrictMode>
-);
+  );
+  
+  window.isDebug = (new URLSearchParams(window.location.search)).get("debug") === "1";
+  ReactDOM.createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+      <AppRouter />
+    </React.StrictMode>
+  );
+  
