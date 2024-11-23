@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition, setPlayerOneScore, setPlayerTwoScore, setGameStatus }) => {
 	const socketRef = useRef(null);
+	const currentKeyPressedRef = useRef(null);
 
 	const sendMovement = (direction) => {
 		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -18,26 +19,50 @@ const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setP
 	// Gestion des événements clavier
 	useEffect(() => {
 		const handleKeyDown = (event) => {
+			if (currentKeyPressedRef.current) {
+				return ;
+			}
+			currentKeyPressedRef.current = event.key;
 			if (p1) {
 				if (event.key === 'ArrowRight') {
-					sendMovement('right');
+					sendMovement('right-on');
 				} else if (event.key === 'ArrowLeft') {
-					sendMovement('left');
+					sendMovement('left-on');
 				}
 			}
 			else {
 				if (event.key === 'ArrowRight') {
-					sendMovement('left');
+					sendMovement('left-on');
 				} else if (event.key === 'ArrowLeft') {
-					sendMovement('right');
+					sendMovement('right-on');
+				}
+			}
+		};
+
+		const handleKeyUp = (event) => {
+			currentKeyPressedRef.current = null;
+			if (p1) {
+				if (event.key === 'ArrowRight') {
+					sendMovement('right-off');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('left-off');
+				}
+			}
+			else {
+				if (event.key === 'ArrowRight') {
+					sendMovement('left-off');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('right-off');
 				}
 			}
 		};
 
 		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
 
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
 		};
 	}, []);
 

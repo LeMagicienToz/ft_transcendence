@@ -285,6 +285,7 @@ const Board = ({ isCreator }) => {
 
 const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
+	const currentKeyPressedRef = useRef(null);
 	const navigate = useNavigate();
 
 	const sendMovement = (direction) => {
@@ -300,28 +301,50 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 	// Gestion des événements clavier
 	useEffect(() => {
 		const handleKeyDown = (event) => {
-			if(p1)
-			{
+			if (currentKeyPressedRef.current) {
+				return ;
+			}
+			currentKeyPressedRef.current = event.key;
+			if (p1) {
 				if (event.key === 'ArrowRight') {
-					sendMovement('right');
+					sendMovement('right-on');
 				} else if (event.key === 'ArrowLeft') {
-					sendMovement('left');
+					sendMovement('left-on');
 				}
 			}
-			else
-			{
+			else {
 				if (event.key === 'ArrowRight') {
-					sendMovement('left');
+					sendMovement('left-on');
 				} else if (event.key === 'ArrowLeft') {
-					sendMovement('right');
+					sendMovement('right-on');
+				}
+			}
+		};
+
+		const handleKeyUp = (event) => {
+			currentKeyPressedRef.current = null;
+			if (p1) {
+				if (event.key === 'ArrowRight') {
+					sendMovement('right-off');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('left-off');
+				}
+			}
+			else {
+				if (event.key === 'ArrowRight') {
+					sendMovement('left-off');
+				} else if (event.key === 'ArrowLeft') {
+					sendMovement('right-off');
 				}
 			}
 		};
 
 		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
 
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
 		};
 	}, []);
 

@@ -153,7 +153,7 @@ class Consumer(AsyncWebsocketConsumer):
                         await sync_to_async(tournament.save)()
         # Convert str in int (because JSON gives only str)
         # todo test without converting
-        self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
+        #self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
         # Send game state by WebSocket
         await self.send(text_data=event["message"])
 

@@ -12,6 +12,7 @@ import { AuthProvider } from './auth/AuthContext';
 import StandardRoute from "./auth/StandardRoute.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 import { AuthWebSocketProvider } from './auth/AuthWebSocketContext.jsx';
+import GameDebug from "./game/GameDebug.jsx";
 
 const AppRouter = () => (
 <AuthProvider>
@@ -37,6 +38,7 @@ const AppRouter = () => (
 </AuthProvider>
 );
 
+window.isDebug = (new URLSearchParams(window.location.search)).get("debug") === "1";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppRouter />

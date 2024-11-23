@@ -49,32 +49,24 @@ class GameLogic():
 				self.INITIAL_POSITIONS["ball"]["x"],
 				self.INITIAL_POSITIONS["ball"]["y"]
 			],
+			"keys": {'1': {"left": False, "right": False}, '2': {"left": False, "right": False}},
 			"player_positions": {},
-			#"SCREEN_X": self.SCREEN_X,
-			#"SCREEN_Y": self.SCREEN_Y,
-			#"PADDLE_DIM_X": self.PADDLE_DIM_X,
-			#"PADDLE_DIM_Y": self.PADDLE_DIM_Y,
-			#"BALL_SIZE": self.BALL_SIZE,
-			#"PADDLE_SPEED": self.PADDLE_SPEED,
-			#"BALL_SPEED_X": self.BALL_SPEED_X,
-			#"BALL_SPEED_Y": self.BALL_SPEED_Y,
-			#"SCORE_TO_WIN": self.game.score_to_win,
 			"status": self.game.status,
 		}
 		# Configuration for 1v1 match type
 		if self.game.match_type == "1v1":
 			self.game_data["player_positions"] = {
-				1: [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
-				2: [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
+				'1': [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
+				'2': [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
 			}
 			self.game_data["scores"] = {'1': 0, '2': 0}
 		# Configuration for 2v2 match type
 		elif self.game.match_type == "2v2":
 			self.game_data["player_positions"] = {
-				1: [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
-				2: [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
-				3: [self.INITIAL_POSITIONS["player3"]["x"], self.INITIAL_POSITIONS["player3"]["y"]],
-				4: [self.INITIAL_POSITIONS["player4"]["x"], self.INITIAL_POSITIONS["player4"]["y"]],
+				'1': [self.INITIAL_POSITIONS["player1"]["x"], self.INITIAL_POSITIONS["player1"]["y"]],
+				'2': [self.INITIAL_POSITIONS["player2"]["x"], self.INITIAL_POSITIONS["player2"]["y"]],
+				'3': [self.INITIAL_POSITIONS["player3"]["x"], self.INITIAL_POSITIONS["player3"]["y"]],
+				'4': [self.INITIAL_POSITIONS["player4"]["x"], self.INITIAL_POSITIONS["player4"]["y"]],
 			}
 			self.game_data["scores"] = {'1': 0, '2': 0, '3': 0, '4': 0}
 
@@ -98,14 +90,28 @@ class GameLogic():
 		action = data_json.get('action')
 		if action == "move":
 			direction = data_json.get('direction')
-			player_index = self.consumer.player.player_index
-			if str(player_index) in map(str, self.game_data["player_positions"].keys()) and direction in ["left", "right"]:
-				await self.update_player_position(player_index, direction)
-			else:
-				await self.consumer.send(json.dumps({
-					"action": "error",
-					"message": "Invalid player ID or direction"
-				}))
+			player_index = str(self.consumer.player.player_index)
+			#logger.debug(f"Move action - Player Index: {player_index}, Direction: {direction}")
+			if direction.endswith("-on"):
+				key = direction.split("-")[0]
+				logger.debug(f"rdm:ceck if text: {type(player_index)}")
+				self.game_data['keys'][player_index][key] = True
+				logger.debug(f"Key {key} set to True for Player {player_index}")
+			elif direction.endswith("-off"):
+				key = direction.split("-")[0]
+				self.game_data['keys'][player_index][key] = False
+				logger.debug(f"Key {key} set to False for Player {player_index}")
+			#logger.debug(f"Player Index: {player_index}, Direction: {direction}")
+			#if str(player_index) in map(str, self.game_data["player_positions"].keys()): # and direction in ["left", "right"]:
+			#logger.debug(f"Valid move for Player {player_index}. Updating position...")
+			await self.update_player_positions()
+			await self.send_game_state()
+			#else:
+			#	logger.debug(f"Invalid move - Player ID or direction is incorrect: {data_json}")
+			#	await self.consumer.send(json.dumps({
+			#		"action": "error",
+			#		"message": "Invalid player ID or direction"
+			#	}))
 		elif action == "game over":
 			await self.end(close_code=1000)
 		elif action == "ping":
@@ -116,14 +122,23 @@ class GameLogic():
 				"message": "Unknown action"
 			}))
 
-	async def update_player_position(self, player_index, direction):
-		x, y = self.game_data["player_positions"][player_index]
-		if direction == "left":
-			y = min(self.SCREEN_Y - self.PADDLE_DIM_Y - 1, y + self.PADDLE_SPEED)
-		elif direction == "right":
-			y = max(0, y - self.PADDLE_SPEED)
-		self.game_data["player_positions"][player_index] = [x, y]
-		await self.send_game_state()
+	async def update_player_positions(self):
+		for player_index, keys in self.game_data['keys'].items():
+			player_index = str(player_index)
+			if player_index not in self.game_data["player_positions"]:
+				logger.debug("rdm: line 131, in update_player_positions player_index not in self.game_data[player_positions]")
+				continue  # Ignore si le joueur n'existe pas
+			x, y = self.game_data["player_positions"][player_index]
+			new_y = y
+			if keys["left"]:
+				new_y = min(self.SCREEN_Y - self.PADDLE_DIM_Y - 1, y + self.PADDLE_SPEED)
+			if keys["right"]:
+				new_y = max(0, y - self.PADDLE_SPEED)
+			if new_y != y:
+				self.game_data["player_positions"][player_index][1] = new_y
+				#logger.debug(f"in update position, player index: {player_index}")
+				#logger.debug(f"Updating positions: {self.game_data['player_positions']}")
+				#logger.debug(f"Keys state: {self.game_data['keys']}")
 
 	async def send_game_state(self):
 		message = json.dumps({
@@ -140,6 +155,7 @@ class GameLogic():
 	async def start_game_loop(self):
 		while self.game.status == "playing":
 			await asyncio.sleep(1 / self.REFRESH_PER_SEC)
+			await self.update_player_positions()
 			await self.update_ball_position()
 			await self.send_game_state()
 
