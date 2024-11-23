@@ -23,18 +23,18 @@ const hexToRgb = (hex) => {
 
 const CameraControl = ({ isCreator }) => {
 	const { camera } = useThree();
-  
+
 	useEffect(() => {
 	  // Adjust camera position when `isCreator` changes
-	  if (isCreator) { 
-		camera.position.set(0, 2.5, -16); // Position when user is creator
+	  if (isCreator) {
+		camera.position.set(0, 0.8, -16); // Position when user is creator
 		camera.rotation.y = 90 * Math.PI / 180;
 	  } else {
-		camera.position.set(0, 2.5, 12.4); // Position when user is not creator
+		camera.position.set(0, 0.8, 12.4); // Position when user is not creator
 	  }
 	  camera.updateProjectionMatrix(); // Update projection matrix after changing position
 	}, [isCreator, camera]);
-  
+
 	return null;
   };
 
@@ -64,6 +64,82 @@ const fetchUserData = async () => {
 //IS CREATOR == TRUE
 
 const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
+	const { scene } = useGLTF('/gltf_files/playertwo.gltf');
+	if (visTexture)
+		{
+			const textureLoader = new THREE.TextureLoader();
+			visTexture = textureLoader.load(visTexture, (texture) => {
+				// Ajustez la répétition pour réduire la taille de la texture
+				texture.repeat.set(2, flatness); // augmente le deuxieme pour applatir la texture
+				texture.wrapS = THREE.RepeatWrapping; // Permet à la texture de se répéter horizontalement
+				texture.wrapT = THREE.RepeatWrapping; // Permet à la texture de se répéter verticalement
+
+				texture.rotation = -Math.PI / 2; // 90 degrés en radians
+				texture.center.set(0.5, 0.5); // Centre de rotation pour éviter un décalage
+				texture.offset.set(horizontalPosition, verticalPosition); // change plutot ca pour decaler la texture ( augmente le premier pour aller a gauche, augmente le deuxieme pour aller en bas)
+			texture.image.onload = () => {
+				const textureWidth = texture.image.width;
+				const textureHeight = texture.image.height;
+
+				// Ajuster la taille et centrer la texture
+				adjustTextureSizeAndPosition(child, textureWidth, textureHeight);
+				};
+			});
+		}
+
+
+	scene.traverse((child) => {
+			if (child.isMesh)
+				{
+					// console.log("Player Two : ", child.name)
+					if (child.name.includes('Cube002')) // Object_4 = suit
+					{
+						if (child.material instanceof THREE.MeshStandardMaterial) {
+							child.material.color.setRGB(suitColor[0], suitColor[1], suitColor[2]);
+						}
+					}
+					if (child.name.includes('Cube001')) { // Object_6 = visiere
+						if (child.material instanceof THREE.MeshStandardMaterial) {
+								if(visTexture)
+								{
+									child.material.map = visTexture;
+									child.material.needsUpdate = true;
+
+									child.material.metalness = 0;
+									child.material.roughness = 1;
+								}
+							child.material.color.setRGB(visColor[0], visColor[1], visColor[2]);
+						}
+					}
+					if (child.name.includes('Cube004') || child.name.includes('Torus')) // Object_8 rings
+					{
+						if (child.material instanceof THREE.MeshStandardMaterial) {
+							child.material.color.setRGB(ringsColor[0], ringsColor[1], ringsColor[2]);
+						}
+					}
+					if (child.name.includes('Cube007')) //Object_20 backpack
+					{
+						if (child.material instanceof THREE.MeshStandardMaterial) {
+							child.material.color.setRGB(bpColor[0], bpColor[1], bpColor[2]);
+						}
+					}
+				}
+			});
+			const avatarRef = useRef();
+
+			useEffect(() => {
+			  if (avatarRef.current) {
+				// Directly set the position once when the component mounts
+				avatarRef.current.position.set(position[0], -1, -20.2);
+			  }
+			}, [position]); // Re-run if the position prop changes
+
+			return (
+				<primitive ref={avatarRef} object={scene}/>
+			);
+		  };
+
+const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
 	const { scene } = useGLTF('/gltf_files/avatar.gltf');
 	if (visTexture)
 		{
@@ -132,103 +208,7 @@ const PlayerOne = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 
 	useEffect(() => {
 		if (avatarRef.current) {
-			const targetPosition = new THREE.Vector3(...position);
-
-			// Animation frame loop pour interpoler la position
-			const updatePosition = () => {
-				// Lerp vers la nouvelle position
-				currentPosition.current.lerp(targetPosition, 0.1);
-				avatarRef.current.position.copy(currentPosition.current);
-
-				// Continue le rendu
-				requestAnimationFrame(updatePosition);
-			};
-
-			updatePosition();
-		}
-	}, [position]);
-
-	return (
-		//<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
-			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
-				<primitive ref={avatarRef} object={scene} />
-			</Stage>
-		//</PresentationControls>
-	);
-};
-
-const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatness, horizontalPosition, verticalPosition, visTexture }) => {
-	const { scene } = useGLTF('/gltf_files/playertwo.gltf');
-	if (visTexture)
-		{
-			const textureLoader = new THREE.TextureLoader();
-			visTexture = textureLoader.load(visTexture, (texture) => {
-				// Ajustez la répétition pour réduire la taille de la texture
-				texture.repeat.set(2, flatness); // augmente le deuxieme pour applatir la texture
-				texture.wrapS = THREE.RepeatWrapping; // Permet à la texture de se répéter horizontalement
-				texture.wrapT = THREE.RepeatWrapping; // Permet à la texture de se répéter verticalement
-
-				texture.rotation = -Math.PI / 2; // 90 degrés en radians
-				texture.center.set(0.5, 0.5); // Centre de rotation pour éviter un décalage
-				texture.offset.set(horizontalPosition, verticalPosition); // change plutot ca pour decaler la texture ( augmente le premier pour aller a gauche, augmente le deuxieme pour aller en bas)
-			texture.image.onload = () => {
-				const textureWidth = texture.image.width;
-				const textureHeight = texture.image.height;
-
-				// Ajuster la taille et centrer la texture
-				adjustTextureSizeAndPosition(child, textureWidth, textureHeight);
-				};
-			});
-		}
-
-
-	scene.traverse((child) => {
-			if (child.isMesh)
-				{
-					// console.log("Player Two : ", child.name)
-					if (child.name.includes('Cube002')) // Object_4 = suit
-					{
-						if (child.material instanceof THREE.MeshStandardMaterial) {
-							child.material.color.setRGB(suitColor[0], suitColor[1], suitColor[2]);
-						}
-					}
-					if (child.name.includes('Cube001')) { // Object_6 = visiere
-						if (child.material instanceof THREE.MeshStandardMaterial) {
-								if(visTexture)
-								{
-									child.material.map = visTexture;
-									child.material.needsUpdate = true;
-
-									child.material.metalness = 0;
-									child.material.roughness = 1;
-								}
-							child.material.color.setRGB(visColor[0], visColor[1], visColor[2]);
-						}
-					}
-					if (child.name.includes('Cube004') || child.name.includes('Torus')) // Object_8 rings
-					{
-						if (child.material instanceof THREE.MeshStandardMaterial) {
-							child.material.color.setRGB(ringsColor[0], ringsColor[1], ringsColor[2]);
-						}
-					}
-					if (child.name.includes('Cube007')) //Object_20 backpack
-					{
-						if (child.material instanceof THREE.MeshStandardMaterial) {
-							child.material.color.setRGB(bpColor[0], bpColor[1], bpColor[2]);
-						}
-					}
-				}
-			});
-	const avatarRef = useRef();
-	const initialRotation = [0, Math.PI, 0];
-
-	// Stocke la position actuelle
-	const currentPosition = useRef(new THREE.Vector3(...position));
-
-	useEffect(() => {
-		if (avatarRef.current) {
 			// Initialise la rotation
-			avatarRef.current.rotation.set(...initialRotation);
 
 			const targetPosition = new THREE.Vector3(...position);
 
@@ -247,11 +227,8 @@ const PlayerTwo = ({ position, suitColor, visColor, ringsColor, bpColor, flatnes
 	}, [position]);
 
 	return (
-		//<PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
-			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={avatarRef} object={scene} />
-			</Stage>
-		//</PresentationControls>
+
 	);
 };
 
@@ -261,14 +238,19 @@ const Ball= ({position}) => {
 
 	// Stocke la position actuelle
 	const currentPosition = useRef(new THREE.Vector3(...position));
-
+	const distance = position[2] - currentPosition.z;
 	useEffect(() => {
 		if (ballRef.current) {
 			const targetPosition = new THREE.Vector3(...position);
 			// Animation frame loop pour interpoler la position
 			const updatePosition = () => {
 				// Lerp vers la nouvelle position
-				currentPosition.current.lerp(targetPosition, 0.1);
+				if (distance < 10) {
+					currentPosition.current.lerp(targetPosition, 0.1);
+				} else {
+					//no animation when distance is very big (most likely reset initial position)
+					currentPosition.current = targetPosition;
+				}
 				ballRef.current.position.copy(currentPosition.current);
 
 				// Continue le rendu
@@ -280,33 +262,27 @@ const Ball= ({position}) => {
 	}, [position]);
 
 	return (
-		// <PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
-			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
 				<primitive ref={ballRef} object={scene} />
-			</Stage>
-		//</PresentationControls>
 	);
 };
 
 
-const Board = ({isCreator}) => {
+const Board = ({ isCreator }) => {
 	const { scene } = useGLTF('/gltf_files/onlyboardfinished.gltf');
 	const boardRef = useRef();
 
 	useEffect(() => {
-		if (boardRef.current) {
-			boardRef.current.position.set(0, 0, 0);
-		}
-	}, []);
+	  // Ensure that the ref is properly initialized before setting the position
+	  if (boardRef.current) {
+		boardRef.current.position.set(0, 0, 0); // Set position to (0, 0, 0)
+	  }
+	}, []); // Empty dependency array to run only once after the initial render
 
 	return (
-		// <PresentationControls speed={1.5} global zoom={0.7} polar={isCreator ? [-0.1, -Math.PI / 4] : [-0.1, Math.PI / 4]}>
-			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
-				<primitive ref={boardRef} object={scene} />
-			</Stage>
-		//</PresentationControls>
+		<primitive ref={boardRef} object={scene} />
 	);
-};
+  };
+
 const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
 	const navigate = useNavigate();
@@ -377,9 +353,9 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 					const ballPosition = data.game_data.ball_position;
 					if (playerPositions) {
 						// Met à jour les positions des joueurs et de la balle
-						setBallPosition([ballPosition[1] / 10.1 - 14.5, 1.2, ballPosition[0] / 9.95 - 19.8]);
-						setPlayerOnePosition([playerPositions['1'][1] / 11.7 - 11.5, 0.3, -21]);
-						setPlayerTwoPosition([playerPositions['2'][1] / 11.7 - 11.5, 0.3, 7.4]);
+						setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.2, ballPosition[0] / 9.9 - 20.2 + 0.5]);
+						setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]);//21
+						setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, 20.2]);//7.4
 					}
 				}
 			}
@@ -391,9 +367,9 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 
 		socket.onclose = () => {
 			console.log('WebSocket closed');
-			setTimeout(() => {
-				navigate('/homepage');
-			}, 5000); // 2000 ms = 2 secondes
+			// setTimeout(() => {
+			// 	navigate('/homepage');
+			// }, 5000); // 2000 ms = 2 secondes
 		};
 
 		// Nettoyage lors du démontage
@@ -411,11 +387,11 @@ const WaitingRoom = () => {
 	const location = useLocation();
 	const [userData, setUserData] = useState(null);
 	const [userDataTwo, setUserDataTwo] = useState(null);
-	const [playerOnePosition, setPlayerOnePosition] = useState([0, 0.3, -21]);
-	const [ballPosition, setBallPosition] = useState([0, 1.2, 0]);
-	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, 0.3, 7.4]);
+	const [playerOnePosition, setPlayerOnePosition] = useState([0, -1, -20.2]);
+	const [ballPosition, setBallPosition] = useState([0, 0.2, 0]);
+	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, 20.2]);
 	const { gameData, isCreator } = location.state;
-  
+
 	useEffect(() => {
 	  const getUserData = async () => {
 		try {
@@ -433,18 +409,18 @@ const WaitingRoom = () => {
 		  setError("Erreur lors de la récupération des données utilisateur");
 		}
 	  };
-  
+
 	  getUserData();
 	}, [isCreator]);
-  
+
 	return (
 	  <div className="game-container">
 		<Canvas style={{ touchAction: 'none' }}>
 		  <CameraControl isCreator={isCreator} />
-  
+
 		  <ambientLight intensity={0.5} />
 		  <directionalLight position={[5, 5, 5]} />
-  
+
 		  <SockCreator
 			p1={isCreator}
 			gameid={gameData.game_id}
@@ -453,36 +429,38 @@ const WaitingRoom = () => {
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}
 		  />
-  
+
 		  {/* Render both avatars in the same Canvas */}
 
-		<PresentationControls speed={1.5} global zoom={0.7} polar={isCreator ? [0, 0] : [0, 0]}>
-		  <PlayerOne
-			position={playerOnePosition}
-			suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
-			visColor={hexToRgb(userData?.visColor || '#FFFFFF')}
-			ringsColor={hexToRgb(userData?.ringsColor || '#FFFFFF')}
-			bpColor={hexToRgb(userData?.bpColor || '#FFFFFF')}
-			flatness={userData?.flatness || 2.8}
-			horizontalPosition={userData?.horizontalPosition || 0.73}
-			verticalPosition={userData?.verticalPosition || 0.08}
-			visTexture={userData?.visTexture || null}
-			/>
-  
-		  <PlayerTwo
-			position={playerTwoPosition}
-			suitColor={hexToRgb(userDataTwo?.suitColor || '#FFFFFF')}
-			visColor={hexToRgb(userDataTwo?.visColor || '#FFFFFF')}
-			ringsColor={hexToRgb(userDataTwo?.ringsColor || '#FFFFFF')}
-			bpColor={hexToRgb(userDataTwo?.bpColor || '#FFFFFF')}
-			flatness={userDataTwo?.flatness || 2.8}
-			horizontalPosition={userDataTwo?.horizontalPosition || 0.73}
-			verticalPosition={userDataTwo?.verticalPosition || 0.08}
-			visTexture={userDataTwo?.visTexture || null}
-			/>
-		  
-		  <Ball position={ballPosition} />
-		  <Board isCreator={isCreator} />
+		<PresentationControls speed={1.5} global zoom={0.7} polar={[0, 0]}>
+			<Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">
+				<PlayerOne
+					position={playerOnePosition}
+					suitColor={hexToRgb(userData?.suitColor || '#FFFFFF')}
+					visColor={hexToRgb(userData?.visColor || '#FFFFFF')}
+					ringsColor={hexToRgb(userData?.ringsColor || '#FFFFFF')}
+					bpColor={hexToRgb(userData?.bpColor || '#FFFFFF')}
+					flatness={userData?.flatness || 2.8}
+					horizontalPosition={userData?.horizontalPosition || 0.73}
+					verticalPosition={userData?.verticalPosition || 0.08}
+					visTexture={userData?.visTexture || null}
+					/>
+
+				<PlayerTwo
+					position={playerTwoPosition}
+					suitColor={hexToRgb(userDataTwo?.suitColor || '#FFFFFF')}
+					visColor={hexToRgb(userDataTwo?.visColor || '#FFFFFF')}
+					ringsColor={hexToRgb(userDataTwo?.ringsColor || '#FFFFFF')}
+					bpColor={hexToRgb(userDataTwo?.bpColor || '#FFFFFF')}
+					flatness={userDataTwo?.flatness || 2.8}
+					horizontalPosition={userDataTwo?.horizontalPosition || 0.73}
+					verticalPosition={userDataTwo?.verticalPosition || 0.08}
+					visTexture={userDataTwo?.visTexture || null}
+					/>
+
+				<Ball position={ballPosition} />
+				<Board isCreator={isCreator} />
+			</Stage>
 		</PresentationControls>
 
 		</Canvas>

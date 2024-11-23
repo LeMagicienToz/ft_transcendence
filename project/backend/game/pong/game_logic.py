@@ -11,17 +11,16 @@ class GameLogic():
 	SCREEN_X = 399 # 0 to 399 => 400 units
 	SCREEN_Y = 299
 	# Paddle dimensions
-	PADDLE_DIM_X = 0 # SCREEN_X // 100
-	PADDLE_DIM_Y = 90 #SCREEN_Y // 10
+	PADDLE_DIM_X = 0
+	PADDLE_DIM_Y = 70
 	# Ball dimensions
-	BALL_SIZE = 6
+	BALL_SIZE = 10
 	# Paddle and ball speed
-	PADDLE_SPEED = 8
+	PADDLE_SPEED = 4
 	BALL_SPEED_X = 1
 	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
 	REFRESH_PER_SEC = 50
-	# Score to reach to win got it from Game instance
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2

@@ -30,7 +30,7 @@ const AppRouter = () => (
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/avatar" element={<Show_Avatar />} />
-          <Route path="/waitingroom" element={<WaitingRoom />} />
+          {window.isDebug ? <Route path="/waitingroom" element={<GameDebug />} /> : <Route path="/waitingroom" element={<WaitingRoom />} />}
         </Route>
       </Routes>
     </Router>
