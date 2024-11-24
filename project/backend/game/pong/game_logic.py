@@ -148,8 +148,8 @@ class GameLogic():
 	def is_ball_touched_by_player(self):
 		ball_x, ball_y = self.game_data["ball_position"]
 		if self.game.match_type == "1v1":
-			p1_x, p1_y = self.game_data["player_positions"][1]
-			p2_x, p2_y = self.game_data["player_positions"][2]
+			p1_x, p1_y = self.game_data["player_positions"]['1']
+			p2_x, p2_y = self.game_data["player_positions"]['2']
 			if p1_y <= ball_y + self.BALL_SIZE - 1 and p1_y + self.PADDLE_DIM_Y - 1 >= ball_y and p1_x == ball_x:
 				"""
 				logger.debug(
