@@ -354,9 +354,35 @@ class GameDeleteView(APIView):
     the game_id is in the url
     """
     def delete(self, request, game_id):
+        # get user_id and user_name from authentification app
+        token = request.COOKIES.get('token')
+        token42 = request.COOKIES.get('42_access_token')
+        user_info = utils_get_user_info(token, token42)
+        if not user_info or not user_info.get('user_id'):
+            return JsonResponse({'error': 'Failed to get user info'}, status=400)
+        player_user_id = user_info['user_id']
+        # Player info validation
+        if not player_user_id:
+            return JsonResponse({'error': 'Player information is required'}, status=400)
+        # get game from id
         game = get_object_or_404(Game, id=game_id)
+        # check if game is full
+        player_is_creator = (game.players.all()[0].user_id == player_user_id)
+        if player_is_creator == False:
+            return JsonResponse({'message': 'Only creator can delete the game'}, status=400)
         game.delete()
         return JsonResponse({'message': 'Game deleted successfully'}, status=200)
+
+class GameDeleteAllView(APIView):
+    """
+    Delete all game
+    the request must be DELETE
+    body = {}
+    """
+    def delete(self, request):
+        # get game from id
+        Game.objects.all().delete()
+        return JsonResponse({'message': 'All games deleted successfully'}, status=200)
 
 class TournamentCreateView(APIView):
     """

@@ -3,7 +3,7 @@ from . import views
 from .views import (
     GameCreateView, GameListView, GameDetailView, GameJoinView, GameUserHistoryView, GameDeleteView,
 	TournamentCreateView, TournamentListView, TournamentDetailView, TournamentJoinView,
-	TournamentDeleteView
+	TournamentDeleteView, GameDeleteAllView
 )
 
 urlpatterns = [
@@ -20,5 +20,8 @@ urlpatterns = [
     path("tournament/list/", TournamentListView.as_view(), name="tournament-list"),   # List all tournaments
     path("tournament/join/<int:tournament_id>/", TournamentJoinView.as_view(), name="tournament-join"),  # Join a tournament
     path("tournament/delete/<int:tournament_id>/", TournamentDeleteView.as_view(), name="tournament-delete"),   # Delete a tournament
+
+    # TODO remove this
+    path("delete-all/", GameDeleteAllView.as_view(), name="game-delete-all"),   # Delete all games
 ]
 # use {% url 'game-join' id=12 %} in html
