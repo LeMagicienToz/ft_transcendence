@@ -97,7 +97,7 @@ def request_from_42_or_regular_user(view_func):
             return jwt_42_required(view_func)(request, *args, **kwargs)
         else:
             return jwt_required(view_func)(request, *args, **kwargs)
-    
+
     return _wrapped_view
 
 def twoFA_status_check(view_func):
@@ -109,6 +109,6 @@ def twoFA_status_check(view_func):
         twoFA_verified = r.get(f'user_{user.id}_twoFA_verified')
         if custom_user.twoFA_enabled and twoFA_verified and twoFA_verified.decode() == 'True':
             return view_func(request, *args, **kwargs)
-        return JsonResponse({'Success': False, 'error': '2FA non verifié'}, status=401)
-    
+        return JsonResponse({'success': False, 'error': '2FA non verifié'}, status=401)
+
     return _wrapped_view
