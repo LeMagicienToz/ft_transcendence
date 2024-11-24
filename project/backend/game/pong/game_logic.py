@@ -91,27 +91,16 @@ class GameLogic():
 		if action == "move":
 			direction = data_json.get('direction')
 			player_index = str(self.consumer.player.player_index)
-			#logger.debug(f"Move action - Player Index: {player_index}, Direction: {direction}")
 			if direction.endswith("-on"):
 				key = direction.split("-")[0]
-				logger.debug(f"rdm:ceck if text: {type(player_index)}")
 				self.game_data['keys'][player_index][key] = True
 				logger.debug(f"Key {key} set to True for Player {player_index}")
 			elif direction.endswith("-off"):
 				key = direction.split("-")[0]
 				self.game_data['keys'][player_index][key] = False
 				logger.debug(f"Key {key} set to False for Player {player_index}")
-			#logger.debug(f"Player Index: {player_index}, Direction: {direction}")
-			#if str(player_index) in map(str, self.game_data["player_positions"].keys()): # and direction in ["left", "right"]:
-			#logger.debug(f"Valid move for Player {player_index}. Updating position...")
 			await self.update_player_positions()
 			await self.send_game_state()
-			#else:
-			#	logger.debug(f"Invalid move - Player ID or direction is incorrect: {data_json}")
-			#	await self.consumer.send(json.dumps({
-			#		"action": "error",
-			#		"message": "Invalid player ID or direction"
-			#	}))
 		elif action == "game over":
 			await self.end(close_code=1000)
 		elif action == "ping":
@@ -126,7 +115,7 @@ class GameLogic():
 		for player_index, keys in self.game_data['keys'].items():
 			player_index = str(player_index)
 			if player_index not in self.game_data["player_positions"]:
-				logger.debug("rdm: line 131, in update_player_positions player_index not in self.game_data[player_positions]")
+				#logger.debug("rdm: line 131, in update_player_positions player_index not in self.game_data[player_positions]")
 				continue  # Ignore si le joueur n'existe pas
 			x, y = self.game_data["player_positions"][player_index]
 			new_y = y
@@ -136,9 +125,6 @@ class GameLogic():
 				new_y = max(0, y - self.PADDLE_SPEED)
 			if new_y != y:
 				self.game_data["player_positions"][player_index][1] = new_y
-				#logger.debug(f"in update position, player index: {player_index}")
-				#logger.debug(f"Updating positions: {self.game_data['player_positions']}")
-				#logger.debug(f"Keys state: {self.game_data['keys']}")
 
 	async def send_game_state(self):
 		message = json.dumps({
