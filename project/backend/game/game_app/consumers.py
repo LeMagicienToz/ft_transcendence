@@ -62,6 +62,12 @@ class Consumer(AsyncWebsocketConsumer):
         self.player.save()
         self.game.refresh_from_db()
 
+    def unassign_player_index(self):
+        self.player.player_index = 0
+        # Save the updated player instance to the database
+        self.player.save()
+        self.game.refresh_from_db()
+
     def is_player_in_game(self):
         user_id = self.user_info.get('user_id')
         # Retrieve the list of user_ids from the players in this game
@@ -110,6 +116,8 @@ class Consumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if hasattr(self, 'game_logic') and self.game_logic:
+            # when we have game_logic we know we have player look "connect()"
+            await sync_to_async(self.unassign_player_index)()
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text

@@ -16,7 +16,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Paddle and ball speed
-	PADDLE_SPEED = 4
+	PADDLE_SPEED = 2
 	BALL_SPEED_X = 1
 	BALL_SPEED_Y = 1
 	# Speed control by how many times the game refreshes per second
@@ -94,11 +94,13 @@ class GameLogic():
 			if direction.endswith("-on"):
 				key = direction.split("-")[0]
 				self.game_data['keys'][player_index][key] = True
-				logger.debug(f"Key {key} set to True for Player {player_index}")
+				opposite_key = "right" if key == "left" else "left"
+				self.game_data['keys'][player_index][opposite_key] = False
+				#logger.debug(f"Key {key} set to True for Player {player_index}")
 			elif direction.endswith("-off"):
 				key = direction.split("-")[0]
 				self.game_data['keys'][player_index][key] = False
-				logger.debug(f"Key {key} set to False for Player {player_index}")
+				#logger.debug(f"Key {key} set to False for Player {player_index}")
 			await self.update_player_positions()
 			await self.send_game_state()
 		elif action == "game over":
@@ -195,10 +197,10 @@ class GameLogic():
 			)
 			"""
 		elif self.game.match_type == "2v2":
-			p1_x, p1_y = self.game_data["player_positions"][1]
-			p2_x, p2_y = self.game_data["player_positions"][2]
-			p3_x, p3_y = self.game_data["player_positions"][3]
-			p4_x, p4_y = self.game_data["player_positions"][4]
+			p1_x, p1_y = self.game_data["player_positions"]['1']
+			p2_x, p2_y = self.game_data["player_positions"]['2']
+			p3_x, p3_y = self.game_data["player_positions"]['3']
+			p4_x, p4_y = self.game_data["player_positions"]['4']
 			if p1_x <= ball_x < p1_x + self.PADDLE_DIM_X and p1_y == ball_y:
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
