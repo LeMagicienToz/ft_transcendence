@@ -17,10 +17,10 @@ class GameLogic():
 	BALL_SIZE = 10
 	# Paddle and ball speed
 	PADDLE_SPEED = 2
-	BALL_SPEED_X = 1
-	BALL_SPEED_Y = 1
+	BALL_SPEED_X = 2
+	BALL_SPEED_Y = 2
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 50
+	REFRESH_PER_SEC = 25
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -91,6 +91,8 @@ class GameLogic():
 		if action == "move":
 			direction = data_json.get('direction')
 			player_index = str(self.consumer.player.player_index)
+			logger.debug("in on receive data")
+			logger.debug(self.consumer.player.player_index)
 			if direction.endswith("-on"):
 				key = direction.split("-")[0]
 				self.game_data['keys'][player_index][key] = True
@@ -152,7 +154,7 @@ class GameLogic():
 		if self.game.match_type == "1v1":
 			p1_x, p1_y = self.game_data["player_positions"]['1']
 			p2_x, p2_y = self.game_data["player_positions"]['2']
-			if p1_y <= ball_y + self.BALL_SIZE - 1 and p1_y + self.PADDLE_DIM_Y - 1 >= ball_y and p1_x == ball_x:
+			if p1_y <= ball_y + self.BALL_SIZE - 1 and p1_y + self.PADDLE_DIM_Y - 1 >= ball_y and p1_x >= ball_x:
 				"""
 				logger.debug(
 					f"Ball touched by Player 1!\n"
@@ -164,7 +166,7 @@ class GameLogic():
 				"""
 				self.BALL_SPEED_X = -self.BALL_SPEED_X
 				return True
-			elif p2_y <= ball_y + self.BALL_SIZE - 1 and p2_y + self.PADDLE_DIM_Y - 1 >= ball_y and p2_x == ball_x + self.BALL_SIZE - 1:
+			elif p2_y <= ball_y + self.BALL_SIZE - 1 and p2_y + self.PADDLE_DIM_Y - 1 >= ball_y and p2_x <= ball_x + self.BALL_SIZE - 1:
 				"""
 				logger.debug(
 					f"Ball touched by Player 2!\n"
@@ -231,9 +233,13 @@ class GameLogic():
 			dy = -dy
 			self.BALL_SPEED_Y = -self.BALL_SPEED_Y
 		if ball_y <= 0:
+			#logger.debug(f"Condition triggered: ball_y ({ball_y}) <= 0")
 			ball_y = 0
+			#logger.debug(f"ball_y adjusted to {ball_y}")
 		if ball_y + self.BALL_SIZE > self.SCREEN_Y + 1:
+			#logger.debug(f"Condition triggered: ball_y + BALL_SIZE ({ball_y + self.BALL_SIZE}) > SCREEN_Y + 1 ({self.SCREEN_Y + 1})")
 			ball_y = self.SCREEN_Y - self.BALL_SIZE + 1
+			#logger.debug(f"ball_y adjusted to {ball_y}")
 		self.game_data["ball_position"] = [ball_x, ball_y]
 		if ball_x <= 0 or ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player():
@@ -249,7 +255,7 @@ class GameLogic():
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
-			self.reset_ball_position()
+			await self.reset_ball_position()
 			return
 		elif ball_x + self.BALL_SIZE > self.SCREEN_X:
 			if self.game.match_type == "1v1":
@@ -262,11 +268,11 @@ class GameLogic():
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
 			await sync_to_async(self.game.save)()
-			self.reset_ball_position()
+			await self.reset_ball_position()
 			return
 		self.game_data["ball_position"] = [ball_x, ball_y]
 
-	def reset_ball_position(self):
+	async def reset_ball_position(self):
 		self.game_data["ball_position"] = [
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]

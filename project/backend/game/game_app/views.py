@@ -38,7 +38,7 @@ def utils_get_user_info(token, token42):
             cookies=cookies
         )
         result = response.json()
-        if (result.get('success') == False):
+        if (result.get('success') != True):
             return None
         return result
     except requests.exceptions.RequestException as e:
@@ -235,33 +235,34 @@ class GameJoinView(APIView):
     the game_id is in the url
     """
     def put(self, request, game_id):
-        # get game from id
-        game = get_object_or_404(Game, id=game_id)
-        # check if game is full
-        if game.match_type == '1v1' and game.players.count() >= 2:
-            return JsonResponse({'message': 'Game is already full'}, status=400)
-        elif game.match_type == '2v2' and game.players.count() >= 4:
-            return JsonResponse({'message': 'Game is already full'}, status=400)
-        # Game must be waiting
-        if game.status != 'waiting':
-            return JsonResponse({'error': 'Game has already started or finished or is full'}, status=400)
         # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
         token42 = request.COOKIES.get('42_access_token')
         user_info = utils_get_user_info(token, token42)
-        if not user_info:
+        if not user_info or not user_info.get('user_id'):
             return JsonResponse({'error': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
-
         # read the JSON file from the request
         data = request.data
         nickname = data.get('nickname', player_user_name)
         # Player info validation
         if not player_user_id or not player_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
+
+        # get game from id
+        game = get_object_or_404(Game, id=game_id)
+        # check if game is full
+        player_is_in_the_game = game.players.filter(user_id=player_user_id).exists()
+        if game.match_type == '1v1' and game.players.count() >= 2 and player_is_in_the_game == False:
+            return JsonResponse({'message': 'Game is already full'}, status=400)
+        elif game.match_type == '2v2' and game.players.count() >= 4 and player_is_in_the_game == False:
+            return JsonResponse({'message': 'Game is already full'}, status=400)
+        # Game must be waiting
+        if game.status != 'waiting':
+            return JsonResponse({'error': 'Game has already started or finished or is full'}, status=400)
         # Check if player allready in game
-        if game.players.filter(user_id=player_user_id).exists() == False:
+        if player_is_in_the_game == False:
             # create Player
             player = Player.objects.create(
                 user_id=player_user_id,

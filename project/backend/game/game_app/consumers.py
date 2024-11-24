@@ -55,12 +55,14 @@ class Consumer(AsyncWebsocketConsumer):
     def assign_player_index(self):
         indexes = list(self.game.players.values_list('player_index', flat=True))
         # Find the maximum value in the indexes list, defaulting to -1 if empty
-        max_index = max(indexes, default=0)
-        # Assign the next index to self.player.player_index
-        self.player.player_index = max_index + 1
-        # Save the updated player instance to the database
-        self.player.save()
-        self.game.refresh_from_db()
+        for index in range(10):
+            player_index = index + 1
+            if player_index in indexes:
+                continue
+            self.player.player_index = player_index
+            self.player.save()
+            self.game.refresh_from_db()
+            break
 
     def unassign_player_index(self):
         self.player.player_index = 0
@@ -118,6 +120,13 @@ class Consumer(AsyncWebsocketConsumer):
         if hasattr(self, 'game_logic') and self.game_logic:
             # when we have game_logic we know we have player look "connect()"
             await sync_to_async(self.unassign_player_index)()
+            logger.debug("unassigned player")
+            if self.game.status == 'ready_to_play':
+                logger.debug("change of status")
+                self.game.status = 'waiting'
+                self.game_logic.game_data['status'] = 'waiting'
+                await sync_to_async(self.game.save)()
+                await self.game_logic.send_game_state()
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
