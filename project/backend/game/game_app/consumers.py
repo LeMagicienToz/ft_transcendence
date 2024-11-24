@@ -65,6 +65,8 @@ class Consumer(AsyncWebsocketConsumer):
             break
 
     def unassign_player_index(self):
+        if self.game.status == "finished":
+            return
         self.player.player_index = 0
         # Save the updated player instance to the database
         self.player.save()
@@ -158,6 +160,8 @@ class Consumer(AsyncWebsocketConsumer):
             self.game_logic.game_data["end_time"] = timezone.now().isoformat()
             self.game.end_time = self.game_logic.game_data["end_time"]
             if self.is_player_1():
+                await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
+                await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
                 await sync_to_async(self.game.save)()
                 if self.game.tournament_id != 0:
                     tournament = await sync_to_async(Tournament.objects.get)(id=self.game.tournament_id)

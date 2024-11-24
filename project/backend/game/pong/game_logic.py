@@ -77,7 +77,7 @@ class GameLogic():
 		}))
 
 	async def end(self, close_code):
-		if (self.game.status == "playing"):
+		if (self.game_data['status'] == "playing"):
 			self.game_data["status"] = "finished"
 			self.game.status = "finished"
 			self.game_data['end_time'] = timezone.now().isoformat()
@@ -91,8 +91,8 @@ class GameLogic():
 		if action == "move":
 			direction = data_json.get('direction')
 			player_index = str(self.consumer.player.player_index)
-			logger.debug("in on receive data")
-			logger.debug(self.consumer.player.player_index)
+			#logger.debug("in on receive data")
+			#logger.debug(self.consumer.player.player_index)
 			if direction.endswith("-on"):
 				key = direction.split("-")[0]
 				self.game_data['keys'][player_index][key] = True
@@ -250,11 +250,9 @@ class GameLogic():
 			elif self.game.match_type == "2v2":
 				self.game_data["scores"]['2'] += 1
 				self.game_data["scores"]['4'] += 1
-			await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
 			if self.game_data["scores"]['2'] >= self.game.score_to_win:
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
-			await sync_to_async(self.game.save)()
 			await self.reset_ball_position()
 			return
 		elif ball_x + self.BALL_SIZE > self.SCREEN_X:
@@ -263,11 +261,9 @@ class GameLogic():
 			elif self.game.match_type == "2v2":
 				self.game_data["scores"]['1'] += 1
 				self.game_data["scores"]['3'] += 1
-			await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
 			if self.game_data["scores"]['1'] >= self.game.score_to_win:
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
-			await sync_to_async(self.game.save)()
 			await self.reset_ball_position()
 			return
 		self.game_data["ball_position"] = [ball_x, ball_y]
