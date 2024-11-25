@@ -283,7 +283,7 @@ const Board = ({ isCreator }) => {
 	);
   };
 
-const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
+const SockCreator = ({p1, gameid, token, token42, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
 	const navigate = useNavigate();
@@ -349,8 +349,12 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 	}, []);
 
 	// Gestion des WebSocket
+	let socket;
 	useEffect(() => {
-		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+		if(token)
+			socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+		else
+			socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token42=${token42}`);
 		socketRef.current = socket;
 
 		socket.onopen = () => {
@@ -359,7 +363,7 @@ const SockCreator = ({p1, gameid, token, setPlayerOnePosition, setPlayerTwoPosit
 
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-			console.log(data);
+			// console.log(data);
 
 			// Vérifiez le statut de la partie
 			if (data.game_data?.status) {
@@ -414,6 +418,11 @@ const WaitingRoom = () => {
 	const [ballPosition, setBallPosition] = useState([0, 0.2, 0]);
 	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, 20.2]);
 	const { gameData, isCreator } = location.state;
+	const token = null;
+	if(gameData.token)
+		token = gameData.token;
+	else
+		token = gameData.token42;
 
 	useEffect(() => {
 	  const getUserData = async () => {
@@ -448,6 +457,7 @@ const WaitingRoom = () => {
 			p1={isCreator}
 			gameid={gameData.game_id}
 			token={gameData.token}
+			token42={gameData.token42}
 			setPlayerOnePosition={setPlayerOnePosition}
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}

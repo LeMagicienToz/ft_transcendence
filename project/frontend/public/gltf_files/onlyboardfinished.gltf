@@ -59,9 +59,37 @@
 			"name":"Mat\u00e9riau.002",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
-					0.7999992966651917,
-					0,
-					0.013687873259186745,
+					0.3864949941635132,
+					0.045184213668107986,
+					0.005605007987469435,
+					1
+				],
+				"metallicFactor":0.125,
+				"roughnessFactor":0.20000000298023224
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Mat\u00e9riau",
+			"pbrMetallicRoughness":{
+				"baseColorFactor":[
+					0.07422607392072678,
+					0.06662304699420929,
+					0.06479858607053757,
+					1
+				],
+				"metallicFactor":0.125,
+				"roughnessFactor":0.20000000298023224
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Mat\u00e9riau.003",
+			"pbrMetallicRoughness":{
+				"baseColorFactor":[
+					0.07422607392072678,
+					0.06662304699420929,
+					0.06479858607053757,
 					1
 				],
 				"metallicFactor":0.125,
@@ -93,7 +121,8 @@
 						"NORMAL":5,
 						"TEXCOORD_0":6
 					},
-					"indices":3
+					"indices":3,
+					"material":1
 				}
 			]
 		},
@@ -106,7 +135,8 @@
 						"NORMAL":8,
 						"TEXCOORD_0":9
 					},
-					"indices":3
+					"indices":3,
+					"material":2
 				}
 			]
 		}
