@@ -17,10 +17,10 @@ class GameLogic():
 	BALL_SIZE = 10
 	# Paddle and ball speed
 	PADDLE_SPEED = 2
-	BALL_SPEED_X = 2
-	BALL_SPEED_Y = 2
+	BALL_SPEED_X = 1.0
+	BALL_SPEED_Y = 1.0
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 25
+	REFRESH_PER_SEC = 50
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -254,6 +254,9 @@ class GameLogic():
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
 			await self.reset_ball_position()
+			#logger.debug("avant sleep p1")
+			await asyncio.sleep(2)
+			#logger.debug("apres sleep p1")
 			return
 		elif ball_x + self.BALL_SIZE > self.SCREEN_X:
 			if self.game.match_type == "1v1":
@@ -265,6 +268,9 @@ class GameLogic():
 				self.game.status = "finished"
 				self.game_data['status'] = "finished"
 			await self.reset_ball_position()
+			#logger.debug("avant sleep p2")
+			await asyncio.sleep(2)
+			#logger.debug("apres sleep p2")
 			return
 		self.game_data["ball_position"] = [ball_x, ball_y]
 
@@ -273,3 +279,5 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
+		await self.send_game_state()
+		#await asyncio.sleep(2)
