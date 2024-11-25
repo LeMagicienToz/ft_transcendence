@@ -53,7 +53,8 @@ class User_connection(AsyncWebsocketConsumer):
 
     @sync_to_async # l'operation sur redis est synchrone et bloquante, donc on utilise sync_to_async pour la rendre asynchrone
     def update_user_status(self, status):
-        r.set(f'user_{self.user.id}_status', status)
+        if self.user and hasattr(self.user, 'id'):
+            r.set(f'user_{self.user.id}_status', status)
     
     @sync_to_async
     def delete_twoFA_data(self):
