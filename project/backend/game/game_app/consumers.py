@@ -9,7 +9,7 @@ from urllib.parse import parse_qs
 from django.utils import timezone
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('myapp')
 
 class Consumer(AsyncWebsocketConsumer):
     user_info = None
