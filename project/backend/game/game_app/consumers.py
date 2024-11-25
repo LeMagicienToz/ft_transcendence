@@ -23,7 +23,7 @@ class Consumer(AsyncWebsocketConsumer):
             # Parse the query string
             params = parse_qs(query_string)
             token = params.get('token', [None])[0]  # Get token, or None if not found
-            token42 = params.get('42_access_token', [None])[0]
+            token42 = params.get('token42', [None])[0]
             self.user_info = utils_get_user_info(token, token42)
         except:
             return
