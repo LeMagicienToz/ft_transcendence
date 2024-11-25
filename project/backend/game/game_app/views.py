@@ -40,6 +40,7 @@ def utils_get_user_info(token, token42):
         result = response.json()
         if (result.get('success') != True):
             return None
+        result.pop('email', None)
         return result
     except requests.exceptions.RequestException as e:
         # Log the detailed error
@@ -249,7 +250,6 @@ class GameJoinView(APIView):
         # Player info validation
         if not player_user_id or not player_user_name:
             return JsonResponse({'error': 'Player information is required'}, status=400)
-
         # get game from id
         game = get_object_or_404(Game, id=game_id)
         # check if game is full
