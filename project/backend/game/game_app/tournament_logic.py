@@ -11,6 +11,11 @@ def create_round_robin_matches(tournament):
     score_to_win = tournament.score_to_win
     match_type = tournament.match_type
     game_type = tournament.game_type
+    ball_speed = tournament.ball_speed
+    color_board = tournament.color_board
+    color_ball = tournament.color_ball
+    color_wall = tournament.color_wall
+    color_paddle = tournament.color_paddle
     games = []
 
     def organize_matches(matches):
@@ -47,6 +52,11 @@ def create_round_robin_matches(tournament):
                     game_type=game_type,
                     score_to_win=score_to_win,
                     tournament_id=tournament_id,
+                    ball_speed=ball_speed,
+                    color_board=color_board,
+                    color_ball=color_ball,
+                    color_wall=color_wall,
+                    color_paddle=color_paddle,
                     status='waiting'
                 )
                 game.save()

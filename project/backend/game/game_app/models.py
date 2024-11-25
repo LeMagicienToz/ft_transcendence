@@ -33,6 +33,11 @@ class Game(models.Model):
         default="waiting"
     )
     tournament_id = models.IntegerField(default = 0)
+    ball_speed = models.FloatField(default=1.0)
+    color_board = models.CharField(max_length=7, default="#FFFFFF")
+    color_ball = models.CharField(max_length=7, default="#E48D2D")
+    color_wall = models.CharField(max_length=7, default="#E48D2D")
+    color_paddle = models.CharField(max_length=7, default="#FFFFFF")
     creation_time = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -95,6 +100,11 @@ class Tournament(models.Model):
                   ("playing", "Game in progress"), ("finished", "Game finished")],
         default="waiting"
     )
+    ball_speed = models.FloatField(default=1.0)
+    color_board = models.CharField(max_length=7, default="#FFFFFF")
+    color_ball = models.CharField(max_length=7, default="#E48D2D")
+    color_wall = models.CharField(max_length=7, default="#E48D2D")
+    color_paddle = models.CharField(max_length=7, default="#FFFFFF")
     creation_time = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)

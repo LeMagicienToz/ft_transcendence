@@ -79,6 +79,11 @@ class GameCreateView(APIView):
     'game_type': 'pong',
     'score_to_win': type int,
     'tournament_id': type int, 0 if not in a tournament,
+    'ball_speed': type float,
+    'color_board': type string,
+    'color_ball': type string,
+    'color_wall': type string,
+    'color_paddle': type string,
     }
     cookie = {
     'token': type string,
@@ -136,6 +141,18 @@ class GameCreateView(APIView):
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, Tournament.DoesNotExist):
             tourn_id = 0
+        # Get game customization parameters
+        try:
+            ball_speed = float(request.data.get('ball_speed', 1.0))
+            color_board = request.data.get('color_board', '#FFFFFF')
+            color_ball = request.data.get('color_ball', '#E48D2D')
+            color_wall = request.data.get('color_wall', '#E48D2D')
+            color_paddle = request.data.get('color_paddle', '#FFFFFF')
+        except ValueError as e:
+            return JsonResponse({'error': f'Invalid value for customization parameter: {str(e)}'}, status=400)
+        # Validate customization parameters
+        if not (0.5 <= ball_speed <= 2.5):
+            return JsonResponse({'error': 'Ball speed must be between 0.5 and 2.5'}, status=400)
         # Game init with pLayer 1
         try:
             game = Game.objects.create(
@@ -144,6 +161,11 @@ class GameCreateView(APIView):
                 game_type=game_type,
                 score_to_win=score_to_win,
                 tournament_id=tourn_id,
+                ball_speed=ball_speed,
+                color_board=color_board,
+                color_ball=color_ball,
+                color_wall=color_wall,
+                color_paddle=color_paddle,
                 creation_time=timezone.now(),
                 status='waiting',
             )
@@ -172,6 +194,11 @@ class GameListView(APIView):
                 'match_type': game.match_type,
                 'score_to_win': game.score_to_win,
                 'tournament_id': game.tournament_id,
+                'ball_speed': game.ball_speed,
+                'color_board': game.color_board,
+                'color_ball': game.color_ball,
+                'color_wall': game.color_wall,
+                'color_paddle': game.color_paddle,
                 'creation_time': game.creation_time,
                 'start_time': game.start_time,
                 'end_time': game.end_time,
@@ -206,6 +233,11 @@ class GameDetailView(APIView):
             'match_type': game.match_type,
             'score_to_win': game.score_to_win,
             'tournament_id': game.tournament_id,
+            'ball_speed': game.ball_speed,
+            'color_board': game.color_board,
+            'color_ball': game.color_ball,
+            'color_wall': game.color_wall,
+            'color_paddle': game.color_paddle,
             'creation_time': game.creation_time,
             'start_time': game.start_time,
             'end_time': game.end_time,
@@ -329,6 +361,11 @@ class GameUserHistoryView(APIView):
                 'match_type': game.match_type,
                 'score_to_win': game.score_to_win,
                 'tournament_id': game.tournament_id,
+                'ball_speed': game.ball_speed,
+                'color_board': game.color_board,
+                'color_ball': game.color_ball,
+                'color_wall': game.color_wall,
+                'color_paddle': game.color_paddle,
                 'creation_time': game.creation_time,
                 'start_time': game.start_time,
                 'end_time': game.end_time,
@@ -454,6 +491,18 @@ class TournamentCreateView(APIView):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'error': 'Invalid number of players'}, status=400)
+        # Get game customization parameters
+        try:
+            ball_speed = float(request.data.get('ball_speed', 1.0))
+            color_board = request.data.get('color_board', '#FFFFFF')
+            color_ball = request.data.get('color_ball', '#E48D2D')
+            color_wall = request.data.get('color_wall', '#E48D2D')
+            color_paddle = request.data.get('color_paddle', '#FFFFFF')
+        except ValueError as e:
+            return JsonResponse({'error': f'Invalid value for customization parameter: {str(e)}'}, status=400)
+        # Validate customization parameters
+        if not (0.5 <= ball_speed <= 2.5):
+            return JsonResponse({'error': 'Ball speed must be between 0.5 and 2.5'}, status=400)
         # create tournament
         tournament = Tournament.objects.create(
             tournament_custom_name=tournament_custom_name,
@@ -461,6 +510,11 @@ class TournamentCreateView(APIView):
             game_type=tourn_game_type,
             score_to_win=score_to_win,
             player_count=player_count,
+            ball_speed=ball_speed,
+            color_board=color_board,
+            color_ball=color_ball,
+            color_wall=color_wall,
+            color_paddle=color_paddle,
             creation_time=timezone.now(),
             status='waiting',
         )
@@ -499,6 +553,11 @@ class TournamentListView(APIView):
                     "game_type": game.game_type,
                     "score_to_win": game.score_to_win,
                     "tournament_id": game.tournament_id,
+                    'ball_speed': game.ball_speed,
+                    'color_board': game.color_board,
+                    'color_ball': game.color_ball,
+                    'color_wall': game.color_wall,
+                    'color_paddle': game.color_paddle,
                     "status": game.status,
                     "creation_time": game.creation_time,
                     "start_time": game.start_time,
@@ -525,6 +584,11 @@ class TournamentListView(APIView):
                 "player_count": tournament.player_count,
                 "score_to_win": tournament.score_to_win,
                 "status": tournament.status,
+                'ball_speed': tournament.ball_speed,
+                'color_board': tournament.color_board,
+                'color_ball': tournament.color_ball,
+                'color_wall': tournament.color_wall,
+                'color_paddle': tournament.color_paddle,
                 "creation_time": tournament.creation_time,
                 "start_time": tournament.start_time,
                 "end_time": tournament.end_time,
@@ -562,6 +626,11 @@ class TournamentDetailView(APIView):
                 "game_type": game.game_type,
                 "score_to_win": game.score_to_win,
                 "tournament_id": game.tournament_id,
+                'ball_speed': game.ball_speed,
+                'color_board': game.color_board,
+                'color_ball': game.color_ball,
+                'color_wall': game.color_wall,
+                'color_paddle': game.color_paddle,
                 "status": game.status,
                 "creation_time": game.creation_time,
                 "start_time": game.start_time,
@@ -588,6 +657,11 @@ class TournamentDetailView(APIView):
             "player_count": tournament.player_count,
             "score_to_win": tournament.score_to_win,
             "status": tournament.status,
+            'ball_speed': tournament.ball_speed,
+            'color_board': tournament.color_board,
+            'color_ball': tournament.color_ball,
+            'color_wall': tournament.color_wall,
+            'color_paddle': tournament.color_paddle,
             "creation_time": tournament.creation_time,
             "start_time": tournament.start_time,
             "end_time": tournament.end_time,
