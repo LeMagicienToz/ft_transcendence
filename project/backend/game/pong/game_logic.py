@@ -15,10 +15,6 @@ class GameLogic():
 	PADDLE_DIM_Y = 70
 	# Ball dimensions
 	BALL_SIZE = 10
-	# Paddle and ball speed
-	PADDLE_SPEED = 2
-	BALL_SPEED_X = 1.0
-	BALL_SPEED_Y = 1.0
 	# Speed control by how many times the game refreshes per second
 	REFRESH_PER_SEC = 50
 	# Initial positions
@@ -43,6 +39,10 @@ class GameLogic():
 	def __init__(self, consumer):
 		self.consumer = consumer
 		self.game = consumer.game
+		# Paddle and ball speed
+		self.PADDLE_SPEED = 2
+		self.BALL_SPEED_X = 1.0 * self.game.ball_speed
+		self.BALL_SPEED_Y = 1.0 * self.game.ball_speed
 		# Initialize positions and scores based on match type
 		self.game_data = {
 			"ball_position": [
@@ -82,6 +82,7 @@ class GameLogic():
 			self.game.status = "finished"
 			self.game_data['end_time'] = timezone.now().isoformat()
 			self.game.end_time = self.game_data['end_time']
+			# TODO make the player who is left as a winner
 			await sync_to_async(self.game.save)()
 			await self.send_game_state()
 
@@ -105,8 +106,8 @@ class GameLogic():
 				#logger.debug(f"Key {key} set to False for Player {player_index}")
 			await self.update_player_positions()
 			await self.send_game_state()
-		elif action == "game over":
-			await self.end(close_code=1000)
+		#elif action == "game over":
+		#	await self.end(close_code=1000)
 		elif action == "ping":
 			await self.consumer.send(json.dumps({"action": "pong"}))
 		else:
