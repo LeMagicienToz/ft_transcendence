@@ -283,7 +283,7 @@ const Board = ({ isCreator }) => {
 	);
   };
 
-const SockCreator = ({p1, gameid, token, token42, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
+const SockCreator = ({p1, gameid, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition }) => {
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
 	const navigate = useNavigate();
@@ -402,7 +402,7 @@ const SockCreator = ({p1, gameid, token, token42, setPlayerOnePosition, setPlaye
 				socketRef.current.close();
 			}
 		};
-	}, [gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
+	}, [gameid, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
 
 	return null; // Pas d'interface utilisateur pour ce composant
 };
@@ -415,11 +415,6 @@ const WaitingRoom = () => {
 	const [ballPosition, setBallPosition] = useState([0, 0.2, 0]);
 	const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, 20.2]);
 	const { gameData, isCreator } = location.state;
-	const token = null;
-	if(gameData.token)
-		token = gameData.token;
-	else
-		token = gameData.token42;
 
 	useEffect(() => {
 	  const getUserData = async () => {
@@ -453,8 +448,6 @@ const WaitingRoom = () => {
 		  <SockCreator
 			p1={isCreator}
 			gameid={gameData.game_id}
-			token={gameData.token}
-			token42={gameData.token42}
 			setPlayerOnePosition={setPlayerOnePosition}
 			setPlayerTwoPosition={setPlayerTwoPosition}
 			setBallPosition={setBallPosition}

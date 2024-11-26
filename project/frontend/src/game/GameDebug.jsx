@@ -2,7 +2,7 @@ import './GameDebug.css';
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition, setPlayerOneScore, setPlayerTwoScore, setGameStatus }) => {
+const SockCreator = ({ p1, gameid, gameStatus, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition, setPlayerOneScore, setPlayerTwoScore, setGameStatus }) => {
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
 
@@ -116,7 +116,7 @@ const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setP
 				socketRef.current.close();
 			}
 		};
-	}, [gameid, token, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
+	}, [gameid, setPlayerOnePosition, setPlayerTwoPosition, setBallPosition]);
 
 	useEffect(() => {
 		if (gameStatus === 'finished' && socketRef.current) {
@@ -155,7 +155,6 @@ const GameDebug = () => {
 				p1={isCreator}
 				gameStatus={gameStatus}
 				gameid={gameData.game_id}
-				token={gameData.token}
 				setPlayerOnePosition={setPlayerOnePosition}
 				setPlayerTwoPosition={setPlayerTwoPosition}
 				setBallPosition={setBallPosition}
