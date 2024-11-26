@@ -17,16 +17,24 @@ class Consumer(AsyncWebsocketConsumer):
     game = None
     player = None
     async def connect(self):
-        try:
-            # Access the query string from the scope
-            query_string = self.scope['query_string'].decode('utf-8')  # Decode from bytes type
-            # Parse the query string
-            params = parse_qs(query_string)
-            token = params.get('token', [None])[0]  # Get token, or None if not found
-            token42 = params.get('token42', [None])[0]
-            self.user_info = utils_get_user_info(token, token42)
-        except:
+        cookies = {}
+        headers = dict(self.scope["headers"])
+        if b"cookie" in headers:
+            cookie_header = headers[b"cookie"].decode()
+            cookie_list = cookie_header.split(';')
+            for cookie in cookie_list:
+                key_value_pair = cookie.split('=')
+                if len(key_value_pair) != 2:
+                    continue
+                key = key_value_pair[0]
+                value = key_value_pair[1]
+                cookies[key] = value
+        else :
+            #await self.close()
             return
+        token = cookies.get('token')
+        token42 = cookies.get('42_access_token')
+        self.user_info = utils_get_user_info(token, token42)
         # check if user_info is caught
         if self.user_info is None:
             return

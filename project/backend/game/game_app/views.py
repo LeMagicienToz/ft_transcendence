@@ -172,10 +172,7 @@ class GameCreateView(APIView):
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'error': 'Error creating game: {}'.format(str(e))}, status=500)
-        if token:
-            return JsonResponse({'message': 'Game created', 'game_id': game.id, 'token': token}, status=201)
-        elif token42:
-            return JsonResponse({'message': 'Game created', 'game_id': game.id, 'token42': token42}, status=201)
+        return JsonResponse({'message': 'Game created', 'game_id': game.id}, status=201)
 
 class GameListView(APIView):
     """
@@ -307,10 +304,7 @@ class GameJoinView(APIView):
             # Assign new player
             game.players.add(player)
             game.save()
-        if token:
-            return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token': token}, status=201)
-        elif token42:
-            return JsonResponse({'message': 'Player joined', 'game_id': game.id, 'token42': token42}, status=201)
+        return JsonResponse({'message': 'Player joined', 'game_id': game.id}, status=201)
 
 class GameUserHistoryView(APIView):
     """
@@ -519,10 +513,7 @@ class TournamentCreateView(APIView):
             status='waiting',
         )
         tournament.players.add(player1)
-        if token:
-            return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id, 'token': token}, status=201)
-        elif token42:
-            return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id, 'token42': token42}, status=201)
+        return JsonResponse({'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
 
 class TournamentListView(APIView):
     """
@@ -730,10 +721,7 @@ class TournamentJoinView(APIView):
             tournament.save()
             # create the list of games
             create_round_robin_matches(tournament)
-        if token:
-            return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token': token}, status=201)
-        elif token42:
-            return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id, 'token42': token42}, status=201)
+        return JsonResponse({'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id}, status=201)
 
 class TournamentDeleteView(APIView):
     """

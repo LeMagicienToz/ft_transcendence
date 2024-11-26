@@ -68,7 +68,7 @@ const SockCreator = ({ p1, gameid, gameStatus, token, setPlayerOnePosition, setP
 
 	// Gestion des WebSocket
 	useEffect(() => {
-		const socket = new WebSocket(`ws://localhost:8001/ws/game/${gameid}/?token=${token}`);
+		const socket = new WebSocket(`wss://localhost:8443/ws/game/${gameid}/`);
 		socketRef.current = socket;
 
 		socket.onopen = () => {
