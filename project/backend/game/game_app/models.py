@@ -29,7 +29,7 @@ class Game(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[("waiting", "Waiting for all the players"),
-                  ("playing", "Game in progress"), ("ready_to_play", "Ready to play"), ("finished", "Game finished")],
+                  ("playing", "Game in progress"), ("ready_to_play", "Ready to play"), ("abandoned", "Abandoned"), ("finished", "Game finished")],
         default="waiting"
     )
     tournament_id = models.IntegerField(default = 0)
@@ -74,6 +74,17 @@ class Game(models.Model):
                 player.score = score
                 # Save the player object to the database
                 player.save()
+
+    def make_the_other_player_win(self, player_who_quit):
+        # Loop through all players in the game
+        players = self.players.all()
+        the_other_players = [
+                    player for player in players
+                    if player.user_id != player_who_quit.user_id
+                ]
+        the_other_player = the_other_players[0]
+        the_other_player.score = self.score_to_win
+        the_other_player.save()
 
     def __str__(self):
         return (f'Game {self.id} (Type: {self.game_type}, Match: {self.match_type}, Status: {self.status})')
