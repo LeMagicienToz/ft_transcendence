@@ -3,3 +3,6 @@ Uncomment logger in django settings.py
 Uncomment nginx.conf
 Uncomment filebeat in bootstrap.sh for: frontend, db_auth, db_games, redis
 Enable 2FA in auth model
+
+remove the hot reload og game container line 81/82 (volumes:
+      - ./services/backend/api_game:/app)
