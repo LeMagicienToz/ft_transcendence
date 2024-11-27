@@ -59,7 +59,7 @@ services:
     env_file: ./.env
     environment:
       - T_SELF_NAME=auth
-      - T_SELF_REDIS_ID=1
+      - T_SELF_REDIS_ID=0
     depends_on:
       db_auth:
           condition: service_healthy
@@ -83,7 +83,7 @@ services:
       - ./services/backend/api_game:/app
     environment:
       - T_SELF_NAME=game
-      - T_SELF_REDIS_ID=0
+      - T_SELF_REDIS_ID=1
     depends_on:
       db_game:
           condition: service_healthy
@@ -353,34 +353,34 @@ networks:
     name: frontend
     ipam:
       config:
-        - subnet: 10.0.0.0/28
+        - subnet: 10.0.0.0/24
 
   backend:
     name: backend
     ipam:
       config:
-        - subnet: 10.1.0.0/28
+        - subnet: 10.1.0.0/24
 
   databases:
     name: databases
     ipam:
       config:
-        - subnet: 10.2.0.0/28
+        - subnet: 10.2.0.0/24
 
   caching:
     name: caching
     ipam:
       config:
-        - subnet: 10.3.0.0/28
+        - subnet: 10.3.0.0/24
 
   monitoring:
     name: monitoring
     ipam:
       config:
-        - subnet: 10.4.0.0/28
+        - subnet: 10.4.0.0/24
 
   logging:
     name: logging
     ipam:
       config:
-        - subnet: 10.5.0.0/28
+        - subnet: 10.5.0.0/24

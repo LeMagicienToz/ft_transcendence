@@ -1,3 +1,8 @@
+import django
+from os import environ
+environ.setdefault('DJANGO_SETTINGS_MODULE', 'service.settings')
+django.setup()
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 import json
@@ -6,10 +11,17 @@ from .consumers_utils import GameLogic
 from urllib.parse import parse_qs
 from django.utils import timezone
 
+
+from ..models import GameModel, TournamentModel
+
 import logging
-logger = logging.getLogger('myapp')
+logger = logging.getLogger(__name__)
+
+# Ensure settings are configured
+
 
 class GameConsumer(AsyncWebsocketConsumer):
+
     user_info = None
     game_id = None
     game = None
@@ -18,9 +30,9 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from ..endpoints.endpoints_utils import utils_get_user_info
 
-        logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         cookies = {}
         headers = dict(self.scope["headers"])
+        """
         if b"cookie" in headers:
             cookie_header = headers[b"cookie"].decode()
             cookie_list = cookie_header.split(';')
@@ -33,22 +45,33 @@ class GameConsumer(AsyncWebsocketConsumer):
                 cookies[key] = value
         else :
             #await self.close()
+            return self.close()
+        """
+        cookies = {}
+        headers = dict(self.scope["headers"])
+        if b"cookie" in headers:
+            cookie_header = headers[b"cookie"].decode()
+            cookies = {key: value for key, value in [cookie.split('=') for cookie in cookie_header.split('; ')]}
+        else :
+            await self.close()
             return
+
         token = cookies.get('token')
         token42 = cookies.get('42_access_token')
         self.user_info = utils_get_user_info(token, token42)
+
         # check if user_info is caught
         if self.user_info is None or self.user_info.get('error'):
             return
         # import game_id from url, cast into int, and get Game instance
         if await self.get_game() is False:
-            return
+            return self.close()
         # check if the player is in the game
         if await sync_to_async(self.is_player_in_game)() is False:
-            return
+            return self.close()
         # pick game_logic
         if (self.pick_game_logic()) is False:
-            return
+            return self.close()
         await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
         if self.player.player_index == 0:
@@ -98,8 +121,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def get_game(self):
 
-        from ..models import GameModel
-
         # get game_id fron url
         try:
             self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
@@ -132,6 +153,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+
         if hasattr(self, 'game_logic') and self.game_logic:
             current_player_index = self.player.player_index
             #logger.debug(f"unassigned player {self.player.player_index}")

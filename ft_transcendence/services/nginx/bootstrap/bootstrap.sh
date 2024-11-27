@@ -17,5 +17,5 @@ fi;
 
 #### EXECUTION #################################################
 
-fn_log_info "Transcendence started successfully !"
+(sleep 2 && fn_log_info "Transcendence started !") &
 nginx -c "/app/config/nginx.conf"

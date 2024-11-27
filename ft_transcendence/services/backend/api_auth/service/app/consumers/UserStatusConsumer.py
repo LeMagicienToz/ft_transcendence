@@ -1,13 +1,20 @@
+import django
+from os import environ
+environ.setdefault('DJANGO_SETTINGS_MODULE', 'service.settings')
+django.setup()
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
+from ..endpoints.endpoints_utils import utils_get_user
 from ..utils.redis_client import r
-import json
 
-
+import logging
+logger = logging.getLogger(__name__)
 
 class UserStatusConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+
         cookies = {}
         headers = dict(self.scope["headers"])
         if b"cookie" in headers:
@@ -36,6 +43,7 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
     #    await self.get_friends_status()
 
     async def disconnect(self, close_code):
+
        if hasattr(self, "user"):
             if hasattr(self, "group_name"):
                 await self.channel_layer.group_discard(
@@ -49,7 +57,7 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
         pass
 
     async def send(self, text_data):
-       pass
+        pass
 
     @sync_to_async
     def update_user_status(self, status):
@@ -95,5 +103,4 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
     @staticmethod
     @sync_to_async
     def sync_utils_get_user(token, refresh_token, token42):
-        from ..endpoints.endpoints_utils import utils_get_user
         return utils_get_user(token, refresh_token, token42)
