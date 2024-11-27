@@ -5,6 +5,8 @@ from django.core.asgi import get_asgi_application
 from os import environ
 
 environ.setdefault('DJANGO_SETTINGS_MODULE', 'service.settings')
+import django
+django.setup()
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

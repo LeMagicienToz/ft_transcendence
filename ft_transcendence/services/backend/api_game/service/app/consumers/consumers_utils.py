@@ -17,7 +17,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 50
+	REFRESH_PER_SEC = 20
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2

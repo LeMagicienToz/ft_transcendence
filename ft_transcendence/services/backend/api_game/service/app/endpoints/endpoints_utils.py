@@ -4,9 +4,13 @@ import requests
 from ..models import PlayerModel, GameModel, TournamentModel
 from django.utils import timezone
 
+import logging
+logger = logging.getLogger(__name__)
+
 def utils_get_user_info(token, token42):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
+
     # Use the appropriate token as a cookie
     if not token and not token42:
         return JsonResponse({'message': 'No authentication token received'}, status=401)
@@ -16,7 +20,7 @@ def utils_get_user_info(token, token42):
         cookies['token'] = token
     try:
         response = requests.get(
-            'http://auth:' + os.environ.get('T_PORT_INTERN_BACKEND') + '/api/auth/me',
+            'http://auth:' + os.environ.get('T_PORT_INTERN_BACKEND') + '/api/auth/me/',
             headers=headers,
             cookies=cookies
         )

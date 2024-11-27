@@ -11,10 +11,11 @@ then . "/app/bootstrap/functions.sh"
     #else fn_download "${T_SELF_BEAT}" "/app/filebeat" || exit 1; fi
 
     cd /app/service
-    npm config set fetch-retries 5
+    npm config set connect-timeout 600000
+    npm config set fetch-timeout 600000
+    npm config set fetch-retries 10
     npm config set fetch-retry-mintimeout 600000
     npm config set fetch-retry-maxtimeout 1200000
-    npm config set fetch-timeout 1800000
     npm install -g npm serve
     npm install
 
