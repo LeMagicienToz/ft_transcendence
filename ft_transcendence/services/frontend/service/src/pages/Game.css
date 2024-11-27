@@ -1,0 +1,6 @@
+.page#page-game > section.view {
+    height: 100%;
+    width: 100%;
+    align-content: center;
+    position: absolute;
+}

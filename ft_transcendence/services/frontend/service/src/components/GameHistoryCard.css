@@ -1,0 +1,78 @@
+tr.game-history-card {
+    min-height: 68px;
+    background-color: var(--color-secondary) !important;
+    cursor: default;
+}
+
+tr.game-history-card:hover {
+    background-color: var(--color-secondary_hover) !important;
+}
+
+tr.game-history-card > td.elem.loading  {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-content: center;
+    animation: fadeIn 300ms;
+    position: absolute;
+    z-index: 1;
+}
+
+tr.game-history-card> td.elem.loading > .loader {
+    margin: auto;
+}
+
+tr.game-history-card > td.elem > .status {
+    height: 8px;
+    width: 8px;
+    max-width: 8px;
+    margin: auto;
+    background-color: #505050;
+    border-radius: 50%;
+}
+
+tr.game-history-card > td.elem > .status.win {
+    background-color: var(--color-success) !important;
+}
+
+tr.game-history-card > td.elem > .status.lose {
+    background-color: var(--color-alert) !important;
+}
+
+tr.game-history-card > td.elem > .main {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+tr.game-history-card > td.elem > .sub {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+@media (max-width: 480px) {
+
+    tr.game-history-card > td.elem.duration {
+        display: none !important;
+    }
+}
+
+tr.game-history-card > td.elem.players {
+    min-width: 84px;
+}
+
+tr.game-history-card > td.elem.players > .list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+tr.game-history-card > td.elem.players > .list > .avatar {
+    height: 24px;
+    aspect-ratio: 1 / 1;
+    background-color: rgba(0, 0, 0, 0.1);
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    border-radius: 50%;
+}
