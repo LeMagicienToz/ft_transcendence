@@ -79,8 +79,6 @@ services:
     image: game:transcendance
     build: ./services/backend/api_game
     env_file: ./.env
-    volumes:
-      - ./services/backend/api_game:/app
     environment:
       - T_SELF_NAME=game
       - T_SELF_REDIS_ID=1
