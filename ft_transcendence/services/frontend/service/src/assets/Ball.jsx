@@ -20,7 +20,7 @@ const Ball = ({ position = [0, 0, 0], color = '#e48d2d'}) => {
             position={position}
             scale={[0.5, 0.5, 0.5]}
         >
-            <sphereGeometry args={[1, 8, 8]} />
+            <sphereGeometry args={[1, 16, 16]} />
             <meshStandardMaterial color={color} metalness={0} roughness={5} />
         </mesh>
     );
