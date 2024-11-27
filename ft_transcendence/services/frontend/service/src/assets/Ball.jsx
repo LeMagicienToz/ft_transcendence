@@ -9,7 +9,8 @@ const Ball = ({ position = [0, 0, 0], color = '#e48d2d'}) => {
 
     useFrame((state, delta) => {
         if (ref.current) {
-            ref.current.position.lerp(targetPos, 0.3 * delta);
+            //ref.current.position.lerp(targetPos, 0.3 * delta);
+            ref.current.position.copy(targetPos);
         }
     });
 
@@ -17,9 +18,9 @@ const Ball = ({ position = [0, 0, 0], color = '#e48d2d'}) => {
         <mesh
             ref={ref}
             position={position}
-            scale={[0.8, 0.8, 0.8]}
+            scale={[0.5, 0.5, 0.5]}
         >
-            <sphereGeometry args={[1, 32, 32]} />
+            <sphereGeometry args={[1, 8, 8]} />
             <meshStandardMaterial color={color} metalness={0} roughness={5} />
         </mesh>
     );

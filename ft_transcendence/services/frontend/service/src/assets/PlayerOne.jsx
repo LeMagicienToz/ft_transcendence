@@ -59,7 +59,8 @@ const PlayerOne = ({ position = [0, 0, 0], suitColor = "#ffffff", visColor = "#f
 
     useFrame((state, delta) => {
         if (ref.current) {
-            ref.current.position.lerp(targetPos, 0.3 * delta);
+            //ref.current.position.lerp(targetPos, 0.3 * delta);
+            ref.current.position.copy(targetPos);
         }
     });
 

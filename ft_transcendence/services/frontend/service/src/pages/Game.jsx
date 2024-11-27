@@ -30,36 +30,19 @@ const SockCreator = ({p1, gameid, setPlayerOnePosition, setPlayerTwoPosition, se
 				return ;
 			}
 			currentKeyPressedRef.current = event.key;
-			if (!p1) {
-				if (event.key === 'ArrowRight') {
-					sendMovement('right-on');
-				} else if (event.key === 'ArrowLeft') {
-					sendMovement('left-on');
-				}
-			} else {
-				if (event.key === 'ArrowRight') {
-					sendMovement('left-on');
-				} else if (event.key === 'ArrowLeft') {
-					sendMovement('right-on');
-				}
+			if (event.key === 'ArrowRight') {
+				sendMovement('left-on');
+			} else if (event.key === 'ArrowLeft') {
+				sendMovement('right-on');
 			}
 		};
 
 		const handleKeyUp = (event) => {
 			currentKeyPressedRef.current = null;
-			if (!p1) {
-				if (event.key === 'ArrowRight') {
-					sendMovement('right-off');
-				} else if (event.key === 'ArrowLeft') {
-					sendMovement('left-off');
-				}
-			}
-			else {
-				if (event.key === 'ArrowRight') {
-					sendMovement('left-off');
-				} else if (event.key === 'ArrowLeft') {
-					sendMovement('right-off');
-				}
+			if (event.key === 'ArrowRight') {
+				sendMovement('left-off');
+			} else if (event.key === 'ArrowLeft') {
+				sendMovement('right-off');
 			}
 		};
 
@@ -89,22 +72,23 @@ const SockCreator = ({p1, gameid, setPlayerOnePosition, setPlayerTwoPosition, se
 			if (data.game_data?.status) {
 				const gameStatus = data.game_data.status;
 
+				if (gameStatus === 'playing') {
+					const playerPositions = data.game_data.player_positions;
+					const ballPosition = data.game_data.ball_position;
+					if (playerPositions) {
+						// Met à jour les positions des joueurs et de la balle
+						setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.8, ballPosition[0] / 9.9 - 20.2 + 0.5]);
+						setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]);//21
+						setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2]);//7.4
+					}
+				}
+
 				if (gameStatus === 'finished') {
 					console.log('Game finished, closing WebSocket...');
 					socket.close();
 					return; // Sortir pour éviter toute gestion supplémentaire après la fermeture
 				}
 
-				if (gameStatus === 'playing') {
-					const playerPositions = data.game_data.player_positions;
-					const ballPosition = data.game_data.ball_position;
-					if (playerPositions) {
-						// Met à jour les positions des joueurs et de la balle
-						setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 1.1, ballPosition[0] / 9.9 - 20.2 + 0.5]);
-						setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]);//21
-						setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2]);//7.4
-					}
-				}
 			}
 		};
 
