@@ -12,7 +12,7 @@ EXPOSE      5000
 
 #### BUILDING ##################################################
 
-RUN         apt-get -y update && apt-get -y upgrade                             \
+RUN         apt-get -y update                                                   \
             && apt-get -y install curl ${CONFIG_INI_PKG}                        \
             && apt-get clean && rm -rf /var/lib/apt/lists/*
 

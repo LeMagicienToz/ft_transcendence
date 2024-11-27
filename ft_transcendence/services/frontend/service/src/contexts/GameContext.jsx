@@ -87,7 +87,7 @@ export const GameProvider = ({ children }) => {
             if (response.ok) {
                 const json = await response.json();
                 if (json?.success == true) {
-                    
+
                 }
             } else {
             }

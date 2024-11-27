@@ -30,7 +30,7 @@ const SockCreator = ({p1, gameid, setPlayerOnePosition, setPlayerTwoPosition, se
 				return ;
 			}
 			currentKeyPressedRef.current = event.key;
-			if (p1) {
+			if (!p1) {
 				if (event.key === 'ArrowRight') {
 					sendMovement('right-on');
 				} else if (event.key === 'ArrowLeft') {

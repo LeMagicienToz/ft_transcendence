@@ -415,7 +415,7 @@ def me_update_password(request):
 @twoFA_status_check
 def user(request, user_id):
 
-    friend = User.objects.filter(id=user_id).first()
+    user = User.objects.filter(id=user_id).first()
 
     if not user:
         return JsonResponse({'success': False, 'message': 'This user does not exist.'}, status=400)
