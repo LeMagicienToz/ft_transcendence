@@ -12,7 +12,7 @@ EXPOSE      8000 8001 8002 8003 8004 8005 8006
 
 #### BUILDING ##################################################
 
-RUN         apt-get -y update && apt-get -y upgrade                             \
+RUN         apt-get -y update                                                   \
             && apt-get -y install curl ${CONFIG_INI_PKG}                        \
             && apt-get clean && rm -rf /var/lib/apt/lists/*
 
