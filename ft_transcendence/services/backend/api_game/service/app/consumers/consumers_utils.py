@@ -2,6 +2,7 @@ from asgiref.sync import sync_to_async
 import json
 import asyncio
 from django.utils import timezone
+import random
 
 import logging
 logger = logging.getLogger('myapp')
@@ -41,8 +42,8 @@ class GameLogic():
 		self.game = consumer.game
 		# Paddle and ball speed
 		self.PADDLE_SPEED = 2
-		self.BALL_SPEED_X = 1.0 * self.game.ball_speed
-		self.BALL_SPEED_Y = 1.0 * self.game.ball_speed
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed
 		# Initialize positions and scores based on match type
 		self.game_data = {
 			"ball_position": [
@@ -280,5 +281,7 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed
 		await self.send_game_state()
 		#await asyncio.sleep(2)
