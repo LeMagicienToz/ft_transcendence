@@ -376,7 +376,7 @@ class GameUserHistoryView(APIView):
         except ValueError:
             return JsonResponse({'success': False, 'message': 'Invalid user_id. Must be an integer.'}, status=400)
         # Filter games where used_id is in
-        games = GameModel.objects.filter(players__user_id=user_id)#, status='finished')
+        games = GameModel.objects.filter(players__user_id=user_id, status='finished')
         game_details_list = []
         for game in games:
             players = game.players.all()
@@ -543,7 +543,7 @@ class TournamentCreateView(APIView):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'success': False, 'message': 'Invalid number of players'}, status=400)
-        
+
         try:
             ball_speed = float(request.data.get('ball_speed', 1.0))
             color_board = request.data.get('color_board', '#FFFFFF')
