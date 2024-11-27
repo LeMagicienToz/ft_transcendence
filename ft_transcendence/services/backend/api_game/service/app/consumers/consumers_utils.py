@@ -85,7 +85,7 @@ class GameLogic():
 			self.game.end_time = self.game_data['end_time']
 			# TODO make the player who is left as a winner
 			await sync_to_async(self.game.save)()
-			await self.send_game_state()
+		await self.send_game_state()
 
 	async def on_receiving_data(self, text_data):
 		data_json = json.loads(text_data)

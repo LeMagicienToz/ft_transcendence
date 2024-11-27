@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class GameConsumer(AsyncWebsocketConsumer):
-    
+
     user_info = None
     game_id = None
     game = None
@@ -61,8 +61,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.user_info = utils_get_user_info(token, token42)
 
         # check if user_info is caught
-        if self.user_info is None:
-            return self.close()
+        if self.user_info is None or self.user_info.get('error'):
+            return
         # import game_id from url, cast into int, and get Game instance
         if await self.get_game() is False:
             return self.close()
@@ -155,15 +155,24 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
 
         if hasattr(self, 'game_logic') and self.game_logic:
+            current_player_index = self.player.player_index
+            #logger.debug(f"unassigned player {self.player.player_index}")
             # when we have game_logic we know we have player look "connect()"
-            await sync_to_async(self.unassign_player_index)()
-            logger.debug("unassigned player")
-            if self.game.status == 'ready_to_play':
+            # await sync_to_async(self.unassign_player_index)()
+            if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
                 logger.debug("change of status")
-                self.game.status = 'waiting'
-                self.game_logic.game_data['status'] = 'waiting'
+                self.game.status = 'abandoned'
+                self.game_logic.game_data['status'] = 'abandoned'
                 await sync_to_async(self.game.save)()
                 await self.game_logic.send_game_state()
+            elif self.game_logic.game_data['status'] == 'playing':
+                if current_player_index == 1:
+                    the_other_player_index = '2'
+                else:
+                    the_other_player_index = '1'
+                self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
+                self.game_logic.game_data['status'] = "finished"
+                await self.finish_game()
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
@@ -187,32 +196,32 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
 
     async def game_onchange(self, event):
-
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
         self.game_logic.game_data = data_json.get("game_data")
         if self.game_logic.game_data['status'] == "finished":
-            self.game.status = "finished"
-            self.game_logic.game_data["end_time"] = timezone.now().isoformat()
-            self.game.end_time = self.game_logic.game_data["end_time"]
             if self.is_player_1():
-                await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
-                await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-                await sync_to_async(self.game.save)()
-                if self.game.tournament_id != 0:
-                    tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
-                    finished_games = await sync_to_async(tournament.games.filter)(status='finished')
-                    tournament_count = await sync_to_async(tournament.games.count)()
-                    finished_count = await sync_to_async(finished_games.count)()
-                    if finished_count == tournament_count:
-                        tournament.status = "finished"
-                        tournament.end_time = timezone.now().isoformat()
-                        await sync_to_async(tournament.save)()
-        # Convert str in int (because JSON gives only str)
-        # todo test without converting
-        #self.game_logic.game_data["player_positions"] = {int(key): value for key, value in self.game_logic.game_data["player_positions"].items()}
+                await self.finish_game()
         # Send game state by WebSocket
         await self.send(text_data=event["message"])
+
+    async def finish_game(self):
+        self.game.status = "finished"
+        self.game_logic.game_data["end_time"] = timezone.now().isoformat()
+        self.game.end_time = self.game_logic.game_data["end_time"]
+        logger.debug(f"score {self.game_logic.game_data['scores']}")
+        await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
+        await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
+        await sync_to_async(self.game.save)()
+        if self.game.tournament_id != 0:
+            tournament = await sync_to_async(Tournament.objects.get)(id=self.game.tournament_id)
+            finished_games = await sync_to_async(tournament.games.filter)(status='finished')
+            tournament_count = await sync_to_async(tournament.games.count)()
+            finished_count = await sync_to_async(finished_games.count)()
+            if finished_count == tournament_count:
+                tournament.status = "finished"
+                tournament.end_time = timezone.now().isoformat()
+                await sync_to_async(tournament.save)()
 
     def is_player_1(self):
         return self.player and self.player.player_index == 1
