@@ -99,14 +99,16 @@ def create_round_robin_matches(tournament):
                     user_name=player1.user_name,
                     score=0,
                     nickname=player1.nickname,
-                    player_index=player1.player_index
+                    player_index=player1.player_index,
+                    user_info=player1.user_info
                 )
                 player2_clone = PlayerModel.objects.create(
                     user_id=player2.user_id,
                     user_name=player2.user_name,
                     score=0,
                     nickname=player2.nickname,
-                    player_index=player2.player_index
+                    player_index=player2.player_index,
+                    user_info=player2.user_info
                 )
                 game.players.add(player1_clone, player2_clone)
                 games.append(game)
@@ -136,34 +138,38 @@ def create_round_robin_matches(tournament):
                     user_name=team1_player1.user_name,
                     score=0,
                     nickname=team1_player1.nickname,
-                    player_index=team1_player1.player_index
+                    player_index=team1_player1.player_index,
+                    user_info=team1_player1.user_info
                 )
                 t1p2_clone = PlayerModel.objects.create(
                     user_id=team1_player2.user_id,
                     user_name=team1_player2.user_name,
                     score=0,
                     nickname=team1_player2.nickname,
-                    player_index=team1_player2.player_index
+                    player_index=team1_player2.player_index,
+                    user_info=team1_player2.user_info
                 )
                 t2p1_clone = PlayerModel.objects.create(
                     user_id=team2_player1.user_id,
                     user_name=team2_player1.user_name,
                     score=0,
                     nickname=team2_player1.nickname,
-                    player_index=team2_player1.player_index
+                    player_index=team2_player1.player_index,
+                    user_info=team2_player1.user_info
                 )
                 t2p2_clone = PlayerModel.objects.create(
                     user_id=team2_player2.user_id,
                     user_name=team2_player2.user_name,
                     score=0,
                     nickname=team2_player2.nickname,
-                    player_index=team2_player2.player_index
+                    player_index=team2_player2.player_index,
+                    user_info=team2_player2.user_info
                 )
                 game.players.add(t1p1_clone, t1p2_clone, t2p1_clone, t2p2_clone)
                 games.append(game)
 
     # Ajoute tous les jeux au tournoi
     tournament.games.set(games)
-    tournament.status = 'playing'
-    tournament.start_time = timezone.now()
+    #tournament.status = 'playing'
+    #tournament.start_time = timezone.now()
     tournament.save()

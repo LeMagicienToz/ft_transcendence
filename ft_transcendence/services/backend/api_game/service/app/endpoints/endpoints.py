@@ -338,29 +338,30 @@ class GameJoinView(APIView):
             return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
         # get game from id
         game = get_object_or_404(GameModel, id=game_id)
+        # Check if player allready in game
+        if game.players.filter(user_id=player_user_id).exists():
+            return JsonResponse({'success': False, 'message': 'Player has already joined the game'}, status=400)
         # check if game is full
-        player_is_in_the_game = game.players.filter(user_id=player_user_id).exists()
-        if game.match_type == '1v1' and game.players.count() >= 2 and player_is_in_the_game == False:
+        if game.match_type == '1v1' and game.players.count() >= 2:
             return JsonResponse({'success': False, 'message': 'Game is already full'}, status=400)
-        elif game.match_type == '2v2' and game.players.count() >= 4 and player_is_in_the_game == False:
+        elif game.match_type == '2v2' and game.players.count() >= 4:
             return JsonResponse({'success': False, 'message': 'Game is already full'}, status=400)
         # Game must be waiting
         if game.status != 'waiting':
             return JsonResponse({'success': False, 'message': 'Game has already started or finished or is full'}, status=400)
-        # Check if player allready in game
-        if player_is_in_the_game == False:
-            # create Player
-            player = PlayerModel.objects.create(
-                user_id=player_user_id,
-                user_name=player_user_name,
-                score=0,
-                nickname=nickname,
-                player_index=0,
-                user_info=user_info,
-            )
-            # Assign new player
-            game.players.add(player)
-            game.save()
+
+        # create Player
+        player = PlayerModel.objects.create(
+            user_id=player_user_id,
+            user_name=player_user_name,
+            score=0,
+            nickname=nickname,
+            player_index=0,
+            user_info=user_info,
+        )
+        # Assign new player
+        game.players.add(player)
+        game.save()
         return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id}, status=201)
 
 class GameUserHistoryView(APIView):
@@ -478,24 +479,30 @@ class GameDeleteAllView(APIView):
 class TournamentCreateView(APIView):
     """
     Create a tourament
-    the request must be DELETE
+    the request must be POST
     body = {
-    'custom_name': type string,
-    'nickname': type string,
-    'match_type': '1v1' or '2v2',
-    'game_type': 'pong',
-    'score_to_win': type int,
-    'player_count': type int,
-    'ball_speed': type float,
-    'color_board': type string,
-    'color_ball': type string,
-    'color_wall': type string,
-    'color_paddle': type string,
+        'custom_name': type string,
+        'nickname': type string,
+        'match_type': '1v1' or '2v2',
+        'game_type': 'pong',
+        'score_to_win': type int,
+        'player_count': type int,
+        'ball_speed': type float,
+        'color_board': type string,
+        'color_ball': type string,
+        'color_wall': type string,
+        'color_paddle': type string,
     }
     cookie = {
-    'token': type string,
-    '42_access_token': type string,
+        'token': type string,
+        '42_access_token': type string,
     } One of the token must be valid
+
+    return {
+        "success": true,
+        "message": "Tournament created",
+        "game_id": 3 #first game to be played
+    }
     """
     def post(self, request):
         # get user_id and user_name from authentification app
@@ -518,15 +525,6 @@ class TournamentCreateView(APIView):
         # Data validation
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # create Player
-        player1 = PlayerModel.objects.create(
-            user_id=player1_user_id,
-            user_name=player1_user_name,
-            score=0,
-            nickname=nickname,
-            player_index=0,
-            user_info=user_info,
-        )
         # get game type (1 vs 1 or 2 vs 2)
         tourn_match_type = request.data.get('match_type')
         if tourn_match_type not in ['1v1', '2v2']:
@@ -543,9 +541,8 @@ class TournamentCreateView(APIView):
         except (ValueError, TypeError):
             score_to_win = 3
         # Get the number of players
-
+        player_count = int(request.data.get('player_count'))
         try:
-            player_count = int(request.data.get('player_count'))
             if player_count <= 1:
                 raise ValueError
             if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
@@ -580,8 +577,38 @@ class TournamentCreateView(APIView):
             creation_time=timezone.now(),
             status='waiting',
         )
-        tournament.players.add(player1)
-        return JsonResponse({'success': True, 'message': 'Tournament created', 'game_id': tournament.id}, status=200)
+
+        # create Player 1
+
+        for idx in range(player_count):
+            placeholder = tournament.get_placeholder_user_name(idx)
+            placeholder_user_id = tournament.get_placeholder_user_id(idx)
+            if (idx == 0):
+                player = PlayerModel.objects.create(
+                    user_id=player1_user_id,
+                    user_name=player1_user_name,
+                    score=0,
+                    nickname=nickname,
+                    player_index=0,
+                    user_info=user_info,
+                )
+            else:
+                player = PlayerModel.objects.create(
+                    user_id=placeholder_user_id,
+                    user_name=placeholder,
+                    score=0,
+                    nickname=placeholder,
+                    player_index=0,
+                )
+            tournament.players.add(player)
+        create_round_robin_matches(tournament)
+        tournament_data = tournament.to_array()
+        return JsonResponse({
+            'success': True,
+            'message': 'Tournament created',
+            'game_id': tournament_data.get('games')[0].get('id'),
+            'tournament': tournament_data,
+        }, status=200)
 
 class TournamentListView(APIView):
     """
@@ -746,7 +773,8 @@ class TournamentJoinView(APIView):
         # get tournament
         tournament = get_object_or_404(TournamentModel, id=tournament_id)
         # check if tournament is full
-        if tournament.players.count() >= tournament.player_count:
+        joined_players_count = tournament.get_joined_players_count() # need to find the number of players that are not iwth placeholders
+        if joined_players_count >= tournament.player_count:
             return JsonResponse({'success': False, 'message': 'Tournament is already full'}, status=400)
         # tournament must be waiting
         if tournament.status != 'waiting':
@@ -768,28 +796,28 @@ class TournamentJoinView(APIView):
         # Check if player allready in tournament
         if tournament.players.filter(user_id=player_user_id).exists():
             return JsonResponse({'success': False, 'message': 'Player has already joined the tournament'}, status=400)
-        # create Player
-        player = PlayerModel.objects.create(
-            user_id=player_user_id,
-            user_name=player_user_name,
-            score=0,
-            nickname=nickname,
-            player_index=0,
-            user_info=user_info,
-        )
-        # add the player
-        tournament.players.add(player)
-        tournament.save()
+        placeholder_player_user_id = tournament.get_placeholder_user_id(joined_players_count)
+        players_with_placeholder_user_id = PlayerModel.objects.filter(user_id=placeholder_player_user_id)
+        for player in players_with_placeholder_user_id:
+            player.user_id = player_user_id
+            player.user_name = player_user_name
+            player.nickname = player.nickname
+            player.user_info = user_info
+            player.save()
+        joined_players_count += 1
         # Check if the number of players matches the required player_count
-        player_count = tournament.players.count()
-        if player_count == tournament.player_count:
+        if joined_players_count == tournament.player_count:
             # Change tournament status to playing
             tournament.status = 'Tournament_full'
             tournament.start_time = timezone.now()
             tournament.save()
-            # create the list of games
-            create_round_robin_matches(tournament)
-        return JsonResponse({'success': True, 'message': 'Player joined the tournament', 'tournament_id': tournament.id, 'player_id': player.id}, status=201)
+        return JsonResponse({
+            'success': True,
+            'message': 'Player joined the tournament',
+            'tournament_id': tournament.id,
+            'player_id': player.user_id,
+            'tournament': tournament.to_array()
+        }, status=201)
 
 class TournamentDeleteView(APIView):
     """
