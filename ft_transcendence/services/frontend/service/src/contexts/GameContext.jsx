@@ -67,7 +67,7 @@ export const GameProvider = ({ children }) => {
         setIsLoading(true);
         setGameId(id);
         fetchGameData(id);
-        setCameraPosition(index == 1 ? [0, 5, -15] : [0, 5, +15]);
+        setCameraPosition(index === 1 ? [0, 5, -15] : [0, 5, +15]);
         setIsLoading(false);
     };
 
