@@ -2,7 +2,7 @@ from django.urls import path
 from .endpoints import endpoints
 
 from .endpoints.endpoints import (
-    GameCreateView, GameListView, GameDetailView, GameJoinView, GameUserHistoryView, GameDeleteView,
+    GameCreateView, ListView, GameDetailView, GameJoinView, GameUserHistoryView, GameDeleteView,
 	TournamentCreateView, TournamentDetailView, TournamentJoinView,
 	TournamentDeleteView, TournamentListView
 )
@@ -16,7 +16,7 @@ urlpatterns = [
     path('status/',                         endpoints.status, name='status'),
 
     path("create/", GameCreateView.as_view(), name="game-create"),     # Create game
-    path("list/", GameListView.as_view(), name="game-list"),                # List all games
+    path("list/", ListView.as_view(), name="list"),                # List all games
     path("game-details/<int:game_id>/", GameDetailView.as_view(), name="game-detail"),   # Detail one game
     path("join/<int:game_id>/", GameJoinView.as_view(), name="game-join"),  # Join a game
     path("user-history/<int:user_id>/", GameUserHistoryView.as_view(), name="user-histoty"),   # list of games played by user_id

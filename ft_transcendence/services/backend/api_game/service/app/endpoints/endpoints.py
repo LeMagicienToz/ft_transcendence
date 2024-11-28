@@ -41,16 +41,16 @@ class GameCreateView(APIView):
     'game_type': 'pong',
     'score_to_win': type int,
     'tournament_id': type int, 0 if not in a tournament,
-    'ball_speed': type float,
-    'color_board': type string,
-    'color_ball': type string,
-    'color_wall': type string,
-    'color_paddle': type string,
+    'ball_speed': type float, (optional)
+    'color_board': type string, (optional)
+    'color_ball': type string, (optional)
+    'color_wall': type string, (optional)
+    'color_paddle': type string, (optional)
     }
     cookie = {
     'token': type string,
     '42_access_token': type string,
-    }
+    } one token must be valid
     """
     def post(self, request):
         # get user_id and user_name from authentification app
@@ -136,7 +136,7 @@ class GameCreateView(APIView):
             return JsonResponse({'success': False, 'message': 'Error creating game: {}'.format(str(e))}, status=500)
         return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id}, status=200)
 
-class GameListView(APIView):
+class ListView(APIView):
     """
     Return a single 'games' array containing both games and tournaments in a single response.
     The request must be GET.
@@ -439,6 +439,10 @@ class GameDeleteView(APIView):
     Delete a game
     the request must be DELETE
     body = {}
+    cookie = {
+    'token': type string,
+    '42_access_token': type string,
+    } one token must be valid
     the game_id is in the url
     """
     def delete(self, request, game_id):
@@ -482,11 +486,16 @@ class TournamentCreateView(APIView):
     'game_type': 'pong',
     'score_to_win': type int,
     'player_count': type int,
+    'ball_speed': type float,
+    'color_board': type string,
+    'color_ball': type string,
+    'color_wall': type string,
+    'color_paddle': type string,
     }
     cookie = {
     'token': type string,
     '42_access_token': type string,
-    }
+    } One of the token must be valid
     """
     def post(self, request):
         # get user_id and user_name from authentification app
@@ -787,6 +796,10 @@ class TournamentDeleteView(APIView):
     Delete a tournament
     the request must be DELETE
     body = {}
+    cookie = {
+    'token': type string,
+    '42_access_token': type string,
+    } one token must be valid
     the tournament_id is in the url
     """
     def delete(self, request, tournament_id):

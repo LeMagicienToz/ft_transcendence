@@ -30,9 +30,9 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from ..endpoints.endpoints_utils import utils_get_user_info
 
+        """
         cookies = {}
         headers = dict(self.scope["headers"])
-        """
         if b"cookie" in headers:
             cookie_header = headers[b"cookie"].decode()
             cookie_list = cookie_header.split(';')
@@ -44,8 +44,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 value = key_value_pair[1]
                 cookies[key] = value
         else :
-            #await self.close()
-            return self.close()
+            await self.close()
+            return
         """
         cookies = {}
         headers = dict(self.scope["headers"])
@@ -53,6 +53,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             cookie_header = headers[b"cookie"].decode()
             cookies = {key: value for key, value in [cookie.split('=') for cookie in cookie_header.split('; ')]}
         else :
+            # refuse the connection (close the websocket)
             await self.close()
             return
 
@@ -62,16 +63,20 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         # check if user_info is caught
         if self.user_info is None or self.user_info.get('error'):
+            await self.close()
             return
         # import game_id from url, cast into int, and get Game instance
         if await self.get_game() is False:
-            return self.close()
+            await self.close()
+            return
         # check if the player is in the game
         if await sync_to_async(self.is_player_in_game)() is False:
-            return self.close()
+            await self.close()
+            return
         # pick game_logic
         if (self.pick_game_logic()) is False:
-            return self.close()
+            await self.close()
+            return
         await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
         if self.player.player_index == 0:
