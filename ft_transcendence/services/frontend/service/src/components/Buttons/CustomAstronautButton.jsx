@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 
 import BaseButton from './BaseButton';
 import AstronautWindow from '../Windows/AstronautWindow';
@@ -16,8 +16,9 @@ const CustomAstronautButton = ({ id, text = '', className = '', disabled = false
             />
             <BaseButton
                 onClick={() => setAstronautWindowState(true)}
-                text='Customize'
                 className='secondary'
+                text='Customize'
+                icon='bi bi-droplet-half'
                 disabled={disabled}
             />
         </div>

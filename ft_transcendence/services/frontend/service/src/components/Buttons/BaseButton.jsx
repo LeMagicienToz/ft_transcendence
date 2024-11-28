@@ -4,7 +4,7 @@ import Loader from '../Loader';
 
 import './BaseButton.css';
 
-const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '', text, disabled = false, children }) => {
+const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '', text, icon, disabled = false, children }) => {
     return (
         <div className={`button ${className}`} >
             {isLoading && (
@@ -17,7 +17,14 @@ const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '',
                 id={id}
                 disabled={disabled}
             >
-                {text || children}
+                {text || icon ? (
+                    <>
+                        {icon && <i className={icon} ></i>}
+                        {text && <span class="text">{text}</span>}
+                    </>
+                ) : (
+                    children
+                )}
             </button>
         </div>
     );

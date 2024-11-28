@@ -47,8 +47,9 @@ const PlayersList = () => {
                 <BaseButton
                     onClick={refresh}
                     className='secondary round refresh'
-                    text='⟳'
-                />
+                >
+                    <i class="bi bi-arrow-clockwise"></i>
+                </BaseButton>
             </header>
             <div className={`content col`} >
                 {users

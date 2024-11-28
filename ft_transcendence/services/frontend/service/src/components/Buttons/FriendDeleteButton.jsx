@@ -6,7 +6,7 @@ import BaseButton from './BaseButton';
 
 import './FriendDeleteButton.css';
 
-const FriendDeleteButton = ({ onSuccess = () => {}, onFailure = () => {}, userId, id, className = 'secondary', text = '-', disabled = false }) => {
+const FriendDeleteButton = ({ onSuccess = () => {}, onFailure = () => {}, userId, id, className = 'secondary', disabled = false }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const { addToast } = useToast();
@@ -43,7 +43,7 @@ const FriendDeleteButton = ({ onSuccess = () => {}, onFailure = () => {}, userId
             onClick={handleClick}
             id={id}
             className={className}
-            text={text}
+            icon='bi bi-dash-circle'
             disabled={disabled}
             isLoading={isLoading}
         />

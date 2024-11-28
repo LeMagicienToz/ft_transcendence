@@ -67,7 +67,6 @@
 
 .player-card:hover > .button.friend {
     display: block;
-    aspect-ratio: 1 / 1;
     max-height: 100%;
 }
 

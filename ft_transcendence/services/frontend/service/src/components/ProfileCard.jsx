@@ -42,8 +42,9 @@ const ProfileCard = () => {
             <BaseButton
                 onClick={() => setAccountWindowState(true)}
                 className='secondary account'
-                text='⚙'
-            />
+            >
+                <i class="bi bi-gear-fill"></i>
+            </BaseButton>
         </div>
     );
 }

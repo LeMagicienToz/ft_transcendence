@@ -14,6 +14,8 @@ import Home from './pages/Home';
 import Index from "./pages/Index";
 import Game from './pages/Game';
 
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 const App = () => {
     return (
         <UserProvider>

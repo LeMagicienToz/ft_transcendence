@@ -18,7 +18,13 @@ const BurgerMenu = () => {
 
     return (
         <div className='burger'>
-            <BaseButton onClick={toggleMenu} text={isOpen ? '⛌' : '☰'} className='burger secondary round' />
+            <BaseButton onClick={toggleMenu} text={isOpen ? '⛌' : '☰'} className='burger secondary round' >
+                {isOpen ? (
+                    <i class="bi bi-x-lg"></i>
+                ) : (
+                    <i class="bi bi-list"></i>
+                )}
+            </BaseButton>
             <nav className={`menu col ${isOpen ? 'open' : ''}`}>
                 <ProfileCard />
                 <div>
