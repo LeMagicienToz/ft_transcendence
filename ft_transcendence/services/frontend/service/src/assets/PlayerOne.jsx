@@ -36,9 +36,9 @@ const PlayerOne = ({ position = [0, 0, 0], suitColor = "#ffffff", visColor = "#f
     useEffect(() => {
         const applyMaterial = (child) => {
             if (child.isMesh && child.material instanceof THREE.MeshStandardMaterial) {
-                if (child.name.includes('Cube002')) {
+                if (child.name.includes('Suit')) {
                     child.material.color.setRGB(...hexToRgb(suitColor));
-                } else if (child.name.includes('Cube001')) {
+                } else if (child.name.includes('Visor')) {
                     if (texture) {
                         child.material.map = texture;
                         child.material.needsUpdate = true;
@@ -46,10 +46,12 @@ const PlayerOne = ({ position = [0, 0, 0], suitColor = "#ffffff", visColor = "#f
                         child.material.roughness = 1;
                     }
                     child.material.color.setRGB(...hexToRgb(visColor));
-                } else if (child.name.includes('Cube004') || child.name.includes('Torus')) {
+                } else if (child.name.includes('Rings1') || child.name.includes('Rings2')) {
                     child.material.color.setRGB(...hexToRgb(ringsColor));
-                } else if (child.name.includes('Cube007')) {
+                } else if (child.name.includes('Backpack')) {
                     child.material.color.setRGB(...hexToRgb(bpColor));
+                } else if (child.name.includes('Paddle')) {
+                    child.material.color.setRGB(...hexToRgb(paddleColor));
                 }
             }
         };
