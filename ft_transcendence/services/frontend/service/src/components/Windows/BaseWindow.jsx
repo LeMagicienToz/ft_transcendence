@@ -38,7 +38,9 @@ const BaseWindow = ({ onClose = () => {}, isOpen = false, title = '', height = '
                     </div>
                     <div className={`col control`}>
                         <div className={`row`}>
-                            <BaseButton onClick={onClose} className={`secondary round`} text='⛌' />
+                            <BaseButton onClick={onClose} className={`secondary round`} >
+                                <i className="bi bi-x-lg"></i>
+                            </BaseButton>
                         </div>
                     </div>
                 </header>

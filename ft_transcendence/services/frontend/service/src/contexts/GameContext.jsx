@@ -24,6 +24,9 @@ export const GameProvider = ({ children }) => {
 
     const [players, setPlayers] = useState({});
 
+    const [lCommand, setLCommand] = useState('left-on');
+    const [rCommand, setRCommand] = useState('right-on');
+
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [PlayerOneNickname, setPlayerOneNickname] = useState('');
 
@@ -47,7 +50,6 @@ export const GameProvider = ({ children }) => {
                     setGameName(json.game.custom_name);
                     setIsTournament(json.game.tournament_id > 0 ? true : false);
                     setPlayers(json.game.players);
-                    setIsPlayerOne(json.game.players.length == 1 ? true : false);
                     setFloorColor(json.game.color_board);
                     setWallColor(json.game.color_wall);
                     setBallColor(json.game.color_ball);
@@ -67,7 +69,10 @@ export const GameProvider = ({ children }) => {
         setIsLoading(true);
         setGameId(id);
         fetchGameData(id);
-        setCameraPosition(index == 1 ? [0, 5, -15] : [0, 5, +15]);
+        setIsPlayerOne(index == 1 ? true : false);
+        setCameraPosition(index === 1 ? [0, 5, -15] : [0, 5, +15]);
+        setLCommand(index == 1 ? 'left-on' : 'right-on');
+        setRCommand(index == 1 ? 'right-on' : 'left-on');
         setIsLoading(false);
     };
 
@@ -84,6 +89,8 @@ export const GameProvider = ({ children }) => {
         setPlayerOnePosition([0, -1, -20.2]);
         setPlayerTwoPosition([0, -1, +20.2]);
         setPlayers({});
+        setLCommand('left-on');
+        setRCommand('right-on');
         setPlayerOneScore(0);
         setPlayerOneNickname('');
         setPlayerTwoScore(0);
@@ -102,6 +109,10 @@ export const GameProvider = ({ children }) => {
             isTournament, setIsTournament,
 
             players, setPlayers,
+
+            lCommand, setLCommand,
+            rCommand, setRCommand,
+
             isPlayerOne, setIsPlayerOne,
             isPlayerTwo, setIsPlayerTwo,
             isStarted, setIsStarted,

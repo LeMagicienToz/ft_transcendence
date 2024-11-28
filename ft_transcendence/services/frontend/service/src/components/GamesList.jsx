@@ -44,8 +44,14 @@ const GamesList = () => {
                     </div>
                 <div className={`col control`}>
                     <div className={`row`}>
-                        <BaseButton onClick={refresh} className={`secondary refresh`} text='⟳' />
-                        <BaseButton onClick={() => setCreateGameWindowState(true)} className={`primary shine create`} text='Create' />
+                        <BaseButton onClick={refresh} className={`secondary refresh`} >
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </BaseButton>
+                        <BaseButton
+                            onClick={() => setCreateGameWindowState(true)}
+                            className={`primary shine create`}
+                            text='Create'
+                        />
                     </div>
                 </div>
             </header>

@@ -41,7 +41,7 @@ const LoginForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled = fals
                 >
                     <BaseInput id='sername' name='username' label='Username' placeholder='Username' />
                     <PasswordInput id='password' name='password' label='Password' placeholder='••••••••' />
-                    <BaseButton text='Login' className='primary shine' />
+                    <BaseButton className='primary shine' text='Login' />
                 </BaseForm>
             ) : (
                 <TwoFactorForm />

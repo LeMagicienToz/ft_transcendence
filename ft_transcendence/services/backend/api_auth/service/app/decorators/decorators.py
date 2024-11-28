@@ -22,15 +22,15 @@ def jwt_required(view_func):
                 request.user = User.objects.get(id=payload['user_id'])
                 redis_token = r.get(f'user_{request.user.id}_token')
                 if redis_token and redis_token.decode() != access_token:
-                    return JsonResponse({'success': False, 'error': 'Access token révoqué'}, status=401)
+                    return JsonResponse({'success': False, 'message': 'Access token révoqué'}, status=401)
                 return view_func(request, *args, **kwargs)
 
             except ObjectDoesNotExist:
-                return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+                return JsonResponse({'success': False, 'message': 'Utilisateur non trouvé'}, status=404)
             except jwt.ExpiredSignatureError:
                 pass
             except jwt.InvalidTokenError:
-                return JsonResponse({'success': False, 'error': 'Access token invalide'}, status=400)
+                return JsonResponse({'success': False, 'message': 'Access token invalide'}, status=400)
 
         if refresh_token:
             try:
@@ -38,19 +38,19 @@ def jwt_required(view_func):
                 request.user = User.objects.get(id=refresh_payload['user_id'])
                 redis_refresh_token = r.get(f'user_{request.user.id}_refresh_token')
                 if redis_refresh_token and redis_refresh_token.decode() != refresh_token:
-                    return JsonResponse({'success': False, 'error': 'Refresh token révoqué'}, status=401)
+                    return JsonResponse({'success': False, 'message': 'Refresh token révoqué'}, status=401)
                 new_access_token = jwt.encode({'user_id': refresh_payload['user_id'], 'iat': int(time.time()), 'exp': int(time.time()) + 60 * 5}, settings.SECRET_KEY, algorithm='HS256')
                 response = view_func(request, *args, **kwargs)
                 response.set_cookie('token', new_access_token, max_age=60*5, httponly=True, secure=True, samesite='Strict')
                 return response
 
             except ObjectDoesNotExist:
-                return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+                return JsonResponse({'success': False, 'message': 'Utilisateur non trouvé'}, status=404)
             except jwt.ExpiredSignatureError:
-                return JsonResponse({'success': False, 'error': 'Refresh token expiré'}, status=401)
+                return JsonResponse({'success': False, 'message': 'Refresh token expiré'}, status=401)
             except jwt.InvalidTokenError:
-                return JsonResponse({'success': False, 'error': 'Refresh token invalide'}, status=400)
-        return JsonResponse({'success': False, 'error': 'Accès refusé : jetons manquants ou expirés'}, status=401)
+                return JsonResponse({'success': False, 'message': 'Refresh token invalide'}, status=400)
+        return JsonResponse({'success': False, 'message': 'Accès refusé : jetons manquants ou expirés'}, status=401)
 
     return _wrapped_view
 
@@ -64,28 +64,29 @@ def jwt_42_required(view_func):
             token_data = response.json()
             expires_in_seconds = token_data.get('expires_in_seconds')
 
-            intra_id = r.get(f'42_access_token_{access_token}')
-
             if expires_in_seconds is None or expires_in_seconds <= 0:
-                return JsonResponse({'success': False, 'error': 'Access token 42 expire'}, status=400)
+                return JsonResponse({'success': False, 'message': 'Access token 42 expired.'}, status=400)
+
+            intra_id = r.get(f'42_access_token_{access_token}')
 
             if not intra_id:
                 user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
                 user_data = user_info_response.json()
                 intra_id = user_data.get('id')
-                user = User.objects.filter(custom_user__intra_id=intra_id).first()
+                r.set(f'42_access_token_{access_token}', intra_id, ex=expires_in_seconds)
+                #user = User.objects.filter(custom_user__intra_id=intra_id).first()
 
             user = User.objects.filter(custom_user__intra_id=intra_id).first()
 
             if not user:
-                return JsonResponse({'success': False, 'error': 'Utilisateur non trouvé'}, status=404)
+                return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
             redis_42_access_token = r.get(f'user_{user.custom_user.intra_id}_42_access_token')
             if redis_42_access_token and redis_42_access_token.decode() != access_token:
-                return JsonResponse({'success': False, 'error': 'Access token 42 revoqué'}, status=401)
+                return JsonResponse({'success': False, 'message': 'Access token 42 revoked.'}, status=401)
             request.user = user
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'error': 'Access token 42 manquant'}, status=400)
+            return JsonResponse({'success': False, 'message': 'Access token 42 missing.'}, status=400)
 
     return _wrapped_view
 
@@ -107,6 +108,6 @@ def twoFA_status_check(view_func):
         twoFA_verified = r.get(f'user_{user.id}_twoFA_verified')
         if custom_user.twoFA_enabled and twoFA_verified and twoFA_verified.decode() == 'True':
             return view_func(request, *args, **kwargs)
-        return JsonResponse({'success': False, 'error': '2FA non verifié'}, status=401)
+        return JsonResponse({'success': False, 'message': '2FA non verifié'}, status=401)
 
     return _wrapped_view

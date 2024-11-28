@@ -101,9 +101,10 @@ class GameLogic():
 				opposite_key = "right" if key == "left" else "left"
 				self.game_data['keys'][player_index][opposite_key] = False
 				#logger.debug(f"Key {key} set to True for Player {player_index}")
-			elif direction.endswith("-off"):
-				key = direction.split("-")[0]
-				self.game_data['keys'][player_index][key] = False
+			elif direction == "off":
+				#key = direction.split("-")[0]
+				self.game_data['keys'][player_index]['left'] = False
+				self.game_data['keys'][player_index]['right'] = False
 				#logger.debug(f"Key {key} set to False for Player {player_index}")
 			await self.update_player_positions()
 			await self.send_game_state()

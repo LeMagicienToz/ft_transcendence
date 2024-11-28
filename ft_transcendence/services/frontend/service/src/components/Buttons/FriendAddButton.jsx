@@ -6,7 +6,7 @@ import BaseButton from './BaseButton';
 
 import './FriendAddButton.css';
 
-const FriendAddbutton = ({ onSuccess = () => {}, onFailure = () => {}, userId, id, className = 'secondary', text = '+', disabled = false }) => {
+const FriendAddbutton = ({ onSuccess = () => {}, onFailure = () => {}, userId, id, className = 'secondary', disabled = false }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const { addToast } = useToast();
@@ -43,7 +43,7 @@ const FriendAddbutton = ({ onSuccess = () => {}, onFailure = () => {}, userId, i
             onClick={handleClick}
             id={id}
             className={className}
-            text={text}
+            icon='bi bi-plus-circle'
             disabled={disabled}
             isLoading={isLoading}
         />

@@ -120,6 +120,32 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'detailed',
+        },
+    },
+    'loggers': {
+        'daphne': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+    'formatters': {
+        'detailed': {
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+}
+
+
+
 # Logging
 
 # LOGGING = {

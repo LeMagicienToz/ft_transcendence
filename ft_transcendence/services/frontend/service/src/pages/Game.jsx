@@ -13,7 +13,7 @@ import './Game.css';
 const Game = () => {
 
 	const { addToast } = useToast();
-	const { isLoading, gameId, setCameraPosition, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, isTournament, isPlayerOne, clear } = useContext(GameContext);
+	const { isLoading, gameId, setCameraPosition, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, isTournament, isPlayerOne, clear } = useContext(GameContext);
 
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
@@ -25,16 +25,18 @@ const Game = () => {
 
 	useEffect(() => {
 		const handleKeyDown = (event) => {
-			if (!currentKeyPressedRef.current && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+			if (!currentKeyPressedRef.current) {
 				currentKeyPressedRef.current = event.key;
-				sendMovement(event.key === 'ArrowRight' ? 'left-on' : 'right-on');
+				if (event.key === 'ArrowLeft') sendMovement(lCommand);
+				else if (event.key === 'ArrowRight') sendMovement(rCommand);
 			}
 		};
 
 		const handleKeyUp = (event) => {
 			if (currentKeyPressedRef.current === event.key) {
 				currentKeyPressedRef.current = null;
-				sendMovement(event.key === 'ArrowRight' ? 'left-off' : 'right-off');
+				if (event.key === 'ArrowRight' || event.key === 'ArrowLeft')
+					sendMovement('off');
 			}
 		};
 

@@ -86,8 +86,9 @@ const ProfileStats = ({ targetId = 0 }) => {
                 <BaseButton
                     onClick={refresh}
                     className='secondary round refresh'
-                    text='⟳'
-                />
+                >
+                    <i class="bi bi-arrow-clockwise"></i>
+                </BaseButton>
             </header>
             <div className={`col content`}>
                 {history.length > 0 &&
