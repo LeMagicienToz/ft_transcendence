@@ -18,38 +18,22 @@ export const GameProvider = ({ children }) => {
 
     const [cameraPosition, setCameraPosition] = useState([0, 0, 0]);
 
-    const [ballPosition, setBallPosition] = useState([0, 0.8, 0]);
+    const [ballPosition, setBallPosition] = useState([0, 0.6, 0]);
     const [playerOnePosition, setPlayerOnePosition] = useState([0, -1, -20.2]);
     const [playerTwoPosition, setPlayerTwoPosition] = useState([0, -1, +20.2]);
 
+    const [players, setPlayers] = useState({});
+
     const [playerOneScore, setPlayerOneScore] = useState(0);
-    const [PlayerOneNickname, setPlayerOneNickanem] = useState('');
+    const [PlayerOneNickname, setPlayerOneNickname] = useState('');
 
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
-    const [PlayerTwoNickname, setPlayerTwoNickanem] = useState('');
+    const [PlayerTwoNickname, setPlayerTwoNickname] = useState('');
 
     const [ballColor, setBallColor] = useState('#e48d2d');
     const [wallColor, setWallColor] = useState('#e48d2d');
     const [floorColor, setFloorColor] = useState('#ffffff');
     const [paddleColor, setPaddleColor] = useState('#ffffff');
-
-    const [p1ProfilePicture, setP1ProfilePicture] = useState('');
-    const [p1SuitColor, setP1SuitColor] = useState('#ffffff');
-    const [p1RingsColor, setP1RingsColor] = useState('#ffffff');
-    const [p1VisColor, setP1VisColor] = useState('#ffffff');
-    const [p1BpColor, setP1BpColor] = useState('#ffffff');
-    const [p1Flatness, setP1Flatness] = useState(2.8);
-    const [p1HorizontalPosition, setP1HorizontalPosition] = useState(7.5);
-    const [p1VerticalPosition, setP1VerticalPosition] = useState(0.0);
-
-    const [p2ProfilePicture, setP2ProfilePicture] = useState('');
-    const [p2SuitColor, setP2SuitColor] = useState('#ffffff');
-    const [p2RingsColor, setP2RingsColor] = useState('#ffffff');
-    const [p2VisColor, setP2VisColor] = useState('#ffffff');
-    const [p2BpColor, setP2BpColor] = useState('#ffffff');
-    const [p2Flatness, setP2Flatness] = useState(2.8);
-    const [p2HorizontalPosition, setP2HorizontalPosition] = useState(7.5);
-    const [p2VerticalPosition, setP2VerticalPosition] = useState(0.0);
 
     const fetchGameData = async (gameId) => {
         try {
@@ -60,13 +44,10 @@ export const GameProvider = ({ children }) => {
             if (response.ok) {
                 const json = await response.json();
                 if (json?.success == true) {
-                    setGameName(json.game.game_custom_name);
+                    setGameName(json.game.custom_name);
                     setIsTournament(json.game.tournament_id > 0 ? true : false);
-                    setPlayersCount(json.game.players.length);
-                    setIsPlayerOne((playersCount == 0 || json.game.players[0].player_index == 0) ? true : false);
-                    setIsPlayerTwo(!isPlayerOne);
-                    setCameraPosition(isPlayerOne ? [0, 5, -15] : [0, 5, +15]);
-
+                    setPlayers(json.game.players);
+                    setIsPlayerOne(json.game.players.length == 1 ? true : false);
                     setFloorColor(json.game.color_board);
                     setWallColor(json.game.color_wall);
                     setBallColor(json.game.color_ball);
@@ -78,51 +59,49 @@ export const GameProvider = ({ children }) => {
         }
     };
 
-    const fetchPlayerData = async () => {
-        try {
-            const response = await fetch(`/api/auth/user/${gameId}`, {
-            method: 'GET',
-            credentials: 'include'
-            });
-            if (response.ok) {
-                const json = await response.json();
-                if (json?.success == true) {
+    const update = async () => {
+        fetchGameData(gameId);
+    }
 
-                }
-            } else {
-            }
-        } catch (error) {
-        }
-    };
-
-
-    const create = (id) => {
+    const join = async (id, index) => {
         setIsLoading(true);
         setGameId(id);
         fetchGameData(id);
-        setCameraPosition([0, 5, -15]);
+        setCameraPosition(index == 1 ? [0, 5, -15] : [0, 5, +15]);
         setIsLoading(false);
-    };
-
-    const join = (id) => {
-        setIsLoading(true);
-        setGameId(id);
-        fetchGameData(id);
-        setCameraPosition([0, 5, +15]);
-        setIsLoading(false);
-    };
-
-    const start = async () => {
     };
 
     const clear = async () => {
+        setGameId(0);
+        setGameName('');
+        setIsTournament(false);
+        setPlayersCount(0);
         setIsPlayerOne(false);
+        setIsPlayerTwo(false);
+        setIsStarted(false);
+        setCameraPosition([0, 0, 0]);
+        setBallPosition([0, 0.6, 0]);
+        setPlayerOnePosition([0, -1, -20.2]);
+        setPlayerTwoPosition([0, -1, +20.2]);
+        setPlayers({});
+        setPlayerOneScore(0);
+        setPlayerOneNickname('');
+        setPlayerTwoScore(0);
+        setPlayerTwoNickname('');
+        setFloorColor('#ffffff');
+        setWallColor('#ffffff');
+        setBallColor('#ffffff');
+        setPaddleColor('#ffffff');
     };
 
     return (
         <GameContext.Provider value={{
             isLoading, setIsLoading,
             gameId, setGameId,
+
+            isTournament, setIsTournament,
+
+            players, setPlayers,
             isPlayerOne, setIsPlayerOne,
             isPlayerTwo, setIsPlayerTwo,
             isStarted, setIsStarted,
@@ -136,26 +115,8 @@ export const GameProvider = ({ children }) => {
             floorColor, setFloorColor,
             paddleColor, setPaddleColor,
 
-            p1ProfilePicture, setP1ProfilePicture,
-            p1SuitColor, setP1SuitColor,
-            p1RingsColor, setP1RingsColor,
-            p1VisColor, setP1VisColor,
-            p1BpColor, setP1BpColor,
-            p1Flatness, setP1Flatness,
-            p1HorizontalPosition, setP1HorizontalPosition,
-            p1VerticalPosition, setP1VerticalPosition,
-
-            p2ProfilePicture, setP2ProfilePicture,
-            p2SuitColor, setP2SuitColor,
-            p2RingsColor, setP2RingsColor,
-            p2VisColor, setP2VisColor,
-            p2BpColor, setP2BpColor,
-            p2Flatness, setP2Flatness,
-            p2HorizontalPosition, setP2HorizontalPosition,
-            p2VerticalPosition, setP2VerticalPosition,
-
-            create, join,
-            start, clear
+            join,
+            clear
         }} >
             {children}
         </GameContext.Provider>

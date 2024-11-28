@@ -39,7 +39,7 @@ def utils_get_user_info(token, token42):
 def create_round_robin_matches(tournament):
     # Récupère les informations nécessaires du tournoi
     players = list(tournament.players.all())
-    game_custom_name = "Game in " + tournament.tournament_custom_name
+    custom_name = "Game in " + tournament.custom_name
     tournament_id = tournament.id
     score_to_win = tournament.score_to_win
     match_type = tournament.match_type
@@ -80,7 +80,7 @@ def create_round_robin_matches(tournament):
         for block in organized_matches:
             for player1, player2 in block:
                 game = GameModel(
-                    game_custom_name=game_custom_name,
+                    custom_name=custom_name,
                     match_type=match_type,
                     game_type=game_type,
                     score_to_win=score_to_win,
@@ -122,7 +122,7 @@ def create_round_robin_matches(tournament):
         for block in organized_matches:
             for (team1_player1, team1_player2), (team2_player1, team2_player2) in block:
                 game = GameModel(
-                    game_custom_name=game_custom_name,
+                    custom_name=custom_name,
                     match_type=match_type,
                     game_type=game_type,
                     score_to_win=score_to_win,

@@ -17,7 +17,7 @@ const GameHistoryList = ({ targetId = 0 }) => {
     /*const fakeHistory = [ //CHANGE
         {
             'id': 1,
-            'game_custom_name': 'Game 1',
+            'custom_name': 'Game 1',
             'status': 'completed',
             'game_type': 'Tournament',
             'match_type': '1v1',
@@ -46,7 +46,7 @@ const GameHistoryList = ({ targetId = 0 }) => {
         },
         {
             'id': 2,
-            'game_custom_name': 'Game 2',
+            'custom_name': 'Game 2',
             'status': 'completed',
             'game_type': 'Normal',
             'match_type': '2v2',

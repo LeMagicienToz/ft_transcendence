@@ -19,7 +19,7 @@ import './GameCreateForm.css'
 const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled = false }) => {
     const [isTournament, setIsTournament] = useState(false);
 
-    const { create } = useContext(GameContext);
+    const { join } = useContext(GameContext);
     const { username } = useContext(UserContext);
     const { addToast } = useToast();
 
@@ -40,7 +40,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
             addToast('An error has occured.', 'failure', 10000)
             valid = false;
         }
-        if (!/^[A-Za-z0-9 _.+'"$@)(\][)-]{4,24}$/.test(form.game_custom_name.value)) {
+        if (!/^[A-Za-z0-9 _.+'"$@)(\][)-]{4,24}$/.test(form.custom_name.value)) {
             addToast('Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.', 'failure', 10000)
             valid = false;
         }
@@ -55,7 +55,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
     }
 
     const handleSuccess = (json) => {
-        create(json.game_id);
+        join(json.game_id, 1);
         navigate('/game');
     }
 
@@ -73,7 +73,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
                 <Tab name='Game' >
                     <SelectInput id='game_type' name='game_type' label='Game' options={[{label: 'Pong', value: 'pong'}]} value='pong' />
                     <div className={`row`} >
-                        <BaseInput id='game_custom_name' name='game_custom_name' label='Room' value={`${username}'s game`} regex={/^[A-Za-z0-9_.+'"$@)(\][)-]{5,24}$/} />
+                        <BaseInput id='custom_name' name='custom_name' label='Room' value={`${username}'s game`} regex={/^[A-Za-z0-9_.+'"$@)(\][)-]{5,24}$/} />
                         <BaseInput id='nickname' name='nickname' label='Nickname' value={username} regex={/^[A-Za-z0-9_-]{5,24}$/} />
                     </div>
                     <div className={`row`} >

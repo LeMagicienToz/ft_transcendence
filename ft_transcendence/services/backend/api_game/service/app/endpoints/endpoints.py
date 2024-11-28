@@ -35,7 +35,7 @@ class GameCreateView(APIView):
     Create a new Game object
     the request must be POST
     body = {
-    'game_custom_name': type string,
+    'custom_name': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
@@ -69,7 +69,7 @@ class GameCreateView(APIView):
         except Exception as e:
             return JsonResponse({'success': False,'message': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-        game_custom_name = request.data.get('game_custom_name')
+        custom_name = request.data.get('custom_name')
         nickname = request.data.get('nickname', player1_user_name)
         # Data validation
         if not player1_user_id or not player1_user_name:
@@ -118,7 +118,7 @@ class GameCreateView(APIView):
         # Game init with pLayer 1
         try:
             game = GameModel.objects.create(
-                game_custom_name=game_custom_name,
+                custom_name=custom_name,
                 match_type=match_type,
                 game_type=game_type,
                 score_to_win=score_to_win,
@@ -134,7 +134,7 @@ class GameCreateView(APIView):
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'success': False, 'message': 'Error creating game: {}'.format(str(e))}, status=500)
-        return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id}, status=201)
+        return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id}, status=200)
 
 class GameListView(APIView):
     """
@@ -147,7 +147,7 @@ class GameListView(APIView):
         games_data = [
             {
                 'id': game.id,
-                'custom_name': game.game_custom_name,
+                'custom_name': game.custom_name,
                 'status': game.status,
                 'game_type': game.game_type,
                 'match_type': game.match_type,
@@ -179,7 +179,7 @@ class GameListView(APIView):
         tournaments_data = [
             {
                 "id": tournament.id,
-                "custom_name": tournament.tournament_custom_name,
+                "custom_name": tournament.custom_name,
                 "match_type": tournament.match_type,
                 "game_type": tournament.game_type,
                 "player_count": tournament.player_count,
@@ -202,7 +202,7 @@ class GameListView(APIView):
                 "games": [
                     {
                         "id": game.id,
-                        "game_custom_name": game.game_custom_name,
+                        "custom_name": game.custom_name,
                         "match_type": game.match_type,
                         "game_type": game.game_type,
                         "score_to_win": game.score_to_win,
@@ -248,7 +248,7 @@ class GameListView(APIView):
 #         games_data = [
 #             {
 #                 'id': game.id,
-#                 'game_custom_name': game.game_custom_name,
+#                 'custom_name': game.custom_name,
 #                 'status': game.status,
 #                 'game_type': game.game_type,
 #                 'match_type': game.match_type,
@@ -281,7 +281,7 @@ class GameDetailView(APIView):
         game = get_object_or_404(GameModel, id=game_id)
         game_details = {
             'game_id': game.id,
-            'game_custom_name': game.game_custom_name,
+            'custom_name': game.custom_name,
             'status': game.status,
             'game_type': game.game_type,
             'match_type': game.match_type,
@@ -406,7 +406,7 @@ class GameUserHistoryView(APIView):
             # Build the game details
             game_details = {
                 'id': game.id,
-                'game_custom_name': game.game_custom_name,
+                'custom_name': game.custom_name,
                 'status': game.status,
                 'game_type': game.game_type,
                 'match_type': game.match_type,
@@ -476,7 +476,7 @@ class TournamentCreateView(APIView):
     Create a tourament
     the request must be DELETE
     body = {
-    'game_custom_name': type string,
+    'custom_name': type string,
     'nickname': type string,
     'match_type': '1v1' or '2v2',
     'game_type': 'pong',
@@ -504,7 +504,7 @@ class TournamentCreateView(APIView):
             return JsonResponse({'success': False, 'message': f'Missing key in user_info: {str(e)}'}, status=400)
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An unexpected error occurred: {str(e)}'}, status=500)
-        tournament_custom_name = request.data.get('game_custom_name')
+        custom_name = request.data.get('custom_name')
         nickname = request.data.get('nickname', player1_user_name)
         # Data validation
         if not player1_user_id or not player1_user_name:
@@ -558,7 +558,7 @@ class TournamentCreateView(APIView):
 
         # create tournament
         tournament = TournamentModel.objects.create(
-            tournament_custom_name=tournament_custom_name,
+            custom_name=custom_name,
             match_type=tourn_match_type,
             game_type=tourn_game_type,
             score_to_win=score_to_win,
@@ -572,7 +572,7 @@ class TournamentCreateView(APIView):
             status='waiting',
         )
         tournament.players.add(player1)
-        return JsonResponse({'success': True, 'message': 'Tournament created', 'tournament_id': tournament.id}, status=201)
+        return JsonResponse({'success': True, 'message': 'Tournament created', 'game_id': tournament.id}, status=200)
 
 class TournamentListView(APIView):
     """
@@ -598,7 +598,7 @@ class TournamentListView(APIView):
             games = [
                 {
                     "id": game.id,
-                    "game_custom_name": game.game_custom_name,
+                    "custom_name": game.custom_name,
                     "match_type": game.match_type,
                     "game_type": game.game_type,
                     "score_to_win": game.score_to_win,
@@ -628,7 +628,7 @@ class TournamentListView(APIView):
             ]
             tournament_data = {
                 "id": tournament.id,
-                "tournament_custom_name": tournament.tournament_custom_name,
+                "custom_name": tournament.custom_name,
                 "match_type": tournament.match_type,
                 "game_type": tournament.game_type,
                 "player_count": tournament.player_count,
@@ -671,7 +671,7 @@ class TournamentDetailView(APIView):
         games = [
             {
                 "id": game.id,
-                "game_custom_name": game.game_custom_name,
+                "custom_name": game.custom_name,
                 "match_type": game.match_type,
                 "game_type": game.game_type,
                 "score_to_win": game.score_to_win,
@@ -701,7 +701,7 @@ class TournamentDetailView(APIView):
         ]
         tournament_data = {
             "id": tournament.id,
-            "tournament_custom_name": tournament.tournament_custom_name,
+            "custom_name": tournament.custom_name,
             "match_type": tournament.match_type,
             "game_type": tournament.game_type,
             "player_count": tournament.player_count,

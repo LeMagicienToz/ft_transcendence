@@ -11,9 +11,7 @@ import PlayerTwo from '../assets/PlayerTwo';
 
 const GameScene = () => {
 
-    const { cameraPosition, ballPosition, playerOnePosition, playerTwoPosition, paddleColor, ballColor, wallColor, floorColor,
-            p1SuitColor, p1VisColor, p1RingsColor, p1BpColor, p1Flatness, p1HorizontalPosition, p1VerticalPosition, p1ProfilePicture,
-            p2SuitColor, p2VisColor, p2RingsColor, p2BpColor, p2Flatness, p2HorizontalPosition, p2VerticalPosition, p2ProfilePicture,} = useContext(GameContext);
+    const { cameraPosition, ballPosition, playerOnePosition, playerTwoPosition, paddleColor, ballColor, wallColor, floorColor, players} = useContext(GameContext);
 
     return (
         <Canvas style={{ touchAction: 'none' }} camera={{ position: cameraPosition }} >
@@ -30,27 +28,27 @@ const GameScene = () => {
                 />
                 <PlayerOne
                     position={playerOnePosition}
-                    suitColor={p1SuitColor}
-                    visColor={p1VisColor}
-                    ringsColor={p1RingsColor}
-                    bpColor={p1BpColor}
+                    suitColor={players[0]?.user_info.suitColor}
+                    visColor={players[0]?.user_info.visColor}
+                    ringsColor={players[0]?.user_info.ringsColor}
+                    bpColor={players[0]?.user_info.bpColor}
                     paddleColor={paddleColor}
-                    flatness={p1Flatness}
-                    horizontalPosition={p1HorizontalPosition}
-                    verticalPosition={p1VerticalPosition}
-                    visTexture={p1ProfilePicture}
+                    flatness={players[0]?.user_info.flatness}
+                    horizontalPosition={players[0]?.user_info.horizontalPosition}
+                    verticalPosition={players[0]?.user_info.verticalPosition}
+                    visTexture={players[0]?.user_info.profile_picture_url}
                 />
                 <PlayerTwo
                     position={playerTwoPosition}
-                    suitColor={p2SuitColor}
-                    visColor={p2VisColor}
-                    ringsColor={p2RingsColor}
-                    bpColor={p2BpColor}
+                    suitColor={players[1]?.user_info.suitColor}
+                    visColor={players[1]?.user_info.visColor}
+                    ringsColor={players[1]?.user_info.ringsColor}
+                    bpColor={players[1]?.user_info.bpColor}
                     paddleColor={paddleColor}
-                    flatness={p2Flatness}
-                    horizontalPosition={p2HorizontalPosition}
-                    verticalPosition={p2VerticalPosition}
-                    visTexture={p2ProfilePicture}
+                    flatness={players[1]?.user_info.flatness}
+                    horizontalPosition={players[1]?.user_info.horizontalPosition}
+                    verticalPosition={players[1]?.user_info.verticalPosition}
+                    visTexture={players[1]?.user_info.profile_picture_url}
                 />
             </Stage>
         </Canvas>

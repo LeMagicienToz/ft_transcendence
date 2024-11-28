@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name='GameModel',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('game_custom_name', models.CharField(default='game_custom_name', max_length=30)),
+                ('custom_name', models.CharField(default='custom_name', max_length=30)),
                 ('score_to_win', models.IntegerField(default=3)),
                 ('match_type', models.CharField(choices=[('1v1', '1 vs 1'), ('2v2', '2 vs 2')], default='1v1', max_length=10)),
                 ('game_type', models.CharField(choices=[('pong', 'Pong'), ('snake', 'Snake')], default='pong', max_length=20)),
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             name='TournamentModel',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tournament_custom_name', models.CharField(default='tournament_custom_name', max_length=30)),
+                ('custom_name', models.CharField(default='custom_name', max_length=30)),
                 ('score_to_win', models.IntegerField(default=3)),
                 ('player_count', models.IntegerField(default=0)),
                 ('match_type', models.CharField(choices=[('1v1', '1 vs 1'), ('2v2', '2 vs 2')], default='1v1', max_length=10)),

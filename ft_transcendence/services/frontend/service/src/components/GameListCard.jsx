@@ -1,33 +1,11 @@
 import React, { useContext, useState } from 'react';
 
-import { UserContext } from '../contexts/UserContext';
-
-import './GameListCard.css';
 import GameJoinWindow from './Windows/GameJoinWindow'
 
+import './GameListCard.css';
+
 const GameListCard = ({ game = {} }) => {
-    const [isLoading, setIsLoading] = useState(false);
     const [joinGameWindowState, setJoinGameWindowState] = useState(false);
-
-    const { username } = useContext(UserContext);
-
-    const handleClick = async () => {
-        setIsLoading(true);
-        /*try {
-            const response = await fetch(
-                `${game?.tournament_id === 0 ? `/api/game/join${game?.tournament_id}/` : `/api/game/tournament/join${game?.tournament_id}/`}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ nickname: player?.user_id }),
-                credentials: 'include'
-            });
-            const json = await response.json();
-            if (response.ok) {
-                return { ...player, ...json };
-            }
-        } catch (error) {}*/
-        setIsLoading(false);
-    };
 
     return (
         <>

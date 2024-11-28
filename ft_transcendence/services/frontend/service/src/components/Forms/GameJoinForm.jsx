@@ -33,7 +33,7 @@ const GameJoinForm = ({ onSuccess = () => {}, onFailure = () => {}, game = {}, d
     }
 
     const handleSuccess = (json) => {
-        join(json.game_id);
+        join(json.game_id, 1);
         navigate('/game');
     }
 

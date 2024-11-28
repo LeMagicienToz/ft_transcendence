@@ -11,7 +11,7 @@ class PlayerModel(models.Model):
 
 class GameModel(models.Model):
 
-    game_custom_name = models.CharField(max_length=30, default="game_custom_name")
+    custom_name = models.CharField(max_length=30, default="custom_name")
     score_to_win = models.IntegerField(default=3)
     players = models.ManyToManyField(PlayerModel, related_name="games")
     match_type = models.CharField(
@@ -86,7 +86,7 @@ class GameModel(models.Model):
 
 class TournamentModel(models.Model):
 
-    tournament_custom_name = models.CharField(max_length=30, default="tournament_custom_name")
+    custom_name = models.CharField(max_length=30, default="custom_name")
     score_to_win = models.IntegerField(default=3)
     player_count = models.IntegerField(default = 0)
     players = models.ManyToManyField(PlayerModel, related_name="tournaments")

@@ -214,7 +214,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
         await sync_to_async(self.game.save)()
         if self.game.tournament_id != 0:
-            tournament = await sync_to_async(Tournament.objects.get)(id=self.game.tournament_id)
+            tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
             finished_games = await sync_to_async(tournament.games.filter)(status='finished')
             tournament_count = await sync_to_async(tournament.games.count)()
             finished_count = await sync_to_async(finished_games.count)()
