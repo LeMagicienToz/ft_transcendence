@@ -1,9 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Stage } from '@react-three/drei';
 
 import { GameContext } from '../contexts/GameContext';
 
+import Camera from './Camera';
 import Ball from '../assets/Ball';
 import Board from '../assets/Board';
 import PlayerOne from '../assets/PlayerOne';
@@ -14,7 +15,8 @@ const GameScene = () => {
     const { cameraPosition, ballPosition, playerOnePosition, playerTwoPosition, paddleColor, ballColor, wallColor, floorColor, players} = useContext(GameContext);
 
     return (
-        <Canvas style={{ touchAction: 'none' }} camera={{ position: cameraPosition }} >
+        <Canvas style={{ touchAction: 'none' }} >
+            <Camera position={cameraPosition} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 5, 5]} />
                 <Stage contactShadow shadows adjustCamera intensity={1} preset="rembrandt" environment="forest">

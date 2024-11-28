@@ -204,7 +204,7 @@ def callback42(request):
 
         if user.custom_user.twoFA_enabled:
             utils_send_twoFA_code(user)
-        response = redirect(f'/home')
+        response = redirect('/home')
         response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict')
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id)

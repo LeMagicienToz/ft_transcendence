@@ -68,7 +68,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             return self.close()
         # check if the player is in the game
         if await sync_to_async(self.is_player_in_game)() is False:
-            logger.error("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             return self.close()
         # pick game_logic
         if (self.pick_game_logic()) is False:

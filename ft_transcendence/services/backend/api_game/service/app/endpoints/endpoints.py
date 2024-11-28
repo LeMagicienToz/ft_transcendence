@@ -106,10 +106,10 @@ class GameCreateView(APIView):
         # Get game customization parameters
         try:
             ball_speed = float(request.data.get('ball_speed', 1.0))
-            color_board = request.data.get('color_board', '#FFFFFF')
-            color_ball = request.data.get('color_ball', '#E48D2D')
-            color_wall = request.data.get('color_wall', '#E48D2D')
-            color_paddle = request.data.get('color_paddle', '#FFFFFF')
+            color_board = request.data.get('color_board', '#000000')
+            color_ball = request.data.get('color_ball', '#e48d2d')
+            color_wall = request.data.get('color_wall', '#e48d2d')
+            color_paddle = request.data.get('color_paddle', '#ffffff')
         except ValueError as e:
             return JsonResponse({'error': f'Invalid value for customization parameter: {str(e)}'}, status=400)
         # Validate customization parameters
@@ -546,10 +546,10 @@ class TournamentCreateView(APIView):
 
         try:
             ball_speed = float(request.data.get('ball_speed', 1.0))
-            color_board = request.data.get('color_board', '#FFFFFF')
-            color_ball = request.data.get('color_ball', '#E48D2D')
-            color_wall = request.data.get('color_wall', '#E48D2D')
-            color_paddle = request.data.get('color_paddle', '#FFFFFF')
+            color_board = request.data.get('color_board', '#000000')
+            color_ball = request.data.get('color_ball', '#e48d2d')
+            color_wall = request.data.get('color_wall', '#e48d2d')
+            color_paddle = request.data.get('color_paddle', '#ffffff')
         except ValueError as e:
             return JsonResponse({'success': False, 'message': f'Invalid value for customization parameter: {str(e)}'}, status=400)
         # Validate customization parameters

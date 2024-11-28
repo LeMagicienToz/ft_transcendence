@@ -13,7 +13,7 @@ import './Game.css';
 const Game = () => {
 
 	const { addToast } = useToast();
-	const { isLoading, gameId, setCameraPosition, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, isTournament, isPlayerOne, clear } = useContext(GameContext);
+	const { isLoading, gameId, isTournament, playerIndex, setCameraPosition, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, clear } = useContext(GameContext);
 
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
@@ -35,8 +35,7 @@ const Game = () => {
 		const handleKeyUp = (event) => {
 			if (currentKeyPressedRef.current === event.key) {
 				currentKeyPressedRef.current = null;
-				if (event.key === 'ArrowRight' || event.key === 'ArrowLeft')
-					sendMovement('off');
+				sendMovement('off');
 			}
 		};
 
@@ -69,12 +68,26 @@ const Game = () => {
 
 			switch (data.game_data.status) {
 				case 'playing':
-					setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.6, ballPosition[0] / 9.9 - 20.2 + 0.5]);
-					setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]); //21
-					setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2]); //7.4
+					//setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.6, ballPosition[0] / 9.9 - 20.2 + 0.5]);
+					//setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]); //21
+					//setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2]); //7.4
+					setBallPosition(prev => {
+						const newPosition = [ballPosition[1] / 9.9 - 15.2 + 0.5, 0.6, ballPosition[0] / 9.9 - 20.2 + 0.5];
+						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
+					});
+					setPlayerOnePosition(prev => {
+						const newPosition = [playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2];
+						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
+					});
+					setPlayerTwoPosition(prev => {
+						const newPosition = [playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2];
+						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
+					});
 					break;
 				case 'ready_to_play':
-					console.log('ready', isTournament);
+					setTimeout(() => {
+						setCameraPosition(playerIndex == 1 ? [0, 10, -35] : [0, 10, +35]);
+					}, 1000);
 					break;
 				case 'finished':
 					socket.close();

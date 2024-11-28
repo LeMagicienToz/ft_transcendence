@@ -9,10 +9,8 @@ export const GameProvider = ({ children }) => {
     const [gameName, setGameName] = useState('');
     const [isTournament, setIsTournament] = useState(false);
 
+    const [playerIndex, setPlayerIndex] = useState(1);
     const [playersCount, setPlayersCount] = useState(0);
-
-    const [isPlayerOne, setIsPlayerOne] = useState(false);
-    const [isPlayerTwo, setIsPlayerTwo] = useState(false);
 
     const [isStarted, setIsStarted] = useState(false);
 
@@ -24,8 +22,8 @@ export const GameProvider = ({ children }) => {
 
     const [players, setPlayers] = useState({});
 
-    const [lCommand, setLCommand] = useState('left-on');
-    const [rCommand, setRCommand] = useState('right-on');
+    const [lCommand, setLCommand] = useState('left');
+    const [rCommand, setRCommand] = useState('right');
 
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [PlayerOneNickname, setPlayerOneNickname] = useState('');
@@ -67,12 +65,12 @@ export const GameProvider = ({ children }) => {
 
     const join = async (id, index) => {
         setIsLoading(true);
+        setPlayerIndex(index);
+        setCameraPosition(index == 1 ? [35, 10, 0] : [-35, 10, 0]);
         setGameId(id);
-        fetchGameData(id);
-        setIsPlayerOne(index == 1 ? true : false);
-        setCameraPosition(index === 1 ? [0, 5, -15] : [0, 5, +15]);
-        setLCommand(index == 1 ? 'left-on' : 'right-on');
-        setRCommand(index == 1 ? 'right-on' : 'left-on');
+        setLCommand(index == 1 ? 'left' : 'right');
+        setRCommand(index == 1 ? 'right' : 'left');
+        await fetchGameData(id);
         setIsLoading(false);
     };
 
@@ -80,9 +78,8 @@ export const GameProvider = ({ children }) => {
         setGameId(0);
         setGameName('');
         setIsTournament(false);
+        setPlayerIndex(1);
         setPlayersCount(0);
-        setIsPlayerOne(false);
-        setIsPlayerTwo(false);
         setIsStarted(false);
         setCameraPosition([0, 0, 0]);
         setBallPosition([0, 0.6, 0]);
@@ -108,13 +105,14 @@ export const GameProvider = ({ children }) => {
 
             isTournament, setIsTournament,
 
+            playerIndex, setPlayerIndex,
+            playersCount, setPlayersCount,
+
             players, setPlayers,
 
             lCommand, setLCommand,
             rCommand, setRCommand,
 
-            isPlayerOne, setIsPlayerOne,
-            isPlayerTwo, setIsPlayerTwo,
             isStarted, setIsStarted,
             cameraPosition, setCameraPosition,
             ballPosition, setBallPosition,
@@ -126,8 +124,7 @@ export const GameProvider = ({ children }) => {
             floorColor, setFloorColor,
             paddleColor, setPaddleColor,
 
-            join,
-            clear
+            join, clear
         }} >
             {children}
         </GameContext.Provider>

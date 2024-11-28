@@ -7,10 +7,9 @@ const Ball = ({ position = [0, 0, 0], color = '#e48d2d'}) => {
     const ref = useRef();
     const targetPos = new THREE.Vector3(...position);
 
-    useFrame((state, delta) => {
+    useFrame(() => {
         if (ref.current) {
-            //ref.current.position.lerp(targetPos, 0.3 * delta);
-            ref.current.position.copy(targetPos);
+            ref.current.position.lerp(targetPos, 0.5);
         }
     });
 

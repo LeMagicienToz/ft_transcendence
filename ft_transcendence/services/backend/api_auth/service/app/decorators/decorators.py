@@ -73,7 +73,6 @@ def jwt_42_required(view_func):
                 user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
                 user_data = user_info_response.json()
                 intra_id = user_data.get('id')
-                r.set(f'42_access_token_{access_token}', intra_id, ex=expires_in_seconds)
                 #user = User.objects.filter(custom_user__intra_id=intra_id).first()
 
             user = User.objects.filter(custom_user__intra_id=intra_id).first()
