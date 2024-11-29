@@ -610,8 +610,8 @@ class TournamentCreateView(APIView):
         except (ValueError, TypeError):
             score_to_win = 3
         # Get the number of players
-        player_count = int(request.data.get('player_count'))
         try:
+            player_count = int(request.data.get('player_count'))
             if player_count <= 1:
                 raise ValueError
             if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
@@ -666,7 +666,7 @@ class TournamentCreateView(APIView):
                     user_id=placeholder_user_id,
                     user_name=placeholder,
                     score=0,
-                    nickname=placeholder,
+                    nickname='...',
                     player_index=0,
                 )
             tournament.players.add(player)
@@ -871,7 +871,7 @@ class TournamentJoinView(APIView):
         for player in players_with_placeholder_user_id:
             player.user_id = player_user_id
             player.user_name = player_user_name
-            player.nickname = player.nickname
+            player.nickname = nickname
             player.user_info = user_info
             player.save()
         joined_players_count += 1
@@ -887,7 +887,7 @@ class TournamentJoinView(APIView):
             'tournament_id': tournament.id,
             'player_id': player.user_id,
             'tournament': tournament.to_array()
-        }, status=201)
+        }, status=200)
         #return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id}, status=200)
 
 class TournamentDeleteView(APIView):
