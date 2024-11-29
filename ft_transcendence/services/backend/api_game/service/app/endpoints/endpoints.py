@@ -143,6 +143,108 @@ class ListView(APIView):
     """
     def get(self, request):
         # Récupération des données des jeux
+        games = GameModel.objects.filter(tournament_id=0, status='waiting')
+        games_data = [
+            {
+                'id': game.id,
+                'custom_name': game.custom_name,
+                'status': game.status,
+                'game_type': game.game_type,
+                'match_type': game.match_type,
+                'score_to_win': game.score_to_win,
+                'tournament_id': game.tournament_id,
+                'ball_speed': game.ball_speed,
+                'color_board': game.color_board,
+                'color_ball': game.color_ball,
+                'color_wall': game.color_wall,
+                'color_paddle': game.color_paddle,
+                'creation_time': game.creation_time,
+                'start_time': game.start_time,
+                'end_time': game.end_time,
+                'type': 'game',
+                'players': [
+                    {
+                        'user_id': player.user_id,
+                        'user_name': player.user_name,
+                        'score': player.score,
+                        'nickname': player.nickname,
+                        'player_index': player.player_index,
+                        'user_info': player.user_info,
+                    } for player in game.players.all()
+                ]
+            } for game in games
+        ]
+
+        tournaments = TournamentModel.objects.filter(status='waiting')
+        tournaments_data = [
+            {
+                "id": tournament.id,
+                "custom_name": tournament.custom_name,
+                "match_type": tournament.match_type,
+                "game_type": tournament.game_type,
+                "player_count": tournament.player_count,
+                "score_to_win": tournament.score_to_win,
+                "status": tournament.status,
+                "creation_time": tournament.creation_time,
+                "start_time": tournament.start_time,
+                "end_time": tournament.end_time,
+                "type": 'tournament',
+                "players": [
+                    {
+                        "user_id": player.user_id,
+                        "user_name": player.user_name,
+                        "score": player.score,
+                        "nickname": player.nickname,
+                        "player_index": player.player_index
+                    }
+                    for player in tournament.players.all()
+                ],
+                "games": [
+                    {
+                        "id": game.id,
+                        "custom_name": game.custom_name,
+                        "match_type": game.match_type,
+                        "game_type": game.game_type,
+                        "score_to_win": game.score_to_win,
+                        "tournament_id": game.tournament_id,
+                        "status": game.status,
+                        "creation_time": game.creation_time,
+                        "start_time": game.start_time,
+                        "end_time": game.end_time,
+                        "players": [
+                            {
+                                "user_id": player.user_id,
+                                "user_name": player.user_name,
+                                "score": player.score,
+                                "nickname": player.nickname,
+                                "player_index": player.player_index
+                            }
+                            for player in game.players.all()
+                        ]
+                    }
+                    for game in tournament.games.all()
+                ]
+            }
+            for tournament in tournaments
+        ]
+
+        combined_data = games_data + tournaments_data
+
+        response_data = {
+            'success': True,
+            'games': combined_data
+        }
+
+        return JsonResponse(response_data, safe=False)
+
+# TODO remove before push
+class ListAllView(APIView):
+    """
+    Return a single 'games' array containing both games and tournaments in a single response.
+    The request must be GET.
+    """
+    def get(self, request):
+        # Récupération des données des jeux
         games = GameModel.objects.filter(tournament_id=0)
         games_data = [
             {
@@ -577,6 +679,7 @@ class TournamentCreateView(APIView):
             'tournament': tournament_data,
         }, status=200)
 
+# TODO remove fefore push
 class TournamentListView(APIView):
     """
     Return the list of the tournaments
