@@ -884,6 +884,7 @@ class TournamentJoinView(APIView):
         return JsonResponse({
             'success': True,
             'message': 'Player joined the tournament',
+            'game_id': tournament.id,
             'tournament_id': tournament.id,
             'player_id': player.user_id,
             'tournament': tournament.to_array()

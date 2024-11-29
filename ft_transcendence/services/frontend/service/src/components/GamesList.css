@@ -42,6 +42,14 @@
     flex: none;
 }
 
+@media (max-width: 380px) {
+
+    .games-list > header.row > .col.control .button.refresh
+    {
+        display: none !important;
+    }
+}
+
 .games-list > .col.content
 {
     height: 100%;

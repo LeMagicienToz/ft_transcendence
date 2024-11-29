@@ -61,7 +61,7 @@ export const GameProvider = ({ children }) => {
     const join = async (id, index) => {
         setIsLoading(true);
         setPlayerIndex(index);
-        setCameraPosition(index == 1 ? [0, 10, -35] : [0, 10, +35]);
+        setCameraPosition(index == 1 ? [0, 10, -40] : [0, 10, +40]);
         setGameId(id);
         setLCommand(index == 1 ? 'left' : 'right');
         setRCommand(index == 1 ? 'right' : 'left');
