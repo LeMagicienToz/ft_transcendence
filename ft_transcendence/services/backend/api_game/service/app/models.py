@@ -93,6 +93,12 @@ class GameModel(models.Model):
             return True
         return False
 
+    def is_tournament_full(self):
+        if self.tournament_id == 0:
+            return True
+        tournament = TournamentModel.objects.get(id=self.tournament_id)
+        return tournament.get_joined_players_count() == tournament.player_count
+
     def update_player_two_score(self, score):
         # Loop through all players in the game
         players = self.players.all()
