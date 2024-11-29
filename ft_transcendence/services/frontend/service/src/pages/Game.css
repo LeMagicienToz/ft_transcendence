@@ -4,3 +4,30 @@
     align-content: center;
     position: absolute;
 }
+
+.page#page-game > section.view > .score {
+    top: 24px;
+    left: 24px;
+    height: 80px;
+    width: 360px;
+    background-color: var(--color-background-d);
+    border-radius: var(--default-radius);
+    position: absolute;
+    z-index: 1;
+}
+
+@media (max-width: 820px) {
+
+    .page#page-game > section.view > .score {
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+    }
+}
+
+.page#page-game > section.view > .announce {
+    top: 25%;
+    align-self: center;
+    position: absolute;
+}

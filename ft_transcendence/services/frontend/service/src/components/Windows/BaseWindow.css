@@ -30,7 +30,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px) {
 
     .window-container > .window {
         top: 0;
@@ -76,7 +76,7 @@
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px) {
 
     .window-container > .window > .row.action {
         flex-direction: column-reverse !important;

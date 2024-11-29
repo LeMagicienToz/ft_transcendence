@@ -1,0 +1,43 @@
+.game-score {
+    height: 100%;
+    width: 100%;
+    padding: 16px 20px;
+    color: var(--color-input-text);
+}
+
+.game-score > .player.row {
+    border-radius: 50%;
+}
+
+.game-score > .player.row > .avatar {
+    height: 40px;
+    aspect-ratio: 1 / 1;
+    background-color: rgba(0, 0, 0, 0.1);
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    border-radius: 50%;
+}
+
+.game-score > .player.row > .info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.game-score > .player.two.row {
+    margin-left: auto;
+}
+
+.game-score > .player.two.row > .info {
+    align-items: end;
+}
+
+.game-score > .player.row > .info > .main {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.game-score > .player.row > .info > .sub {
+    font-size: 12px;
+}

@@ -40,16 +40,24 @@ tr.game-history-card > td.elem > .status.lose {
 }
 
 tr.game-history-card > td.elem > .main {
+    max-width: 100%;
     font-size: 14px;
     line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 tr.game-history-card > td.elem > .sub {
+    max-width: 100%;
     font-size: 12px;
     line-height: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px) {
 
     tr.game-history-card > td.elem.duration {
         display: none !important;

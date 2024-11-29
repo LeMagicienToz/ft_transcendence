@@ -27,18 +27,48 @@ tr.game-list-card > td.elem > .status.ready_to_play {
 }
 
 tr.game-list-card > td.elem > .main {
+    max-width: 100%;
     font-size: 14px;
     line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+@media (max-width: 820px) {
+
+    tr.game-list-card > td.elem > .main {
+        width: 96px !important;
+    }
 }
 
 tr.game-list-card > td.elem > .sub {
+    max-width: 100%;
     font-size: 12px;
     line-height: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 1000px) {
 
     tr.game-list-card > td.elem.score {
         display: none !important;
+    }
+}
+
+@media (max-width: 820px) {
+
+    tr.game-list-card > td.elem > .sub {
+        width: 96px !important;
+    }
+
+    tr.game-list-card > td.elem.type > p {
+        width: 64px !important;
+    }
+
+    tr.game-list-card > td.elem.count > p {
+        width: 32px !important;
     }
 }

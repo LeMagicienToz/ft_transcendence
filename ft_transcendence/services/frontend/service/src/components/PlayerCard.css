@@ -70,6 +70,13 @@
     max-height: 100%;
 }
 
+@media (max-width: 820px) {
+
+    .player-card > .button.friend {
+        display: block !important;
+    }
+}
+
 .player-card > .button.friend > button {
     height: 100% !important;
 }

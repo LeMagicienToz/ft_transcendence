@@ -116,6 +116,84 @@ class TournamentModel(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
 
+    def to_array(self):
+        players = [
+            {
+                "user_id": player.user_id,
+                "user_name": player.user_name,
+                "score": player.score,
+                "nickname": player.nickname,
+                "player_index": player.player_index,
+                'user_info': player.user_info,
+            }
+            for player in self.players.all()
+        ]
+        games = [
+            {
+                "id": game.id,
+                "custom_name": game.custom_name,
+                "match_type": game.match_type,
+                "game_type": game.game_type,
+                "score_to_win": game.score_to_win,
+                "tournament_id": game.tournament_id,
+                'ball_speed': game.ball_speed,
+                'color_board': game.color_board,
+                'color_ball': game.color_ball,
+                'color_wall': game.color_wall,
+                'color_paddle': game.color_paddle,
+                "status": game.status,
+                "creation_time": game.creation_time,
+                "start_time": game.start_time,
+                "end_time": game.end_time,
+                "players": [
+                    {
+                        "user_id": player.user_id,
+                        "user_name": player.user_name,
+                        "score": player.score,
+                        "nickname": player.nickname,
+                        "player_index": player.player_index,
+                        'user_info': player.user_info,
+                    }
+                    for player in game.players.all().order_by('id')
+                ]
+            }
+            for game in self.games.all().order_by('id')
+        ]
+        tournament_data = {
+            "id": self.id,
+            "custom_name": self.custom_name,
+            "match_type": self.match_type,
+            "game_type": self.game_type,
+            "player_count": self.player_count,
+            "score_to_win": self.score_to_win,
+            "status": self.status,
+            'ball_speed': self.ball_speed,
+            'color_board': self.color_board,
+            'color_ball': self.color_ball,
+            'color_wall': self.color_wall,
+            'color_paddle': self.color_paddle,
+            "creation_time": self.creation_time,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "players": players,
+            "games": games,
+            "joined_players_count": self.get_joined_players_count(),
+        }
+        return tournament_data
+
+    def get_joined_players_count(self):
+        players_that_not_with_placeholder_username = [
+            player for player in self.players.all()
+            if not player.user_name.startswith("__placeholder")
+        ]
+        return len(players_that_not_with_placeholder_username)
+
+    def get_placeholder_user_id(self, idx):
+        return self.id * 10000000 + idx
+
+    def get_placeholder_user_name(self, idx):
+        return f"__placeholder_{idx}"
+
     def __str__(self):
         num_players = self.players.count()
         return (f'Tournament {self.id} (Game: {self.game_type}, Match: {self.match_type}, Players: {num_players}, Status: {self.status})')

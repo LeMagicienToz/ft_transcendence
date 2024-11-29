@@ -3,14 +3,13 @@ import React, { createContext, useState } from 'react';
 export const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [gameId, setGameId] = useState(0);
 
     const [gameName, setGameName] = useState('');
     const [isTournament, setIsTournament] = useState(false);
 
     const [playerIndex, setPlayerIndex] = useState(1);
-    const [playersCount, setPlayersCount] = useState(0);
 
     const [isStarted, setIsStarted] = useState(false);
 
@@ -25,11 +24,7 @@ export const GameProvider = ({ children }) => {
     const [lCommand, setLCommand] = useState('left');
     const [rCommand, setRCommand] = useState('right');
 
-    const [playerOneScore, setPlayerOneScore] = useState(0);
-    const [PlayerOneNickname, setPlayerOneNickname] = useState('');
-
-    const [playerTwoScore, setPlayerTwoScore] = useState(0);
-    const [PlayerTwoNickname, setPlayerTwoNickname] = useState('');
+    const [score, setScore] = useState([0, 0]);
 
     const [ballColor, setBallColor] = useState('#e48d2d');
     const [wallColor, setWallColor] = useState('#e48d2d');
@@ -66,11 +61,11 @@ export const GameProvider = ({ children }) => {
     const join = async (id, index) => {
         setIsLoading(true);
         setPlayerIndex(index);
-        setCameraPosition(index == 1 ? [35, 10, 0] : [-35, 10, 0]);
+        setCameraPosition(index == 1 ? [0, 10, -35] : [0, 10, +35]);
         setGameId(id);
         setLCommand(index == 1 ? 'left' : 'right');
         setRCommand(index == 1 ? 'right' : 'left');
-        await fetchGameData(id);
+        fetchGameData(id);
         setIsLoading(false);
     };
 
@@ -79,19 +74,15 @@ export const GameProvider = ({ children }) => {
         setGameName('');
         setIsTournament(false);
         setPlayerIndex(1);
-        setPlayersCount(0);
         setIsStarted(false);
         setCameraPosition([0, 0, 0]);
         setBallPosition([0, 0.6, 0]);
         setPlayerOnePosition([0, -1, -20.2]);
         setPlayerTwoPosition([0, -1, +20.2]);
         setPlayers({});
-        setLCommand('left-on');
-        setRCommand('right-on');
-        setPlayerOneScore(0);
-        setPlayerOneNickname('');
-        setPlayerTwoScore(0);
-        setPlayerTwoNickname('');
+        setLCommand('left');
+        setRCommand('right');
+        setScore([0, 0]);
         setFloorColor('#ffffff');
         setWallColor('#ffffff');
         setBallColor('#ffffff');
@@ -106,12 +97,13 @@ export const GameProvider = ({ children }) => {
             isTournament, setIsTournament,
 
             playerIndex, setPlayerIndex,
-            playersCount, setPlayersCount,
 
             players, setPlayers,
 
             lCommand, setLCommand,
             rCommand, setRCommand,
+
+            score, setScore,
 
             isStarted, setIsStarted,
             cameraPosition, setCameraPosition,
@@ -124,7 +116,7 @@ export const GameProvider = ({ children }) => {
             floorColor, setFloorColor,
             paddleColor, setPaddleColor,
 
-            join, clear
+            join, update, clear
         }} >
             {children}
         </GameContext.Provider>

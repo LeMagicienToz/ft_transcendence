@@ -5,15 +5,18 @@ import { GameContext } from '../contexts/GameContext';
 import { useToast } from '../contexts/ToastContext';
 
 import Loading from './Loading';
+import GameScore from '../components/GameScore';
 import SpaceBackground from '../components/SpaceBackground';
+import TypeWriter from '../components/Typewriter';
 import GameScene from '../scenes/GameScene';
 
 import './Game.css';
 
 const Game = () => {
+	const [announce, setAnnounce] = useState('');
 
 	const { addToast } = useToast();
-	const { isLoading, gameId, isTournament, playerIndex, setCameraPosition, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, clear } = useContext(GameContext);
+	const { isLoading, gameId, isTournament, playerIndex, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, score, setScore, playerTwoScore, setPlayerTwoScore, update, clear } = useContext(GameContext);
 
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
@@ -48,7 +51,6 @@ const Game = () => {
 		};
 	}, []);
 
-	// Gestion des WebSocket
 	useEffect(() => {
 		const socket = new WebSocket(`/wss/game/${gameId}/`);
 		socketRef.current = socket;
@@ -57,37 +59,31 @@ const Game = () => {
 			console.log('WebSocket connected');
 		};
 
+		const normalize = (value, offset) => value / 9.9 + offset;
+
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
 			console.log(data);
 
-			// Vérifiez le statut de la partie
-
 			const playerPositions = data.game_data.player_positions;
 			const ballPosition = data.game_data.ball_position;
+			const dscore = data.game_data.scores;
 
 			switch (data.game_data.status) {
 				case 'playing':
-					//setBallPosition([ballPosition[1] / 9.9 - 15.2 + 0.5, 0.6, ballPosition[0] / 9.9 - 20.2 + 0.5]);
-					//setPlayerOnePosition([playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2]); //21
-					//setPlayerTwoPosition([playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2]); //7.4
-					setBallPosition(prev => {
-						const newPosition = [ballPosition[1] / 9.9 - 15.2 + 0.5, 0.6, ballPosition[0] / 9.9 - 20.2 + 0.5];
-						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
-					});
-					setPlayerOnePosition(prev => {
-						const newPosition = [playerPositions['1'][1] / 9.9 - 15 + 3.5, -1, -20.2];
-						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
-					});
-					setPlayerTwoPosition(prev => {
-						const newPosition = [playerPositions['2'][1] / 9.9 - 15 + 3.5, -1, +20.2];
-						return prev[0] !== newPosition[0] || prev[1] !== newPosition[1] || prev[2] !== newPosition[2] ? newPosition : prev;
-					});
+					const ballX = normalize(ballPosition[1], -15.2) + 0.5;
+					const ballZ = normalize(ballPosition[0], -20.2) + 0.5;
+					setBallPosition([ballX, 0.6, ballZ]);
+					const playerOneX = normalize(playerPositions['1'][1], -15) + 3.5;
+					setPlayerOnePosition([playerOneX, -1, -20.2]);
+					const playerTwoX = normalize(playerPositions['2'][1], -15) + 3.5;
+					setPlayerTwoPosition([playerTwoX, -1, 20.2]);
+					setScore([dscore['1'], dscore['2']]);
 					break;
 				case 'ready_to_play':
-					setTimeout(() => {
-						setCameraPosition(playerIndex == 1 ? [0, 10, -35] : [0, 10, +35]);
-					}, 1000);
+					if (playerIndex == 1)
+						update();
+					display('Start !');
 					break;
 				case 'finished':
 					socket.close();
@@ -112,18 +108,36 @@ const Game = () => {
 		};
 	}, []);
 
+	const display = (text) => {
+		setAnnounce(text);
+		setTimeout(() => {
+			setAnnounce('');
+		}, 5000);
+	};
+
 	return (
 		<>
-		{isLoading ? (
-			<Loading />
-		) : (
-			<div className={`page`} id={`page-game`}>
-				<SpaceBackground />
-				<section className={`view`}>
-					<GameScene />
-				</section>
-			</div>
-		)}
+			{isLoading ? (
+				<Loading />
+			) : (
+				<div className={`page`} id={`page-game`} >
+					<SpaceBackground />
+					<section className={`view`} >
+						<div className='score'>
+							<GameScore
+								players={players}
+								score={score}
+							/>
+						</div>
+						{announce &&
+							<div className={`announce`} >
+								<TypeWriter text={announce} />
+							</div>
+						}
+						<GameScene />
+					</section>
+				</div>
+			)}
 		</>
 	);
 };

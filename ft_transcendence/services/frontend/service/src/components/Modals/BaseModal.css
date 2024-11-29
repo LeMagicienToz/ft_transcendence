@@ -28,7 +28,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px) {
 
     .modal-container > .modal {
         bottom: 0;
@@ -55,7 +55,7 @@
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px) {
 
     .modal-container > .modal > .row.action {
         flex-direction: column-reverse !important;
