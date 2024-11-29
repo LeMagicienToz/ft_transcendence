@@ -93,20 +93,14 @@ class GameLogic():
 		if action == "move":
 			direction = data_json.get('direction')
 			player_index = str(self.consumer.player.player_index)
-			#logger.debug("in on receive data")
-			#logger.debug(self.consumer.player.player_index)
 			if direction != 'off':
 				self.game_data['keys'][player_index][direction] = True
 				opposite_key = "right" if direction == "left" else "left"
 				self.game_data['keys'][player_index][opposite_key] = False
-				#logger.debug(f"Key {key} set to True for Player {player_index}")
 			else:
 				self.game_data['keys'][player_index][direction] = False
-				#logger.debug(f"Key {key} set to False for Player {player_index}")
 			await self.update_player_positions()
 			await self.send_game_state()
-		#elif action == "game over":
-		#	await self.end(close_code=1000)
 		elif action == "ping":
 			await self.consumer.send(json.dumps({"action": "pong"}))
 		else:
@@ -119,7 +113,7 @@ class GameLogic():
 		for player_index, keys in self.game_data['keys'].items():
 			player_index = str(player_index)
 			if player_index not in self.game_data["player_positions"]:
-				continue  # Ignore si le joueur n'existe pas
+				continue
 			x, y = self.game_data["player_positions"][player_index]
 			new_y = y
 			if keys["left"]:
@@ -187,9 +181,7 @@ class GameLogic():
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
-				#logger.debug("avant sleep p1")
 				await asyncio.sleep(2)
-				#logger.debug("apres sleep p1")
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player_right():
@@ -197,16 +189,11 @@ class GameLogic():
 			else:
 				if self.game.match_type == "1v1":
 					self.game_data["scores"]['1'] += 1
-				#elif self.game.match_type == "2v2":
-				#	self.game_data["scores"]['1'] += 1
-				#	self.game_data["scores"]['3'] += 1
 				if self.game_data["scores"]['1'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
-				#logger.debug("avant sleep p2")
 				await asyncio.sleep(2)
-				#logger.debug("apres sleep p2")
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]
 
@@ -218,4 +205,3 @@ class GameLogic():
 		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
 		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed
 		await self.send_game_state()
-		#await asyncio.sleep(2)
