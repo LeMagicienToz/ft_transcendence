@@ -237,39 +237,6 @@ class ListView(APIView):
 
         return JsonResponse(response_data, safe=False)
 
-# class GameListView(APIView):
-#     """
-#     Return the list of the games
-#     the request must be GET and look like
-#     body = {}
-#     """
-#     def get(self, request):
-#         games = Game.objects.all()
-#         games_data = [
-#             {
-#                 'id': game.id,
-#                 'custom_name': game.custom_name,
-#                 'status': game.status,
-#                 'game_type': game.game_type,
-#                 'match_type': game.match_type,
-#                 'score_to_win': game.score_to_win,
-#                 'tournament_id': game.tournament_id,
-#                 'creation_time': game.creation_time,
-#                 'start_time': game.start_time,
-#                 'end_time': game.end_time,
-#                 'players': [
-#                     {
-#                         'user_id': player.user_id,
-#                         'user_name': player.user_name,
-#                         'score': player.score,
-#                         'nickname': player.nickname,
-#                         'player_index': player.player_index,
-#                     } for player in game.players.all()
-#                 ]
-#             } for game in games
-#         ]
-#         return JsonResponse({'success': True, 'games': games_data}, safe=False)
-
 class GameDetailView(APIView):
     """
     return the details of a game
