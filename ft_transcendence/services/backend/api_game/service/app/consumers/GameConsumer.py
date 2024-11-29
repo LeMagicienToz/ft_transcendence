@@ -161,11 +161,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         if hasattr(self, 'game_logic') and self.game_logic:
             current_player_index = self.player.player_index
-            #logger.debug(f"unassigned player {self.player.player_index}")
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
-                logger.debug("change of status")
                 self.game.status = 'abandoned'
                 self.game_logic.game_data['status'] = 'abandoned'
                 await sync_to_async(self.game.save)()
@@ -178,6 +176,12 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
                 self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
+
+            if self.game.tournament_id != 0:
+                tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
+                if tournament.status == 'waiting':
+                    tournament.status = 'abandoned'
+                    await sync_to_async(tournament.save)()
             await self.game_logic.end(close_code)
 
     # I receive only text because json is only text
