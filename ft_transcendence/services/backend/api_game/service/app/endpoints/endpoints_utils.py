@@ -38,7 +38,7 @@ def utils_get_user_info(token, token42):
 
 def create_round_robin_matches(tournament):
     # Récupère les informations nécessaires du tournoi
-    players = list(tournament.players.all())
+    players = list(tournament.players.all().order_by('user_id'))
     custom_name = "Game in " + tournament.custom_name
     tournament_id = tournament.id
     score_to_win = tournament.score_to_win

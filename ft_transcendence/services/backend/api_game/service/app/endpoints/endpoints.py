@@ -179,7 +179,7 @@ class ListAllView(APIView):
         games = GameModel.objects.filter(tournament_id=0)
         games_data = [
             game.to_array()
-            for game in games 
+            for game in games
         ]
 
         tournaments = TournamentModel.objects.all()
@@ -595,12 +595,14 @@ class TournamentJoinView(APIView):
             tournament.status = 'Tournament_full'
             tournament.start_time = timezone.now()
             tournament.save()
+        tournament_data = tournament.to_array()
         return JsonResponse({
             'success': True,
             'message': 'Player joined the tournament',
             'tournament_id': tournament.id,
+            'game_id': tournament_data.get('games')[0].get('id'),
             'player_id': player.user_id,
-            'tournament': tournament.to_array()
+            'tournament': tournament_data
         }, status=200)
         #return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id}, status=200)
 
