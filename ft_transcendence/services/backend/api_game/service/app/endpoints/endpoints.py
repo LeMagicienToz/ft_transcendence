@@ -134,7 +134,12 @@ class GameCreateView(APIView):
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'success': False, 'message': 'Error creating game: {}'.format(str(e))}, status=500)
-        return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id}, status=200)
+        return JsonResponse({
+            'success': True,
+            'message': 'Game created',
+            'game_id': game.id,
+            'game': game.to_array()
+        }, status=200)
 
 class ListView(APIView):
     """
@@ -145,86 +150,12 @@ class ListView(APIView):
         # Récupération des données des jeux
         games = GameModel.objects.filter(tournament_id=0, status='waiting')
         games_data = [
-            {
-                'id': game.id,
-                'custom_name': game.custom_name,
-                'status': game.status,
-                'game_type': game.game_type,
-                'match_type': game.match_type,
-                'score_to_win': game.score_to_win,
-                'tournament_id': game.tournament_id,
-                'ball_speed': game.ball_speed,
-                'color_board': game.color_board,
-                'color_ball': game.color_ball,
-                'color_wall': game.color_wall,
-                'color_paddle': game.color_paddle,
-                'creation_time': game.creation_time,
-                'start_time': game.start_time,
-                'end_time': game.end_time,
-                'type': 'game',
-                'players': [
-                    {
-                        'user_id': player.user_id,
-                        'user_name': player.user_name,
-                        'score': player.score,
-                        'nickname': player.nickname,
-                        'player_index': player.player_index,
-                        'user_info': player.user_info,
-                    } for player in game.players.all()
-                ]
-            } for game in games
+            game.to_array() for game in games
         ]
 
         tournaments = TournamentModel.objects.filter(status='waiting')
         tournaments_data = [
-            {
-                "id": tournament.id,
-                "custom_name": tournament.custom_name,
-                "match_type": tournament.match_type,
-                "game_type": tournament.game_type,
-                "player_count": tournament.player_count,
-                "score_to_win": tournament.score_to_win,
-                "status": tournament.status,
-                "creation_time": tournament.creation_time,
-                "start_time": tournament.start_time,
-                "end_time": tournament.end_time,
-                "type": 'tournament',
-                "players": [
-                    {
-                        "user_id": player.user_id,
-                        "user_name": player.user_name,
-                        "score": player.score,
-                        "nickname": player.nickname,
-                        "player_index": player.player_index
-                    }
-                    for player in tournament.players.all()
-                ],
-                "games": [
-                    {
-                        "id": game.id,
-                        "custom_name": game.custom_name,
-                        "match_type": game.match_type,
-                        "game_type": game.game_type,
-                        "score_to_win": game.score_to_win,
-                        "tournament_id": game.tournament_id,
-                        "status": game.status,
-                        "creation_time": game.creation_time,
-                        "start_time": game.start_time,
-                        "end_time": game.end_time,
-                        "players": [
-                            {
-                                "user_id": player.user_id,
-                                "user_name": player.user_name,
-                                "score": player.score,
-                                "nickname": player.nickname,
-                                "player_index": player.player_index
-                            }
-                            for player in game.players.all()
-                        ]
-                    }
-                    for game in tournament.games.all()
-                ]
-            }
+            tournament.to_array()
             for tournament in tournaments
         ]
 
@@ -247,86 +178,13 @@ class ListAllView(APIView):
         # Récupération des données des jeux
         games = GameModel.objects.filter(tournament_id=0)
         games_data = [
-            {
-                'id': game.id,
-                'custom_name': game.custom_name,
-                'status': game.status,
-                'game_type': game.game_type,
-                'match_type': game.match_type,
-                'score_to_win': game.score_to_win,
-                'tournament_id': game.tournament_id,
-                'ball_speed': game.ball_speed,
-                'color_board': game.color_board,
-                'color_ball': game.color_ball,
-                'color_wall': game.color_wall,
-                'color_paddle': game.color_paddle,
-                'creation_time': game.creation_time,
-                'start_time': game.start_time,
-                'end_time': game.end_time,
-                'type': 'game',
-                'players': [
-                    {
-                        'user_id': player.user_id,
-                        'user_name': player.user_name,
-                        'score': player.score,
-                        'nickname': player.nickname,
-                        'player_index': player.player_index,
-                        'user_info': player.user_info,
-                    } for player in game.players.all()
-                ]
-            } for game in games
+            game.to_array()
+            for game in games 
         ]
 
         tournaments = TournamentModel.objects.all()
         tournaments_data = [
-            {
-                "id": tournament.id,
-                "custom_name": tournament.custom_name,
-                "match_type": tournament.match_type,
-                "game_type": tournament.game_type,
-                "player_count": tournament.player_count,
-                "score_to_win": tournament.score_to_win,
-                "status": tournament.status,
-                "creation_time": tournament.creation_time,
-                "start_time": tournament.start_time,
-                "end_time": tournament.end_time,
-                "type": 'tournament',
-                "players": [
-                    {
-                        "user_id": player.user_id,
-                        "user_name": player.user_name,
-                        "score": player.score,
-                        "nickname": player.nickname,
-                        "player_index": player.player_index
-                    }
-                    for player in tournament.players.all()
-                ],
-                "games": [
-                    {
-                        "id": game.id,
-                        "custom_name": game.custom_name,
-                        "match_type": game.match_type,
-                        "game_type": game.game_type,
-                        "score_to_win": game.score_to_win,
-                        "tournament_id": game.tournament_id,
-                        "status": game.status,
-                        "creation_time": game.creation_time,
-                        "start_time": game.start_time,
-                        "end_time": game.end_time,
-                        "players": [
-                            {
-                                "user_id": player.user_id,
-                                "user_name": player.user_name,
-                                "score": player.score,
-                                "nickname": player.nickname,
-                                "player_index": player.player_index
-                            }
-                            for player in game.players.all()
-                        ]
-                    }
-                    for game in tournament.games.all()
-                ]
-            }
+            tournament.to_array()
             for tournament in tournaments
         ]
 
@@ -348,33 +206,7 @@ class GameDetailView(APIView):
     """
     def get(self, request, game_id):
         game = get_object_or_404(GameModel, id=game_id)
-        game_details = {
-            'game_id': game.id,
-            'custom_name': game.custom_name,
-            'status': game.status,
-            'game_type': game.game_type,
-            'match_type': game.match_type,
-            'score_to_win': game.score_to_win,
-            'tournament_id': game.tournament_id,
-            'ball_speed': game.ball_speed,
-            'color_board': game.color_board,
-            'color_ball': game.color_ball,
-            'color_wall': game.color_wall,
-            'color_paddle': game.color_paddle,
-            'creation_time': game.creation_time,
-            'start_time': game.start_time,
-            'end_time': game.end_time,
-            'players': [
-                {
-                    'user_id': player.user_id,
-                    'user_name': player.user_name,
-                    'score': player.score,
-                    'nickname': player.nickname,
-                    'player_index': player.player_index,
-                    'user_info': player.user_info,
-                } for player in game.players.all()
-            ]
-        }
+        game_details = game.to_array()
         return JsonResponse({'success': True, 'game': game_details})
 
 class GameJoinView(APIView):
