@@ -143,7 +143,7 @@ class ListView(APIView):
     """
     def get(self, request):
         # Récupération des données des jeux
-        games = GameModel.objects.all()
+        games = GameModel.objects.filter(tournament_id=0)
         games_data = [
             {
                 'id': game.id,
