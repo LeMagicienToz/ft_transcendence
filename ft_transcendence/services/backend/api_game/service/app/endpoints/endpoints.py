@@ -690,67 +690,7 @@ class TournamentListView(APIView):
         tournaments = TournamentModel.objects.all()
         tournament_list = []
         for tournament in tournaments:
-            players = [
-                {
-                    "user_id": player.user_id,
-                    "user_name": player.user_name,
-                    "score": player.score,
-                    "nickname": player.nickname,
-                    "player_index": player.player_index,
-                    'user_info': player.user_info,
-                }
-                for player in tournament.players.all()
-            ]
-            games = [
-                {
-                    "id": game.id,
-                    "custom_name": game.custom_name,
-                    "match_type": game.match_type,
-                    "game_type": game.game_type,
-                    "score_to_win": game.score_to_win,
-                    "tournament_id": game.tournament_id,
-                    'ball_speed': game.ball_speed,
-                    'color_board': game.color_board,
-                    'color_ball': game.color_ball,
-                    'color_wall': game.color_wall,
-                    'color_paddle': game.color_paddle,
-                    "status": game.status,
-                    "creation_time": game.creation_time,
-                    "start_time": game.start_time,
-                    "end_time": game.end_time,
-                    "players": [
-                        {
-                            "user_id": player.user_id,
-                            "user_name": player.user_name,
-                            "score": player.score,
-                            "nickname": player.nickname,
-                            "player_index": player.player_index,
-                            'user_info': player.user_info,
-                        }
-                        for player in game.players.all()
-                    ]
-                }
-                for game in tournament.games.all()
-            ]
-            tournament_data = {
-                "id": tournament.id,
-                "custom_name": tournament.custom_name,
-                "match_type": tournament.match_type,
-                "game_type": tournament.game_type,
-                "player_count": tournament.player_count,
-                "score_to_win": tournament.score_to_win,
-                "status": tournament.status,
-                'ball_speed': tournament.ball_speed,
-                'color_board': tournament.color_board,
-                'color_ball': tournament.color_ball,
-                'color_wall': tournament.color_wall,
-                'color_paddle': tournament.color_paddle,
-                "creation_time": tournament.creation_time,
-                "start_time": tournament.start_time,
-                "end_time": tournament.end_time,
-                "players": players,
-                "games": games
-            }
+            tournament_data = tournament.to_array()
             tournament_list.append(tournament_data)
         return JsonResponse({'success': True, 'data': tournament_list}, status=200)
 
@@ -763,68 +703,10 @@ class TournamentDetailView(APIView):
     """
     def get(self, request, tournament_id):
         tournament = get_object_or_404(TournamentModel, id=tournament_id)
-        players = [
-            {
-                "user_id": player.user_id,
-                "user_name": player.user_name,
-                "score": player.score,
-                "nickname": player.nickname,
-                "player_index": player.player_index,
-                'user_info': player.user_info,
-            }
-            for player in tournament.players.all()
-        ]
-        games = [
-            {
-                "id": game.id,
-                "custom_name": game.custom_name,
-                "match_type": game.match_type,
-                "game_type": game.game_type,
-                "score_to_win": game.score_to_win,
-                "tournament_id": game.tournament_id,
-                'ball_speed': game.ball_speed,
-                'color_board': game.color_board,
-                'color_ball': game.color_ball,
-                'color_wall': game.color_wall,
-                'color_paddle': game.color_paddle,
-                "status": game.status,
-                "creation_time": game.creation_time,
-                "start_time": game.start_time,
-                "end_time": game.end_time,
-                "players": [
-                    {
-                        "user_id": player.user_id,
-                        "user_name": player.user_name,
-                        "score": player.score,
-                        "nickname": player.nickname,
-                        "player_index": player.player_index,
-                        'user_info': player.user_info,
-                    }
-                    for player in game.players.all()
-                ]
-            }
-            for game in tournament.games.all()
-        ]
-        tournament_data = {
-            "id": tournament.id,
-            "custom_name": tournament.custom_name,
-            "match_type": tournament.match_type,
-            "game_type": tournament.game_type,
-            "player_count": tournament.player_count,
-            "score_to_win": tournament.score_to_win,
-            "status": tournament.status,
-            'ball_speed': tournament.ball_speed,
-            'color_board': tournament.color_board,
-            'color_ball': tournament.color_ball,
-            'color_wall': tournament.color_wall,
-            'color_paddle': tournament.color_paddle,
-            "creation_time": tournament.creation_time,
-            "start_time": tournament.start_time,
-            "end_time": tournament.end_time,
-            "players": players,
-            "games": games,
-        }
-        return JsonResponse({'success': True, 'data': tournament_data}, status=200)
+        return JsonResponse({
+            'success': True,
+            'data': tournament.to_array()
+        }, status=200)
 
 class TournamentJoinView(APIView):
     """
