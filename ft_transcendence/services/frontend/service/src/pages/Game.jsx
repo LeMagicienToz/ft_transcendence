@@ -64,6 +64,7 @@ const Game = () => {
 
 		socket.onmessage = (event) => {
 			// TODO simplify the 7 lines bellow
+
 			let data;
 			try {
 				data = JSON.parse(event.data);

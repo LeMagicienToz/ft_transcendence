@@ -102,7 +102,8 @@ class GameLogic():
 				opposite_key = "right" if direction == "left" else "left"
 				self.game_data['keys'][player_index][opposite_key] = False
 			else:
-				self.game_data['keys'][player_index][direction] = False
+				self.game_data['keys'][player_index]['left'] = False
+				self.game_data['keys'][player_index]['right'] = False
 			#await self.update_player_positions()
 			await self.send_game_state(["keys"], player_index)
 		elif action == "ping":
