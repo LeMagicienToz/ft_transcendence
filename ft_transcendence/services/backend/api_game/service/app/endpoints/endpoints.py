@@ -176,20 +176,16 @@ class ListAllView(APIView):
             game.to_array()
             for game in games
         ]
-
         tournaments = TournamentModel.objects.all()
         tournaments_data = [
             tournament.to_array()
             for tournament in tournaments
         ]
-
         combined_data = games_data + tournaments_data
-
         response_data = {
             'success': True,
             'games': combined_data
         }
-
         return JsonResponse(response_data, safe=False)
 
 class GameDetailView(APIView):
@@ -245,7 +241,6 @@ class GameJoinView(APIView):
         # Game must be waiting
         if game.status != 'waiting':
             return JsonResponse({'success': False, 'message': 'Game has already started or finished or is full'}, status=400)
-
         # create Player
         player = PlayerModel.objects.create(
             user_id=player_user_id,
@@ -255,14 +250,12 @@ class GameJoinView(APIView):
             player_index=0,
             user_info=user_info,
         )
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if game.tournament_id > 0:
             tournament = TournamentModel.objects.filter(id=game.tournament_id)
             if tournament:
                 game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting').exclude(id=game.id)
-
         # Assign new player
         game.players.add(player)
         game.save()
@@ -453,7 +446,6 @@ class TournamentCreateView(APIView):
                 raise ValueError
         except (ValueError, TypeError):
             return JsonResponse({'success': False, 'message': 'Invalid number of players'}, status=400)
-
         try:
             ball_speed = float(request.data.get('ball_speed', 1.0))
             color_board = request.data.get('color_board', '#000000')
@@ -465,7 +457,6 @@ class TournamentCreateView(APIView):
         # Validate customization parameters
         if not (0.5 <= ball_speed <= 2.5):
             return JsonResponse({'success': False, 'message': 'Ball speed must be between 0.5 and 2.5'}, status=400)
-
         # create tournament
         tournament = TournamentModel.objects.create(
             custom_name=custom_name,
@@ -481,9 +472,7 @@ class TournamentCreateView(APIView):
             creation_time=timezone.now(),
             status='waiting',
         )
-
         # create Player 1
-
         for idx in range(player_count):
             placeholder = tournament.get_placeholder_user_name(idx)
             placeholder_user_id = tournament.get_placeholder_user_id(idx)
@@ -507,13 +496,10 @@ class TournamentCreateView(APIView):
             tournament.players.add(player)
         create_round_robin_matches(tournament)
         tournament_data = tournament.to_array()
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if tournament:
             game_list = tournament.games.filter(players__user_id=player1_user_id, status='waiting')
-
         game_id = tournament_data.get('games')[0].get('id')
         return JsonResponse({
             'success': True,
@@ -607,14 +593,11 @@ class TournamentJoinView(APIView):
             tournament.status = 'Tournament_full'
             tournament.start_time = timezone.now()
             tournament.save()
-
         game = tournament.games.filter(status='waiting', players__user_id=player_user_id).first()
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if tournament:
             game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting')
-    
         return JsonResponse({
             'success': True,
             'message': 'Player joined the tournament',

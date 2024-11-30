@@ -92,7 +92,7 @@ class GameLogic():
 		data_json = json.loads(text_data)
 		action = data_json.get('action')
 		if action == "move":
-			#TODO do not know why player sometimes empty when one tournament game is fnished
+			#TODO why player sometimes empty when one tournament game is fnished
 			if self.consumer.player == None:
 				return
 			direction = data_json.get('direction')

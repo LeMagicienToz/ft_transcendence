@@ -53,7 +53,7 @@ def create_round_robin_matches(tournament):
 
     def organize_matches(matches):
         """
-        Organise les matchs pour minimiser les conflits de disponibilité des joueurs.
+        Organise matches to minimise conflicts of availability od players
         """
         scheduled_matches = []
         while matches:
@@ -61,7 +61,6 @@ def create_round_robin_matches(tournament):
             used_players = set()
             remaining_matches = []
             for match in matches:
-                # Si aucun joueur du match n'est déjà utilisé, on peut le programmer dans ce bloc
                 if not used_players.intersection(match):
                     block.append(match)
                     used_players.update(match)

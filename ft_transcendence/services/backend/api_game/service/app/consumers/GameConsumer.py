@@ -238,7 +238,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game.status = "finished"
         self.game_logic.game_data["end_time"] = timezone.now().isoformat()
         self.game.end_time = self.game_logic.game_data["end_time"]
-        logger.debug(f"score {self.game_logic.game_data['scores']}")
         await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
         await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
         await sync_to_async(self.game.save)()
