@@ -59,27 +59,29 @@ def jwt_42_required(view_func):
         access_token = request.COOKIES.get('42_access_token')
 
         if access_token:
-            headers = {'Authorization': f'Bearer {access_token}'}
-            response = requests.get(url=os.getenv('T_API_42_URL_INFO'), headers=headers)
-            token_data = response.json()
-            expires_in_seconds = token_data.get('expires_in_seconds')
+            intra_id = r.get(f'42_access_token{access_token}')
+            if intra_id:
+                intra_id = intra_id.decode()
+            else:
+                headers = {'Authorization': f'Bearer {access_token}'}
+                response = requests.get(url=os.getenv('T_API_42_URL_INFO'), headers=headers)
+                token_data = response.json()
+                expires_in_seconds = token_data.get('expires_in_seconds')
 
-            if expires_in_seconds is None or expires_in_seconds <= 0:
-                return JsonResponse({'success': False, 'message': 'Access token 42 expired.'}, status=400)
+                if expires_in_seconds is None or expires_in_seconds <= 0:
+                    return JsonResponse({'success': False, 'message': 'Access token 42 expired.'}, status=400)
 
-            intra_id = r.get(f'42_access_token_{access_token}')
-
-            if not intra_id:
                 user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
                 user_data = user_info_response.json()
                 intra_id = user_data.get('id')
-                #user = User.objects.filter(custom_user__intra_id=intra_id).first()
+                r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
 
             user = User.objects.filter(custom_user__intra_id=intra_id).first()
 
             if not user:
                 return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
-            redis_42_access_token = r.get(f'user_{user.custom_user.intra_id}_42_access_token')
+
+            redis_42_access_token = r.get(f'user{user.custom_user.intra_id}_42_access_token')
             if redis_42_access_token and redis_42_access_token.decode() != access_token:
                 return JsonResponse({'success': False, 'message': 'Access token 42 revoked.'}, status=401)
             request.user = user

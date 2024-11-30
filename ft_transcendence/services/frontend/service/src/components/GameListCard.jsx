@@ -30,7 +30,7 @@ const GameListCard = ({ game = {} }) => {
                     <p className={`main`} >Score: {game?.score_to_win}</p>
                 </td>
                 <td className='elem count' >
-                    <p className={`main`} >{game?.players.length}/{game?.type === 'tournament' ? game?.player_count : (game?.match_type === '1v1' ? '2' : '4') }</p>
+                    <p className={`main`} >{game?.joined_players_count}/{game?.player_count}</p>
                 </td>
             </tr>
         </>

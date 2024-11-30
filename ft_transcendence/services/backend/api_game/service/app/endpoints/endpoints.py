@@ -134,12 +134,7 @@ class GameCreateView(APIView):
             game.players.add(player1)
         except Exception as e:
             return JsonResponse({'success': False, 'message': 'Error creating game: {}'.format(str(e))}, status=500)
-        return JsonResponse({
-            'success': True,
-            'message': 'Game created',
-            'game_id': game.id,
-            'game': game.to_array()
-        }, status=200)
+        return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id, 'list_id': [game.id]}, status=200)
 
 class ListView(APIView):
     """
@@ -260,10 +255,18 @@ class GameJoinView(APIView):
             player_index=0,
             user_info=user_info,
         )
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        game_list = None
+        if game.tournament_id > 0:
+            tournament = TournamentModel.objects.filter(id=game.tournament_id)
+            if tournament:
+                game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting').exclude(id=game.id)
+
         # Assign new player
         game.players.add(player)
         game.save()
-        return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id}, status=200)
+        return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id, 'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game_id]}, status=200)
 
 class GameUserHistoryView(APIView):
     """
@@ -504,10 +507,19 @@ class TournamentCreateView(APIView):
             tournament.players.add(player)
         create_round_robin_matches(tournament)
         tournament_data = tournament.to_array()
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        game_list = None
+        if tournament:
+            game_list = tournament.games.filter(players__user_id=player1_user_id, status='waiting')
+
+        game_id = tournament_data.get('games')[0].get('id')
         return JsonResponse({
             'success': True,
             'message': 'Tournament created',
-            'game_id': tournament_data.get('games')[0].get('id'),
+            'game_id': game_id,
+            'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game_id],
             'tournament': tournament_data,
         }, status=200)
 
@@ -595,10 +607,19 @@ class TournamentJoinView(APIView):
             tournament.status = 'Tournament_full'
             tournament.start_time = timezone.now()
             tournament.save()
-        tournament_data = tournament.to_array()
+
+        game = tournament.games.filter(status='waiting', players__user_id=player_user_id).first()
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        game_list = None
+        if tournament:
+            game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting')
+    
         return JsonResponse({
             'success': True,
             'message': 'Player joined the tournament',
+            'game_id': game.id,
+            'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game.id],
             'tournament_id': tournament.id,
             'game_id': tournament_data.get('games')[0].get('id'),
             'player_id': player.user_id,

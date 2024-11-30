@@ -1,13 +1,13 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+
+import { UserContext } from './UserContext';
 
 export const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [gameId, setGameId] = useState(0);
-
-    const [gameName, setGameName] = useState('');
-    const [isTournament, setIsTournament] = useState(false);
+    const [listId, setListId] = useState([]);
 
     const [playerIndex, setPlayerIndex] = useState(1);
 
@@ -31,6 +31,8 @@ export const GameProvider = ({ children }) => {
     const [floorColor, setFloorColor] = useState('#ffffff');
     const [paddleColor, setPaddleColor] = useState('#ffffff');
 
+    const { userId } = useContext(UserContext);
+
     const fetchGameData = async (gameId) => {
         try {
             const response = await fetch(`/api/game/game-details/${gameId}/`, {
@@ -40,9 +42,18 @@ export const GameProvider = ({ children }) => {
             if (response.ok) {
                 const json = await response.json();
                 if (json?.success == true) {
-                    setGameName(json.game.custom_name);
-                    setIsTournament(json.game.tournament_id > 0 ? true : false);
+
+                    const index = json.game.players.findIndex(player => player.user_id === userId);
+
+                    //setListId(json.next_id);
+                    //console.log(json.next_id);
+                    setPlayerIndex(index);
+                    console.log(json);
+                    console.log(index);
+                    setCameraPosition(index == 0 ? [0, 10, -40] : [0, 10, +40]);
                     setPlayers(json.game.players);
+                    setLCommand(index == 0 ? 'left' : 'right');
+                    setRCommand(index == 0 ? 'right' : 'left');
                     setFloorColor(json.game.color_board);
                     setWallColor(json.game.color_wall);
                     setBallColor(json.game.color_ball);
@@ -58,21 +69,24 @@ export const GameProvider = ({ children }) => {
         fetchGameData(gameId);
     }
 
-    const join = async (id, index) => {
+    const join = (gameId, listId) => {
         setIsLoading(true);
-        setPlayerIndex(index);
-        setCameraPosition(index == 1 ? [0, 10, -35] : [0, 10, +35]);
-        setGameId(id);
-        setLCommand(index == 1 ? 'left' : 'right');
-        setRCommand(index == 1 ? 'right' : 'left');
-        fetchGameData(id);
+
+        setGameId(gameId);
+        setListId(listId.filter(id => id !== gameId));
+        setScore([0, 0]);
+        setBallPosition([0, 0.6, 0]);
+        setPlayerOnePosition([0, -1, -20.2]);
+        setPlayerTwoPosition([0, -1, +20.2]);
+        console.log(listId);
+        fetchGameData(gameId);
+
         setIsLoading(false);
     };
 
     const clear = async () => {
         setGameId(0);
-        setGameName('');
-        setIsTournament(false);
+        setListId(0);
         setPlayerIndex(1);
         setIsStarted(false);
         setCameraPosition([0, 0, 0]);
@@ -93,8 +107,7 @@ export const GameProvider = ({ children }) => {
         <GameContext.Provider value={{
             isLoading, setIsLoading,
             gameId, setGameId,
-
-            isTournament, setIsTournament,
+            listId, setListId,
 
             playerIndex, setPlayerIndex,
 

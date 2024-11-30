@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { GameContext } from '../contexts/GameContext';
 import { useToast } from '../contexts/ToastContext';
@@ -16,10 +16,11 @@ const Game = () => {
 	const [announce, setAnnounce] = useState('');
 
 	const { addToast } = useToast();
-	const { isLoading, gameId, isTournament, playerIndex, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, score, setScore, playerTwoScore, setPlayerTwoScore, update, clear } = useContext(GameContext);
+	const { isLoading, gameId, listId, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, score, setScore, update, join, clear } = useContext(GameContext);
 
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
+	const location = useLocation();
 	const navigate = useNavigate();
 
 	const sendMovement = (direction) => {
@@ -49,7 +50,7 @@ const Game = () => {
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
 		};
-	}, []);
+	}, [lCommand, rCommand]);
 
 	useEffect(() => {
 		const socket = new WebSocket(`/wss/game/${gameId}/`);
@@ -63,7 +64,7 @@ const Game = () => {
 
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-			console.log(data);
+			//console.log(data);
 
 			const playerPositions = data.game_data.player_positions;
 			const ballPosition = data.game_data.ball_position;
@@ -81,15 +82,18 @@ const Game = () => {
 					setScore([dscore['1'], dscore['2']]);
 					break;
 				case 'ready_to_play':
-					if (playerIndex == 1)
-						update();
+					update();
 					display('Start !');
 					break;
 				case 'finished':
 					socket.close();
-					clear();
-					navigate('/home');
-					return;
+					if (listId && listId.length > 0) {
+						join(listId[0], listId)
+					} else {
+						clear();
+						navigate('/home');
+					}
+					break;
 			}
 		};
 
@@ -106,7 +110,7 @@ const Game = () => {
 				socketRef.current.close();
 			}
 		};
-	}, []);
+	}, [gameId]);
 
 	const display = (text) => {
 		setAnnounce(text);

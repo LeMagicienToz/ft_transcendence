@@ -35,7 +35,7 @@ tr.game-list-card > td.elem > .main {
     overflow: hidden;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 380px) {
 
     tr.game-list-card > td.elem > .main {
         width: 96px !important;
@@ -58,7 +58,7 @@ tr.game-list-card > td.elem > .sub {
     }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 380px) {
 
     tr.game-list-card > td.elem > .sub {
         width: 96px !important;

@@ -55,7 +55,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
     }
 
     const handleSuccess = (json) => {
-        join(json.game_id, 1);
+        join(json.game_id, json.list_id);
         navigate('/game');
     }
 
