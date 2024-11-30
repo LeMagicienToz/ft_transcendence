@@ -26,6 +26,8 @@ class GameConsumer(AsyncWebsocketConsumer):
     game_id = None
     game = None
     player = None
+    tournament_room_group_name = ""
+    tournament = None
 
     async def connect(self):
         from ..endpoints.endpoints_utils import utils_get_user_info
@@ -51,8 +53,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         if await self.get_game() is False:
             await self.close()
             return
-        # check if the player is in the game
-        if await sync_to_async(self.is_player_in_game)() is False:
+        is_playing_this_game = await sync_to_async(self.is_player_in_game)()
+        # check if the player is in the game, if he is in tournament he can spectate
+        if self.game.tournament_id == 0 and (is_playing_this_game is False):
             await self.close()
             return
         # pick game_logic
@@ -61,16 +64,43 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
         await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
-        if self.player.player_index == 0:
+        if is_playing_this_game and self.player.player_index == 0:
             # check the status of the game
             await sync_to_async(self.assign_player_index)()
         await self.listen()
+        #await self.setup_regular_ping()
+        if self.game.tournament_id != 0:
+            self.tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
+            await self.listen_to_tournament_group()
+            await self.send_to_tournament_group({
+                "action": "someone joined"
+            })
+        await self.accept()
+        if self.game.tournament_id == 0:
+            await self.update_game_status_to_ready_to_play()
+
+    async def update_game_status_to_ready_to_play(self):
         if self.game.status == 'waiting' and await sync_to_async(self.game.is_full)():
             self.game.status = 'ready_to_play'
             await sync_to_async(self.game.save)()
             #tell eveyrone to update their game_data.status
             self.game_logic.game_data['status'] = 'ready_to_play'
             await self.game_logic.send_game_state()
+
+    async def send_to_tournament_group(self, data):
+        message = json.dumps(data)
+        await self.channel_layer.group_send(
+            self.tournament_room_group_name, {
+                "type": "tournament_onchange",
+                "message": message
+            }
+        )
+
+    async def tournament_onchange(self, event):
+        data_json = json.loads(event["message"])
+        if data_json.get('action') == 'someone joined':
+            if (await sync_to_async(self.tournament.is_full)()):
+                await self.update_game_status_to_ready_to_play()
 
     def assign_player_index(self):
         indexes = list(self.game.players.values_list('player_index', flat=True))
@@ -136,18 +166,31 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        await self.accept()
+
+    # add current channel_name to the group and start accepting message
+    async def listen_to_tournament_group(self):
+        self.tournament_room_group_name = f"tournament_{self.tournament.id}"
+        await self.channel_layer.group_add(
+            self.tournament_room_group_name,
+            self.channel_name
+        )
 
     async def disconnect(self, close_code):
-        if hasattr(self, 'game_logic') and self.game_logic:
+        if hasattr(self, 'game_logic') and self.game_logic and self.player:
             current_player_index = self.player.player_index
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
                 self.game.status = 'abandoned'
                 self.game_logic.game_data['status'] = 'abandoned'
-                await sync_to_async(self.game.save)()
-                await self.game_logic.send_game_state()
+                #takes the tournament from id
+                if self.game.tournament_id != 0:
+                    tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
+                    if tournament.status == 'waiting':
+                        tournament.status = 'abandoned'
+                        await sync_to_async(tournament.save)()
+                    await sync_to_async(self.game.save)()
+                    await self.game_logic.send_game_state()
             elif self.game_logic.game_data['status'] == 'playing':
                 if current_player_index == 1:
                     the_other_player_index = '2'
@@ -156,13 +199,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
                 self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
+                await self.game_logic.send_game_state()
 
-            if self.game.tournament_id != 0:
-                tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
-                if tournament.status == 'waiting':
-                    tournament.status = 'abandoned'
-                    await sync_to_async(tournament.save)()
-            await self.game_logic.end(close_code=1000)
 
     # I receive only text because json is only text
     async def receive(self, text_data):
@@ -216,6 +254,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     def is_player_1(self):
         return self.player and self.player.player_index == 1
+
+    async def regular_ping(self):
+        while True:
+            await asyncio.sleep(10)
+            json_message = json.dumps({
+                "message": "ping"
+            })
+            await self.send(text_data=json_message)
+
+    async def setup_regular_ping(self):
+        asyncio.create_task(self.regular_ping())
 
     async def start_game_loop(self, event):
         #game has started

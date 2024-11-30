@@ -77,6 +77,7 @@ class GameLogic():
 			"game_data": self.game_data
 		}))
 
+	#TODO obsolete no need to use this
 	async def end(self, close_code):
 		if (self.game_data['status'] == "playing"):
 			self.game_data["status"] = "finished"
@@ -91,6 +92,9 @@ class GameLogic():
 		data_json = json.loads(text_data)
 		action = data_json.get('action')
 		if action == "move":
+			#TODO do not know why player sometimes empty when one tournament game is fnished
+			if self.consumer.player == None:
+				return
 			direction = data_json.get('direction')
 			player_index = str(self.consumer.player.player_index)
 			if direction != 'off':

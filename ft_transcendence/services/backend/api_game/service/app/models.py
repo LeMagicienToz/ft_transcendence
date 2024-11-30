@@ -93,12 +93,6 @@ class GameModel(models.Model):
             return True
         return False
 
-    def is_tournament_full(self):
-        if self.tournament_id == 0:
-            return True
-        tournament = TournamentModel.objects.get(id=self.tournament_id)
-        return tournament.get_joined_players_count() == tournament.player_count
-
     def update_player_two_score(self, score):
         # Loop through all players in the game
         players = self.players.all()
@@ -163,6 +157,9 @@ class TournamentModel(models.Model):
     creation_time = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+
+    def is_full(self):
+        return (self.get_joined_players_count() == self.player_count)
 
     def to_array(self):
         players = [
