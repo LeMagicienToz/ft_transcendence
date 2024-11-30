@@ -21,10 +21,10 @@ const AccountWindow = ({ onClose = () => {}, isOpen = false, title = 'Account', 
             className='account'
         >
             <Tabs>
-                <Tab name='Profile' >
+                <Tab name='Profile' icon='person-fill' >
                     <ProfileForm />
                 </Tab>
-                <Tab name='Security' >
+                <Tab name='Security' icon='shield-shaded' >
                     <div className='col' >
                         <SecurityForm />
                         <DeleteAccoutButton />

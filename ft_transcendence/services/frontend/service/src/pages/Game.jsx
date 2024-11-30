@@ -106,7 +106,7 @@ const Game = () => {
 		};
 
 		socket.onerror = (error) => {
-			addToast('An error has occured !', 'failure', 5000);
+			addToast('An error has occurred.', 'failure', 5000);
 			navigate('/home');
 			console.log('WebSocket error');
 		};

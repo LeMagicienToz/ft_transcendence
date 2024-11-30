@@ -19,10 +19,10 @@ const LoginWindow = ({ onClose = () => {}, isOpen = false, title = 'Join the gam
             width={width}
         >
             <Tabs>
-                <Tab name='Login' >
+                <Tab name='Login' icon='box-arrow-in-right' >
                     <LoginForm />
                 </Tab>
-                <Tab name='Register' >
+                <Tab name='Register' icon='person-fill-add' >
                     <RegisterForm />
                 </Tab>
             </Tabs>

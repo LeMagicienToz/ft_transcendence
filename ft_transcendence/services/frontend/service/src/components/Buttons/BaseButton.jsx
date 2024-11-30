@@ -19,7 +19,7 @@ const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '',
             >
                 {text || icon ? (
                     <>
-                        {icon && <i className={icon} ></i>}
+                        {icon && <i className={`bi bi-${icon}`} ></i>}
                         {text && <span class="text">{text}</span>}
                     </>
                 ) : (

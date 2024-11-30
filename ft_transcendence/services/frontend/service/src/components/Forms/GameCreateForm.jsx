@@ -70,7 +70,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
             disabled={disabled}
         >
             <Tabs destructive={false} >
-                <Tab name='Game' >
+                <Tab name='Game' icon='controller' >
                     <SelectInput id='game_type' name='game_type' label='Game' options={[{label: 'Pong', value: 'pong'}]} value='pong' />
                     <div className={`row`} >
                         <BaseInput id='custom_name' name='custom_name' label='Room' value={`${username}'s game`} regex={/^[A-Za-z0-9 _.+'"$#@)(\][)-]{4,24}$/} />
@@ -90,7 +90,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
                     }
                     <BaseButton text='Create' className='primary' />
                 </Tab>
-                <Tab name='Customization' >
+                <Tab name='Customization' icon='sliders2' >
                     <div className={`row`} >
                         <SliderInput id='score_to_win' name='score_to_win' label='Score' value={5} min={3} max={15} step={1} />
                         <SliderInput id='ball_speed' name='ball_speed' label='Ball speed' value={1} min={0.5} max={2.5} step={0.25} />

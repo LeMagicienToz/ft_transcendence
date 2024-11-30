@@ -43,7 +43,7 @@ const FriendAddbutton = ({ onSuccess = () => {}, onFailure = () => {}, userId, i
             onClick={handleClick}
             id={id}
             className={className}
-            icon='bi bi-plus-circle'
+            icon='plus-circle'
             disabled={disabled}
             isLoading={isLoading}
         />

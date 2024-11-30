@@ -29,14 +29,14 @@ const ProfileWindow = ({ onClose = () => {}, isOpen = false, targetId, username 
                 </div>
                 <div className={`col action`}>
                     <Tabs >
-                        <Tab name='History'>
-                            <div className={`history`}>
+                        <Tab name='History' icon='clock-history' >
+                            <div className={`history`} >
                                 <GameHistoryList
                                     targetId={targetId}
                                 />
                             </div>
                         </Tab>
-                        <Tab name='Statistics'>
+                        <Tab name='Statistics' icon='bar-chart-fill' >
                             <div className={`statistics`}>
                                 <ProfileStats
                                     targetId={targetId}

@@ -18,7 +18,7 @@ const CustomAstronautButton = ({ id, text = '', className = '', disabled = false
                 onClick={() => setAstronautWindowState(true)}
                 className='secondary'
                 text='Customize'
-                icon='bi bi-droplet-half'
+                icon='droplet-half'
                 disabled={disabled}
             />
         </div>

@@ -67,6 +67,7 @@ const DeleteAccoutButton = ({ id, className = 'alert', text = 'Delete my account
                 id={id}
                 className={className}
                 text={text}
+                icon='trash3-fill'
                 disabled={disabled}
                 isLoading={isLoading}
             />

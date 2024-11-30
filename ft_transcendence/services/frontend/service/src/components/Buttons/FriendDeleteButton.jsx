@@ -43,7 +43,7 @@ const FriendDeleteButton = ({ onSuccess = () => {}, onFailure = () => {}, userId
             onClick={handleClick}
             id={id}
             className={className}
-            icon='bi bi-dash-circle'
+            icon='dash-circle'
             disabled={disabled}
             isLoading={isLoading}
         />

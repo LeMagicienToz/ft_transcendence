@@ -16,11 +16,16 @@ const Tabs = ({ index = 0, destructive = true, children }) => {
                     <button
                         key={child.props.name}
                         className={`${child.props.name === activeTab ? 'active' : ''}`}
-                        onClick={ (e) => { if (child.props.onClick) child.props.onClick(e); handleTabChange(child.props.name) }}
+                        onClick={ (event) => { if (child.props.onClick) child.props.onClick(event); handleTabChange(child.props.name) }}
                         type='button'
                         disabled={child.props.disabled || false}
                     >
+                        {child.props.icon &&
+                            <i className={`bi bi-${child.props.icon}`} ></i>
+                        }
+                        <span className={`text`} >
                         {child.props.name}
+                        </span>
                     </button>
                 ))}
             </header>

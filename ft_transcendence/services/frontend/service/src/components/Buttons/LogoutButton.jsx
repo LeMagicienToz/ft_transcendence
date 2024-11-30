@@ -38,7 +38,7 @@ const LogoutButton = ({ id, className = 'alert', text = 'Logout', disabled = fal
             id={id}
             className={className}
             text='Logout'
-            icon='bi bi-box-arrow-right'
+            icon='box-arrow-right'
             disabled={disabled}
         />
     );
