@@ -211,13 +211,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         if (self.game.status == "ready_to_play"):
             # if player1 moves, it starts the game
             if (self.player.player_index == 1):
-                await self.start_game_loop({})
+                await self.onchange_start_game({})
             # send a msg to everyone but the player who moved to tell game has atrted
             # if it's not the player 1 who moved, he'll start the game when receiving the msg
             await self.channel_layer.group_send(
                 f"game_{self.game.id}",  # group name from the consumer
                 {
-                    "type": "start_game_loop",  # the custom type we'll handle in the consumer
+                    "type": "onchange_start_game",  # the custom type we'll handle in the consumer
                     "message": "start"
                 }
             )
@@ -228,20 +228,28 @@ class GameConsumer(AsyncWebsocketConsumer):
         received_game_data = data_json.get("game_data")
         # Send game state by WebSocket
         fields = data_json.get("fields")
+        should_send = True
         for field in fields:
             if (field == "keys"):
+                should_send = False
                 player_index = data_json.get("player_index")
                 self.game_logic.game_data['keys'][player_index] = received_game_data['keys'][player_index]
             else:
                 self.game_logic.game_data[field] = received_game_data[field]
-        await self.send(text_data=json.dumps({
-            'game_data':self.game_logic.game_data
-        }))
+        if should_send:
+            await self.send(text_data=json.dumps({
+                'game_data': self.present(self.game_logic.game_data)
+            }))
         if self.game_logic.game_data['status'] == "finished":
             if self.is_player_1():
                 await self.finish_game()
         if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
             await self.close()
+
+    def present(self, data):
+        new_data = data.copy()
+        del new_data["keys"]
+        return new_data
 
     async def finish_game(self):
         self.game.status = "finished"
@@ -277,14 +285,14 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def setup_regular_ping(self):
         asyncio.create_task(self.regular_ping())
 
-    async def start_game_loop(self, event):
+    async def onchange_start_game(self, event):
         #game has started
         self.game.status = 'playing'
         self.game.start_time = timezone.now().isoformat()
         #tell eveyrone to update their game_data.status
         self.game_logic.game_data['status'] = 'playing'
         #self.game_logic.game_data['start_time'] = self.game.start_time
-        self.game_logic.send_game_state(["status"])
+        await self.game_logic.send_game_state(["status"])
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
