@@ -17,7 +17,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 45
+	REFRESH_PER_SEC = 120
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -42,8 +42,8 @@ class GameLogic():
 		self.game = consumer.game
 		# Paddle and ball speed
 		self.PADDLE_SPEED = 2
-		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
-		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * 1.5 * self.game.ball_speed
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * 1.5 * self.game.ball_speed
 		# Initialize positions and scores based on match type
 		self.game_data = {
 			"ball_position": [

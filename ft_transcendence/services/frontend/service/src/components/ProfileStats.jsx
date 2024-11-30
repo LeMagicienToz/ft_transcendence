@@ -25,12 +25,12 @@ const ProfileStats = ({ targetId = 0 }) => {
         setMData([
             {
                 name: '1v1',
-                value: ((history.filter(game => game.match_type === '1v1').length / history.length) * 100).toFixed(2),
+                value: ((history.filter(game => game.match_type === '1v1').length / history.length) * 100).toFixed(0),
                 color: '#2980b9'
             },
             {
                 name: '2v2',
-                value: ((history.filter(game => game.match_type === '2v2').length / history.length) * 100).toFixed(2),
+                value: ((history.filter(game => game.match_type === '2v2').length / history.length) * 100).toFixed(0),
                 color: '#16a085'
             }
         ]);
@@ -38,12 +38,12 @@ const ProfileStats = ({ targetId = 0 }) => {
         setTData([
             {
             name: 'Normal',
-            value: ((history.filter(game => game.tournament_id === 0).length / history.length) * 100).toFixed(2),
+            value: ((history.filter(game => game.tournament_id === 0).length / history.length) * 100).toFixed(0),
             color: 'var(--color-primary)'
             },
             {
             name: 'Tournament',
-            value: ((history.filter(game => game.tournament_id > 0).length / history.length) * 100).toFixed(2),
+            value: ((history.filter(game => game.tournament_id > 0).length / history.length) * 100).toFixed(0),
             color: '#d35400'
             }
         ]);
@@ -51,12 +51,12 @@ const ProfileStats = ({ targetId = 0 }) => {
         setWData([
             {
                 name: 'Victories',
-                value: ((history.filter(game => game.has_won).length / history.length) * 100).toFixed(2),
+                value: ((history.filter(game => game.has_won).length / history.length) * 100).toFixed(0),
                 color: 'var(--color-success)'
             },
             {
                 name: 'Losses',
-                value: ((history.filter(game => !game.has_won).length / history.length) * 100).toFixed(2),
+                value: ((history.filter(game => !game.has_won).length / history.length) * 100).toFixed(0),
                 color: 'var(--color-alert)'
             }
         ]);
