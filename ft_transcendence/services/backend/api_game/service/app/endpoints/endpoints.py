@@ -87,6 +87,10 @@ class GameCreateView(APIView):
         match_type = request.data.get('match_type')
         if match_type not in ['1v1', '2v2']:
             return JsonResponse({'success': False,'message': 'Invalid match type'}, status=400)
+        if match_type == '1v1':
+            player_count = 2
+        elif match_type == '2v2':
+            player_count = 4
         # get game name (pong or snake)
         game_type = request.data.get('game_type')
         if game_type not in ['pong']:
@@ -122,6 +126,7 @@ class GameCreateView(APIView):
                 match_type=match_type,
                 game_type=game_type,
                 score_to_win=score_to_win,
+                player_count=player_count,
                 tournament_id=tourn_id,
                 ball_speed=ball_speed,
                 color_board=color_board,

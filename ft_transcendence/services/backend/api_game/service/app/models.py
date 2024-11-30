@@ -24,6 +24,7 @@ class GameModel(models.Model):
     custom_name = models.CharField(max_length=30, default="custom_name")
     score_to_win = models.IntegerField(default=3)
     players = models.ManyToManyField(PlayerModel, related_name="games")
+    player_count = models.IntegerField(default = 0)
     match_type = models.CharField(
         max_length=10,
         choices=[("1v1", "1 vs 1"), ("2v2", "2 vs 2")],
@@ -57,6 +58,7 @@ class GameModel(models.Model):
             'status': self.status,
             'game_type': self.game_type,
             'match_type': self.match_type,
+            "player_count": self.player_count,
             'score_to_win': self.score_to_win,
             'tournament_id': self.tournament_id,
             'ball_speed': self.ball_speed,
