@@ -16,7 +16,7 @@ const Game = () => {
 	const [announce, setAnnounce] = useState('');
 
 	const { addToast } = useToast();
-	const { isLoading, gameId, listId, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, score, setScore, update, join, clear } = useContext(GameContext);
+	const { isLoading, gameId, listId, isStarted, setIsStarted, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, players, lCommand, rCommand, score, setScore, update, join, clear } = useContext(GameContext);
 
 	const socketRef = useRef(null);
 	const currentKeyPressedRef = useRef(null);
@@ -63,18 +63,14 @@ const Game = () => {
 		const normalize = (value, offset) => value / 9.9 + offset;
 
 		socket.onmessage = (event) => {
-			if (event.data === "ping") {
-				return ;
-			}
 			const data = JSON.parse(event.data);
 			//console.log(data);
 
-			const playerPositions = data.game_data.player_positions;
-			const ballPosition = data.game_data.ball_position;
-			const dscore = data.game_data.scores;
-
 			switch (data.game_data.status) {
 				case 'playing':
+					const playerPositions = data.game_data.player_positions;
+					const ballPosition = data.game_data.ball_position;
+					const dscore = data.game_data.scores;
 					const ballX = normalize(ballPosition[1], -15.2) + 0.5;
 					const ballZ = normalize(ballPosition[0], -20.2) + 0.5;
 					setBallPosition([ballX, 0.6, ballZ]);
@@ -87,9 +83,11 @@ const Game = () => {
 				case 'ready_to_play':
 					update();
 					display('Start !');
+					setIsStarted(true);
 					break;
 				case 'finished':
 					socket.close();
+					setIsStarted(false);
 					if (listId && listId.length > 0) {
 						join(listId[0], listId)
 					} else {
@@ -101,7 +99,9 @@ const Game = () => {
 		};
 
 		socket.onerror = (error) => {
-			console.error('WebSocket Error: ', error);
+			addToast('An error has occured !', 'failure', 5000);
+			navigate('/home');
+			console.log('WebSocket error');
 		};
 
 		socket.onclose = () => {
