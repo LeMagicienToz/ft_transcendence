@@ -4,3 +4,4 @@ Uncomment nginx.conf
 Uncomment filebeat in bootstrap.sh for: frontend, db_auth, db_games, redis
 Enable 2FA in auth model
 T_DEBUG to false in .env
+changer redirect URI depuis api42 avec le nouveau nom de server et dans le code
