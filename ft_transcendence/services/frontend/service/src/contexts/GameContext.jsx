@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
+import { useToast } from '../contexts/ToastContext';
 import { UserContext } from './UserContext';
 
 export const GameContext = createContext();
@@ -9,9 +10,9 @@ export const GameProvider = ({ children }) => {
     const [gameId, setGameId] = useState(0);
     const [listId, setListId] = useState([]);
 
-    const [playerIndex, setPlayerIndex] = useState(1);
-
     const [isStarted, setIsStarted] = useState(false);
+
+    const [playerIndex, setPlayerIndex] = useState(1);
 
     const [cameraPosition, setCameraPosition] = useState([0, 0, 0]);
 
@@ -32,6 +33,8 @@ export const GameProvider = ({ children }) => {
     const [paddleColor, setPaddleColor] = useState('#ffffff');
 
     const { userId } = useContext(UserContext);
+
+    const { addToast } = useToast();
 
     const fetchGameData = async (gameId) => {
         try {
@@ -60,8 +63,12 @@ export const GameProvider = ({ children }) => {
                     setPaddleColor(json.game.color_paddle);
                 }
             } else {
+                addToast('Failed to fetch game data.', 'failure', 5000);
+                clear();
             }
         } catch (error) {
+            addToast('Failed to fetch game data.', 'failure', 5000);
+            clear();
         }
     };
 
@@ -78,7 +85,6 @@ export const GameProvider = ({ children }) => {
         setBallPosition([0, 0.6, 0]);
         setPlayerOnePosition([0, -1, -20.2]);
         setPlayerTwoPosition([0, -1, +20.2]);
-        console.log(listId);
         fetchGameData(gameId);
 
         setIsLoading(false);
@@ -87,8 +93,8 @@ export const GameProvider = ({ children }) => {
     const clear = async () => {
         setGameId(0);
         setListId(0);
-        setPlayerIndex(1);
         setIsStarted(false);
+        setPlayerIndex(1);
         setCameraPosition([0, 0, 0]);
         setBallPosition([0, 0.6, 0]);
         setPlayerOnePosition([0, -1, -20.2]);
@@ -109,6 +115,8 @@ export const GameProvider = ({ children }) => {
             gameId, setGameId,
             listId, setListId,
 
+            isStarted, setIsStarted,
+
             playerIndex, setPlayerIndex,
 
             players, setPlayers,
@@ -118,7 +126,6 @@ export const GameProvider = ({ children }) => {
 
             score, setScore,
 
-            isStarted, setIsStarted,
             cameraPosition, setCameraPosition,
             ballPosition, setBallPosition,
             playerOnePosition, setPlayerOnePosition,

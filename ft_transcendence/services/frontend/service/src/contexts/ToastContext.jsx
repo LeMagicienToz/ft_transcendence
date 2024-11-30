@@ -9,7 +9,7 @@ export const ToastProvider = ({ children }) => {
     const [timers, setTimers] = useState({});
 
     const addToast = useCallback((message, className = '', duration = 3000) => {
-        const id = Math.random().toString(36).substr(2, 9);
+        const id = Math.random().toString(36);
         setToasts((toasts) => [...toasts, { id, message, className, duration }]);
 
         const timerId = setTimeout(() => {

@@ -108,6 +108,8 @@ CHANNEL_LAYERS = {
                  + environ.get('T_PORT_INTERN_CACHING') + '/'
                  + environ.get('T_SELF_REDIS_ID'))
                 ],
+            "capacity": 3000,
+            "expiry": 3600,
         },
     },
 }

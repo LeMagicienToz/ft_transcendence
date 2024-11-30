@@ -274,7 +274,13 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def regular_ping(self):
         while True:
             await asyncio.sleep(30)
-            await self.send(text_data="ping")
+            #await self.send(text_data="ping")
+            await self.send(text_data=json.dumps({
+                "game_data": {
+                    "status": "ping",
+                }
+            }))
+
 
     async def setup_regular_ping(self):
         asyncio.create_task(self.regular_ping())
