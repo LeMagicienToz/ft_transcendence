@@ -29,24 +29,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         from ..endpoints.endpoints_utils import utils_get_user_info
-
-        """
-        cookies = {}
-        headers = dict(self.scope["headers"])
-        if b"cookie" in headers:
-            cookie_header = headers[b"cookie"].decode()
-            cookie_list = cookie_header.split(';')
-            for cookie in cookie_list:
-                key_value_pair = cookie.split('=')
-                if len(key_value_pair) != 2:
-                    continue
-                key = key_value_pair[0]
-                value = key_value_pair[1]
-                cookies[key] = value
-        else :
-            await self.close()
-            return
-        """
         cookies = {}
         headers = dict(self.scope["headers"])
         if b"cookie" in headers:
@@ -125,7 +107,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             return False
 
     async def get_game(self):
-
         # get game_id fron url
         try:
             self.game_id = int(self.scope["url_route"]["kwargs"]["game_id"])
@@ -158,14 +139,11 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-
         if hasattr(self, 'game_logic') and self.game_logic:
             current_player_index = self.player.player_index
-            #logger.debug(f"unassigned player {self.player.player_index}")
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
-                logger.debug("change of status")
                 self.game.status = 'abandoned'
                 self.game_logic.game_data['status'] = 'abandoned'
                 await sync_to_async(self.game.save)()
@@ -178,7 +156,13 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
                 self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
-            await self.game_logic.end(close_code)
+
+            if self.game.tournament_id != 0:
+                tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
+                if tournament.status == 'waiting':
+                    tournament.status = 'abandoned'
+                    await sync_to_async(tournament.save)()
+            await self.game_logic.end(close_code=1000)
 
     # I receive only text because json is only text
     async def receive(self, text_data):
@@ -204,11 +188,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
         self.game_logic.game_data = data_json.get("game_data")
+        # Send game state by WebSocket
+        await self.send(text_data=event["message"])
         if self.game_logic.game_data['status'] == "finished":
             if self.is_player_1():
                 await self.finish_game()
-        # Send game state by WebSocket
-        await self.send(text_data=event["message"])
+        if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
+            await self.close()
 
     async def finish_game(self):
         self.game.status = "finished"

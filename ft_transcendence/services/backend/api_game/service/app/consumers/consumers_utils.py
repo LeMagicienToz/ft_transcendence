@@ -181,6 +181,7 @@ class GameLogic():
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
+				await self.send_game_state()
 				await asyncio.sleep(2)
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
@@ -193,6 +194,7 @@ class GameLogic():
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
+				await self.send_game_state()
 				await asyncio.sleep(2)
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]
@@ -204,4 +206,3 @@ class GameLogic():
 		]
 		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
 		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed
-		await self.send_game_state()

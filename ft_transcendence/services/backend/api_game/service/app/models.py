@@ -9,6 +9,16 @@ class PlayerModel(models.Model):
     player_index = models.IntegerField(default=0)
     user_info = models.JSONField(default=dict, blank=True)
 
+    def to_array(self):
+        return {
+            'user_id': self.user_id,
+            'user_name': self.user_name,
+            'score': self.score,
+            'nickname': self.nickname,
+            'player_index': self.player_index,
+            'user_info': self.user_info,
+        }
+
 class GameModel(models.Model):
 
     custom_name = models.CharField(max_length=30, default="custom_name")
@@ -40,6 +50,38 @@ class GameModel(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
 
+    def to_array(self):
+        return {
+            'id': self.id,
+            'custom_name': self.custom_name,
+            'status': self.status,
+            'game_type': self.game_type,
+            'match_type': self.match_type,
+            'score_to_win': self.score_to_win,
+            'tournament_id': self.tournament_id,
+            'ball_speed': self.ball_speed,
+            'color_board': self.color_board,
+            'color_ball': self.color_ball,
+            'color_wall': self.color_wall,
+            'color_paddle': self.color_paddle,
+            'creation_time': self.creation_time,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'type': 'game',
+            'joined_players_count': self.get_joined_players_count(),
+            'players': [
+                player.to_array()
+                for player in self.players.all()
+            ]
+        }
+
+    def get_joined_players_count(self):
+        players_that_not_with_placeholder_username = [
+            player for player in self.players.all()
+            if not player.user_name.startswith("__placeholder")
+        ]
+        return len(players_that_not_with_placeholder_username)
+
     def is_full(self):
         indexes = list(self.players.values_list('player_index', flat=True))
         # Count indexes that are not zero
@@ -50,6 +92,12 @@ class GameModel(models.Model):
         if (self.match_type == '2v2' and joined_players_number == 4):
             return True
         return False
+
+    def is_tournament_full(self):
+        if self.tournament_id == 0:
+            return True
+        tournament = TournamentModel.objects.get(id=self.tournament_id)
+        return tournament.get_joined_players_count() == tournament.player_count
 
     def update_player_two_score(self, score):
         # Loop through all players in the game
@@ -118,45 +166,11 @@ class TournamentModel(models.Model):
 
     def to_array(self):
         players = [
-            {
-                "user_id": player.user_id,
-                "user_name": player.user_name,
-                "score": player.score,
-                "nickname": player.nickname,
-                "player_index": player.player_index,
-                'user_info': player.user_info,
-            }
+            player.to_array()
             for player in self.players.all()
         ]
         games = [
-            {
-                "id": game.id,
-                "custom_name": game.custom_name,
-                "match_type": game.match_type,
-                "game_type": game.game_type,
-                "score_to_win": game.score_to_win,
-                "tournament_id": game.tournament_id,
-                'ball_speed': game.ball_speed,
-                'color_board': game.color_board,
-                'color_ball': game.color_ball,
-                'color_wall': game.color_wall,
-                'color_paddle': game.color_paddle,
-                "status": game.status,
-                "creation_time": game.creation_time,
-                "start_time": game.start_time,
-                "end_time": game.end_time,
-                "players": [
-                    {
-                        "user_id": player.user_id,
-                        "user_name": player.user_name,
-                        "score": player.score,
-                        "nickname": player.nickname,
-                        "player_index": player.player_index,
-                        'user_info': player.user_info,
-                    }
-                    for player in game.players.all().order_by('id')
-                ]
-            }
+            game.to_array()
             for game in self.games.all().order_by('id')
         ]
         tournament_data = {

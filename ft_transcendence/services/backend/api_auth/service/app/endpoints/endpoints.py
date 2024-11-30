@@ -279,8 +279,7 @@ def me(request):
     visColor = user.custom_user.visColor
     ringsColor = user.custom_user.ringsColor
     bpColor = user.custom_user.bpColor
-    twoFA_enabled = user.custom_user.twoFA_enabled
-    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'email': email, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor, 'twoFA_enabled': twoFA_enabled}, status=200)
+    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'email': email, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor}, status=200)
 
 ## > ME: UPDATE AVATAR < #######
 
