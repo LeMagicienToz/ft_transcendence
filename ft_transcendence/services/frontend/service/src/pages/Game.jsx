@@ -66,8 +66,14 @@ const Game = () => {
 			if (event.data === "ping") {
 				return ;
 			}
-			const data = JSON.parse(event.data);
-			//console.log(data);
+			// TODO simplify the 7 lines bellow
+			let data;
+			try {
+				data = JSON.parse(event.data);
+			} catch (e) {
+				console.log("failed to parse ", event.data)
+				return ;
+			}
 
 			const playerPositions = data.game_data.player_positions;
 			const ballPosition = data.game_data.ball_position;

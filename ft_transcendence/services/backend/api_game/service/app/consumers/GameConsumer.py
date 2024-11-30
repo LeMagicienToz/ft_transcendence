@@ -85,7 +85,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             await sync_to_async(self.game.save)()
             #tell eveyrone to update their game_data.status
             self.game_logic.game_data['status'] = 'ready_to_play'
-            await self.game_logic.send_game_state()
+            await self.game_logic.send_game_state(["status"])
 
     async def send_to_tournament_group(self, data):
         message = json.dumps(data)
@@ -190,7 +190,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                         tournament.status = 'abandoned'
                         await sync_to_async(tournament.save)()
                     await sync_to_async(self.game.save)()
-                    await self.game_logic.send_game_state()
+                    await self.game_logic.send_game_state(["status"])
             elif self.game_logic.game_data['status'] == 'playing':
                 if current_player_index == 1:
                     the_other_player_index = '2'
@@ -199,7 +199,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
                 self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
-                await self.game_logic.send_game_state()
+                await self.game_logic.send_game_state(["status"])
 
 
     # I receive only text because json is only text
@@ -225,9 +225,18 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def game_onchange(self, event):
         #update self.game_logic.game_data
         data_json = json.loads(event["message"])
-        self.game_logic.game_data = data_json.get("game_data")
+        received_game_data = data_json.get("game_data")
         # Send game state by WebSocket
-        await self.send(text_data=event["message"])
+        fields = data_json.get("fields")
+        for field in fields:
+            if (field == "keys"):
+                player_index = data_json.get("player_index")
+                self.game_logic.game_data['keys'][player_index] = received_game_data['keys'][player_index]
+            else:
+                self.game_logic.game_data[field] = received_game_data[field]
+        await self.send(text_data=json.dumps({
+            'game_data':self.game_logic.game_data
+        }))
         if self.game_logic.game_data['status'] == "finished":
             if self.is_player_1():
                 await self.finish_game()
@@ -269,7 +278,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         #tell eveyrone to update their game_data.status
         self.game_logic.game_data['status'] = 'playing'
         #self.game_logic.game_data['start_time'] = self.game.start_time
-        self.game_logic.send_game_state()
+        self.game_logic.send_game_state(["status"])
         if (self.is_player_1()):
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
