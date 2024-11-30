@@ -603,6 +603,7 @@ class TournamentJoinView(APIView):
         game_list = None
         if tournament:
             game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting')
+        tournament_data = tournament.to_array()
         return JsonResponse({
             'success': True,
             'message': 'Player joined the tournament',
