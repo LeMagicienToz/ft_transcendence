@@ -86,7 +86,7 @@ class GameLogic():
 			self.game.end_time = self.game_data['end_time']
 			# TODO make the player who is left as a winner
 			await sync_to_async(self.game.save)()
-		await self.send_game_state()
+		await self.send_game_state(["status", "end_time"])
 
 	async def on_receiving_data(self, text_data):
 		data_json = json.loads(text_data)
@@ -103,8 +103,8 @@ class GameLogic():
 				self.game_data['keys'][player_index][opposite_key] = False
 			else:
 				self.game_data['keys'][player_index][direction] = False
-			await self.update_player_positions()
-			await self.send_game_state()
+			#await self.update_player_positions()
+			await self.send_game_state(["keys"], player_index)
 		elif action == "ping":
 			await self.consumer.send(json.dumps({"action": "pong"}))
 		else:
@@ -127,9 +127,10 @@ class GameLogic():
 			if new_y != y:
 				self.game_data["player_positions"][player_index][1] = new_y
 
-	async def send_game_state(self):
+	async def send_game_state(self, fields, player_index = None):
 		message = json.dumps({
-			"action": "update",
+			"fields": fields,
+			"player_index": player_index,
 			"game_data": self.game_data
 		})
 		await self.consumer.channel_layer.group_send(
@@ -144,7 +145,7 @@ class GameLogic():
 			await asyncio.sleep(1 / self.REFRESH_PER_SEC)
 			await self.update_player_positions()
 			await self.update_ball_position()
-			await self.send_game_state()
+			await self.send_game_state(["ball_position", "player_positions"])
 
 	def is_ball_touched_by_player_right(self):
 		ball_x, ball_y = self.game_data["ball_position"]
@@ -185,7 +186,7 @@ class GameLogic():
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
-				await self.send_game_state()
+				await self.send_game_state(["ball_position", "scores", "status"])
 				await asyncio.sleep(2)
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
@@ -198,7 +199,7 @@ class GameLogic():
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
-				await self.send_game_state()
+				await self.send_game_state(["ball_position", "scores", "status"])
 				await asyncio.sleep(2)
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]
