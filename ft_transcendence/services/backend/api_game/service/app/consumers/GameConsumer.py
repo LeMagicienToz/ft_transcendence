@@ -68,7 +68,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             # check the status of the game
             await sync_to_async(self.assign_player_index)()
         await self.listen()
-        #await self.setup_regular_ping()
+        await self.setup_regular_ping()
         if self.game.tournament_id != 0:
             self.tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
             await self.listen_to_tournament_group()
@@ -256,11 +256,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def regular_ping(self):
         while True:
-            await asyncio.sleep(10)
-            json_message = json.dumps({
-                "message": "ping"
-            })
-            await self.send(text_data=json_message)
+            await asyncio.sleep(30)
+            await self.send(text_data="ping")
 
     async def setup_regular_ping(self):
         asyncio.create_task(self.regular_ping())

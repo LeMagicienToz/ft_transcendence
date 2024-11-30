@@ -63,6 +63,9 @@ const Game = () => {
 		const normalize = (value, offset) => value / 9.9 + offset;
 
 		socket.onmessage = (event) => {
+			if (event.data === "ping") {
+				return ;
+			}
 			const data = JSON.parse(event.data);
 			//console.log(data);
 
