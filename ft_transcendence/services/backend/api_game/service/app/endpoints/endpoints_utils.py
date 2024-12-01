@@ -36,7 +36,7 @@ def utils_get_user_info(token, token42):
             'details': str(e)
         }
 
-def create_round_robin_matches(tournament):
+def create_round_robin_matches_old(tournament):
     # Récupère les informations nécessaires du tournoi
     players = list(tournament.players.all().order_by('user_id'))
     custom_name = "Game in " + tournament.custom_name
@@ -176,6 +176,122 @@ def create_round_robin_matches(tournament):
 
     # Ajoute tous les jeux au tournoi
     tournament.games.set(games)
-    #tournament.status = 'playing'
-    #tournament.start_time = timezone.now()
+    tournament.save()
+
+def create_round_robin_matches(tournament):
+    # get info to create tournament
+    players = list(tournament.players.all())
+    custom_name = "Game in " + tournament.custom_name
+    tournament_id = tournament.id
+    score_to_win = tournament.score_to_win
+    match_type = tournament.match_type
+    game_type = tournament.game_type
+    ball_speed = tournament.ball_speed
+    color_board = tournament.color_board
+    color_ball = tournament.color_ball
+    color_wall = tournament.color_wall
+    color_paddle = tournament.color_paddle
+    games = []
+
+    if match_type == '1v1':
+        # Mode 1v1 : everuone plays against everyone
+        for i in range(len(players)):
+            for j in range(i + 1, len(players)):
+                game = GameModel(
+                    custom_name=custom_name,
+                    match_type=match_type,
+                    game_type=game_type,
+                    score_to_win=score_to_win,
+                    player_count=2,
+                    tournament_id=tournament_id,
+                    ball_speed=ball_speed,
+                    color_board=color_board,
+                    color_ball=color_ball,
+                    color_wall=color_wall,
+                    color_paddle=color_paddle,
+                    status='waiting'
+                )
+                game.save()
+                # Clone les joueurs pour le jeu
+                player1 = PlayerModel(
+                    user_id=players[i].user_id,
+                    user_name=players[i].user_name,
+                    score=0,
+                    nickname=players[i].nickname,
+                    player_index=players[i].player_index,
+                    user_info=players[i].user_info
+                )
+                player2 = PlayerModel(
+                    user_id=players[j].user_id,
+                    user_name=players[j].user_name,
+                    score=0,
+                    nickname=players[j].nickname,
+                    player_index=players[j].player_index,
+                    user_info=players[j].user_info
+                )
+                player1.save()
+                player2.save()
+                game.players.add(player1, player2)
+                games.append(game)
+    elif match_type == '2v2':
+        # Mode 2v2 : each team plays against each team
+        if len(players) % 2 != 0:
+            raise ValueError("The number of players must be even for 2v2 matches.")
+        # Create teams of 2
+        teams = [(players[i], players[i + 1]) for i in range(0, len(players), 2)]
+        # each team plays each other team
+        for i in range(len(teams)):
+            for j in range(i + 1, len(teams)):
+                game = GameModel(
+                    custom_name=custom_name,
+                    match_type=match_type,
+                    game_type=game_type,
+                    score_to_win=score_to_win,
+                    player_count=2,
+                    tournament_id=tournament_id,
+                    ball_speed=ball_speed,
+                    color_board=color_board,
+                    color_ball=color_ball,
+                    color_wall=color_wall,
+                    color_paddle=color_paddle,
+                    status='waiting'
+                )
+                game.save()
+                # Clone les joueurs pour le jeu
+                team1_player1 = PlayerModel.objects.create(
+                    user_id=teams[i][0].user_id,
+                    user_name=teams[i][0].user_name,
+                    score=0,
+                    nickname=teams[i][0].nickname,
+                    player_index=teams[i][0].player_index,
+                    user_info=teams[i][0].user_info
+                )
+                team1_player2 = PlayerModel.objects.create(
+                    user_id=teams[i][1].user_id,
+                    user_name=teams[i][1].user_name,
+                    score=0,
+                    nickname=teams[i][1].nickname,
+                    player_index=teams[i][1].player_index,
+                    user_info=teams[i][1].user_info
+                )
+                team2_player1 = PlayerModel.objects.create(
+                    user_id=teams[j][0].user_id,
+                    user_name=teams[j][0].user_name,
+                    score=0,
+                    nickname=teams[j][0].nickname,
+                    player_index=teams[j][0].player_index,
+                    user_info=teams[j][0].user_info
+                )
+                team2_player2 = Player.objects.create(
+                    user_id=teams[j][1].user_id,
+                    user_name=teams[j][1].user_name,
+                    score=0,
+                    nickname=teams[j][1].nickname,
+                    player_index=teams[j][1].player_index,
+                    user_info=teams[j][1].user_info
+                )
+                game.players.add(team1_player1, team1_player2, team2_player1, team2_player2)
+                games.append(game)
+    # Ajoute tous les jeux au tournoi
+    tournament.games.set(games)
     tournament.save()
