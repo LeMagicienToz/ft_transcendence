@@ -17,7 +17,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 150
+	REFRESH_PER_SEC = 20
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -41,11 +41,12 @@ class GameLogic():
 		self.consumer = consumer
 		self.game = consumer.game
 		# Paddle and ball speed
-		self.PADDLE_SPEED = 2
-		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * 1.5 * self.game.ball_speed
-		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * 1.5 * self.game.ball_speed
+		self.PADDLE_SPEED = 2 * (100 / self.REFRESH_PER_SEC)
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC)
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC)
 		# Initialize positions and scores based on match type
 		self.game_data = {
+			"game_id": self.game.id,
 			"ball_position": [
 				self.INITIAL_POSITIONS["ball"]["x"],
 				self.INITIAL_POSITIONS["ball"]["y"]
@@ -105,7 +106,7 @@ class GameLogic():
 				self.game_data['keys'][player_index]['left'] = False
 				self.game_data['keys'][player_index]['right'] = False
 			#await self.update_player_positions()
-			#await self.send_game_state(["keys"], player_index)
+			await self.send_game_state(["keys"], player_index)
 		elif action == "ping":
 			await self.consumer.send(json.dumps({"action": "pong"}))
 		else:
@@ -210,5 +211,3 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
-		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed
-		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed

@@ -62,7 +62,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         if (self.pick_game_logic()) is False:
             await self.close()
             return
-        await self.game_logic.on_connect()
+        #await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
         if is_playing_this_game and self.player.player_index == 0:
             # check the status of the game
