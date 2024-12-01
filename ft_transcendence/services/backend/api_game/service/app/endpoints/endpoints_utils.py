@@ -83,6 +83,7 @@ def create_round_robin_matches(tournament):
                     match_type=match_type,
                     game_type=game_type,
                     score_to_win=score_to_win,
+                    player_count=2,
                     tournament_id=tournament_id,
                     ball_speed=ball_speed,
                     color_board=color_board,
@@ -127,7 +128,13 @@ def create_round_robin_matches(tournament):
                     match_type=match_type,
                     game_type=game_type,
                     score_to_win=score_to_win,
+                    player_count=2,
                     tournament_id=tournament_id,
+                    ball_speed=ball_speed,
+                    color_board=color_board,
+                    color_ball=color_ball,
+                    color_wall=color_wall,
+                    color_paddle=color_paddle,
                     status='waiting'
                 )
                 game.save()
