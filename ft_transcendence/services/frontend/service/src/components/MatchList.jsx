@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import GameListCard from './GameListCard';
-import Loader from './Loader';
 import BaseButton from './Buttons/BaseButton';
-import GameCreateWindow from './Windows/GameCreateWindow';
+import MatchListCard from './MatchListCard';
 
-import './MatchesList.css';
+import './MatchList.css';
 
-const MatchesList = ({ tournamentId = 0 }) => {
+const MatchList = ({ tournamentId = 0 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [games, setGames] = useState([]);
 
@@ -35,7 +33,7 @@ const MatchesList = ({ tournamentId = 0 }) => {
     };
 
     return (
-        <div className='matches-list col'>
+        <div className='match-list col' >
             <header>
                 <h3>Matches</h3>
                 <BaseButton
@@ -45,13 +43,13 @@ const MatchesList = ({ tournamentId = 0 }) => {
                     <i class="bi bi-arrow-clockwise"></i>
                 </BaseButton>
             </header>
-            <div className={`content col`} >
+            <div className={`col content`}>
                 {games.map((game, index) => (
-                    <p>{game.players[0].nickname} VS {game.players[1].nickname}</p>
+                    <MatchListCard game={game} />
                 ))}
             </div>
         </div>
     );
 }
 
-export default MatchesList;
+export default MatchList;

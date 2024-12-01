@@ -4,7 +4,7 @@ import Loader from '../Loader';
 
 import './BaseButton.css';
 
-const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '', text, icon, disabled = false, children }) => {
+const BaseButton = ({ onClick = () => {}, onTouchStart = () => {}, onTouchEnd = () => {}, isLoading = false, id, className = '', text, icon, disabled = false, children }) => {
     return (
         <div className={`button ${className}`} >
             {isLoading && (
@@ -14,6 +14,8 @@ const BaseButton = ({ onClick = () => {}, isLoading = false, id, className = '',
             )}
             <button
                 onClick={onClick}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
                 id={id}
                 disabled={disabled}
             >

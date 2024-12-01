@@ -1,11 +1,11 @@
-.matches-list {
+.match-list {
     gap: 0 !important;
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-.matches-list > .loading {
+.match-list > .loading {
     height: 100%;
     width: 100%;
     background-color: rgba(0, 0, 0, 0.5);
@@ -15,25 +15,25 @@
     z-index: 1;
 }
 
-.matches-list > .loading > .loader {
+.match-list > .loading > .loader {
     margin: auto;
 }
 
-.matches-list > header {
+.match-list > header {
     display: flex;
     align-items: center;
     padding: 8px;
 }
 
-.matches-list > header > h3 {
+.match-list > header > h3 {
     color: #e3e3e3;
 }
 
-.matches-list > header > .button.refresh {
+.match-list > header > .button.refresh {
     margin-left: auto;
 }
 
-.matches-list > .content {
+.match-list > .content {
     gap: 8px !important;
     padding: 8px;
     overflow-y: auto;

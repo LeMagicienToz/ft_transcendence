@@ -17,6 +17,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     environ.get('T_SERVER_NAME'),
+    environ.get('T_SERVER_ADDR'),
     environ.get('T_SELF_NAME'),
     'auth'
 ]
@@ -27,6 +28,7 @@ CORS_ALLOWED_ORIGINS = [
     'localhost',
     '127.0.0.1',
     environ.get('T_SERVER_NAME'),
+    environ.get('T_SERVER_ADDR'),
     environ.get('T_SELF_NAME'),
     'auth'
 ]

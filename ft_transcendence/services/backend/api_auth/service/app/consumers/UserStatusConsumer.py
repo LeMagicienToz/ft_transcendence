@@ -43,7 +43,6 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
     #    await self.get_friends_status()
 
     async def disconnect(self, close_code):
-
        if hasattr(self, "user"):
             if hasattr(self, "group_name"):
                 await self.channel_layer.group_discard(

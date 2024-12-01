@@ -29,7 +29,7 @@
     position: relative;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 460px) {
 
     .page#page-home > section.view > .games {
         height: 88%;

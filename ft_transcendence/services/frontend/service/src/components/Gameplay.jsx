@@ -5,6 +5,7 @@ import { GameContext } from '../contexts/GameContext';
 import { useToast } from '../contexts/ToastContext';
 
 import Loader from './Loader';
+import BaseButton from './Buttons/BaseButton';
 import GameScene from '../scenes/GameScene';
 
 import './Gameplay.css';
@@ -17,7 +18,7 @@ const Gameplay = () => {
 	const currentKeyPressedRef = useRef(null);
 	const navigate = useNavigate();
 
-	const sendMovement = (direction) => {
+	const send = (direction) => {
 			socketRef.current.send(`{"action": "move", "direction": "${direction}"}`);
 	};
 
@@ -25,15 +26,15 @@ const Gameplay = () => {
 		const handleKeyDown = (event) => {
 			if (!currentKeyPressedRef.current) {
 				currentKeyPressedRef.current = event.key;
-				if (event.key === 'ArrowLeft') sendMovement(lCommand);
-				else if (event.key === 'ArrowRight') sendMovement(rCommand);
+				if (event.key === 'ArrowLeft') send(lCommand);
+				else if (event.key === 'ArrowRight') send(rCommand);
 			}
 		};
 
 		const handleKeyUp = (event) => {
 			if (currentKeyPressedRef.current === event.key) {
 				currentKeyPressedRef.current = null;
-				sendMovement('off');
+				if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') send('off');
 			}
 		};
 
@@ -51,7 +52,7 @@ const Gameplay = () => {
 		socketRef.current = socket;
 
 		socket.onopen = () => {
-			console.log('WebSocket connected');
+			addToast('Connection established.', 'success', 5000);
 		};
 
 		const normalize = (value, offset) => value / 9.9 + offset;
@@ -88,13 +89,19 @@ const Gameplay = () => {
 						navigate('/home');
 					}
 					break;
+				case 'abandoned':
+					socket.close();
+					setIsStarted(false);
+					clear();
+					addToast('The game was abandoned by a player.', 'failure', 5000);
+					navigate('/home');
+					break;
 			}
 		};
 
 		socket.onerror = (error) => {
-			addToast('An error has occurred.', 'failure', 5000);
+			addToast('Connection lost.', 'failure', 5000);
 			navigate('/home');
-			console.log('WebSocket error');
 		};
 
 		socket.onclose = () => {
@@ -118,6 +125,20 @@ const Gameplay = () => {
 			}
 			<div className="game">
 				<GameScene />
+			</div>
+			<div className="controls row">
+				<BaseButton
+					onTouchStart={() => send(lCommand)}
+					onTouchEnd={() => send('off')}
+					className='secondary round'
+					icon='arrow-left'
+				/>
+				<BaseButton
+					onTouchStart={() => send(rCommand)}
+					onTouchEnd={() => send('off')}
+					className='secondary round'
+					icon='arrow-right'
+				/>
 			</div>
 		</div>
 	);

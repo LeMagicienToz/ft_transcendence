@@ -30,3 +30,18 @@
     width: 100%;
     position: absolute;
 }
+
+.gameplay > .controls {
+    display: none;
+    bottom: 0;
+    animation: fadeIn 300ms;
+    position: absolute;
+    z-index: 1;
+}
+
+@media (max-width: 460px) {
+
+    .gameplay > .controls  {
+        display: block !important;
+    }
+}

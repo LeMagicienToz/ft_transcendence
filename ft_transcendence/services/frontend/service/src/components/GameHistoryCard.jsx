@@ -59,7 +59,11 @@ const GameHistoryCard = ({ game = {} }) => {
             {!isLoading && (
                 <>
                     <td className='elem' >
-                        <div className={`status ${game?.has_won === true ? 'win' : 'lose'}`} ></div>
+                        <div className={`status ${game?.has_won === true ? 'win' : 'lose'}`} >
+                            {game?.has_won === true &&
+                                <i class="bi bi-trophy-fill"></i>
+                            }
+                        </div>
                     </td>
                     <td className='elem' >
                         <p className={`main`} >{startDate}</p>

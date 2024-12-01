@@ -14,14 +14,9 @@ const BaseWindow = ({ onClose = () => {}, isOpen = false, title = '', height = '
             }
         };
 
-        if (isOpen) {
-            document.addEventListener('keydown', handleKeyDown);
-        }
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    },
-    [onClose, isOpen]);
+        if (isOpen) document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [onClose, isOpen]);
 
     if (!isOpen) {
         return null;

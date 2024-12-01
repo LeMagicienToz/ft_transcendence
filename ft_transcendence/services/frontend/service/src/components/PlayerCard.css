@@ -70,7 +70,7 @@
     max-height: 100%;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 460px) {
 
     .player-card > .button.friend {
         display: block !important;

@@ -42,7 +42,7 @@
     flex: none;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 460px) {
 
     .games-list > header.row > .col.control .button.refresh
     {
