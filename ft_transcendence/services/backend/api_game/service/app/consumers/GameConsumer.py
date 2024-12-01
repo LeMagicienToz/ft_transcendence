@@ -78,6 +78,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         if self.game.tournament_id == 0:
             await self.update_game_status_to_ready_to_play()
+        await self.send(text_data=json.dumps({
+            'game_data': self.present(self.game_logic.game_data)
+        }))
 
     async def update_game_status_to_ready_to_play(self):
         if self.game.status == 'waiting' and await sync_to_async(self.game.is_full)():
@@ -273,8 +276,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def regular_ping(self):
         while True:
-            await asyncio.sleep(30)
-            #await self.send(text_data="ping")
+            await asyncio.sleep(20)
             await self.send(text_data=json.dumps({
                 "game_data": {
                     "status": "ping",
