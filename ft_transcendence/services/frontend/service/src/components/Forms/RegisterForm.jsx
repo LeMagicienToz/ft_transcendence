@@ -21,7 +21,7 @@ const RegisterForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled = f
     const handleValidation = (form) => {
         let valid = true;
 
-        if (!/^[A-Za-z0-9_-]{5,24}$/.test(form.username.value)) {
+        if (!/^[A-Za-z0-9_-]{5,16}$/.test(form.username.value)) {
             addToast('Username can only contain alphanumeric characters and "_-" symbols, and be between 5 and 24 characters long.', 'failure', 10000)
             valid = false;
         }

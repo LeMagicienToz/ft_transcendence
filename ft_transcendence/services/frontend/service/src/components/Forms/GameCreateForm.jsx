@@ -74,7 +74,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
                     <SelectInput id='game_type' name='game_type' label='Game' options={[{label: 'Pong', value: 'pong'}]} value='pong' />
                     <div className={`row`} >
                         <BaseInput id='custom_name' name='custom_name' label='Room' value={`${username}'s game`} regex={/^[A-Za-z0-9 _.+'"$#@)(\][)-]{4,24}$/} />
-                        <BaseInput id='nickname' name='nickname' label='Nickname' value={username} regex={/^[A-Za-z0-9_-]{5,24}$/} />
+                        <BaseInput id='nickname' name='nickname' label='Nickname' value={username} regex={/^[A-Za-z0-9_-]{5,16}$/} />
                     </div>
                     <div className={`row`} >
                         <SelectInput

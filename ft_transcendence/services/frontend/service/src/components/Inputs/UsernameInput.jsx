@@ -16,7 +16,7 @@ const UsernameInput = ({ onBlur = () => {}, onChange = () => {}, onFocus = () =>
             label={label}
             placeholder={placeholder}
             disabled={disabled}
-            regex={/^[A-Za-z0-9_-]{5,}$/}
+            regex={/^[A-Za-z0-9_-]{5,16}$/}
         />
     );
 }

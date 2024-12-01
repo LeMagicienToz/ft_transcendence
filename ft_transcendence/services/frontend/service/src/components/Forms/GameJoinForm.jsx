@@ -48,7 +48,7 @@ const GameJoinForm = ({ onSuccess = () => {}, onFailure = () => {}, game = {}, d
             headers={{'Content-Type': 'application/json'}}
             disabled={disabled}
         >
-            <BaseInput id='nickname' name='nickname' label='Nickname' value={username} />
+            <BaseInput id='nickname' name='nickname' label='Nickname' value={username} regex={/^[A-Za-z0-9_#-]{5,16}$/} />
             <BaseButton text='Join' className='primary' />
         </BaseForm>
     );
