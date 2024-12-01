@@ -73,7 +73,7 @@ class GameModel(models.Model):
             'joined_players_count': self.get_joined_players_count(),
             'players': [
                 player.to_array()
-                for player in self.players.all()
+                for player in self.players.all().order_by('player_index')
             ]
         }
 
