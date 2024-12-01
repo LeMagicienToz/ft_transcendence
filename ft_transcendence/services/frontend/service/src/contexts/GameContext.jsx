@@ -9,6 +9,7 @@ export const GameProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [gameId, setGameId] = useState(0);
     const [listId, setListId] = useState([]);
+    const [tournamentId, setTournamentId] = useState(0);
 
     const [isStarted, setIsStarted] = useState(false);
 
@@ -45,14 +46,9 @@ export const GameProvider = ({ children }) => {
             if (response.ok) {
                 const json = await response.json();
                 if (json?.success == true) {
-
+                    setTournamentId(json.game.tournament_id);
                     const index = json.game.players.findIndex(player => player.user_id === userId);
-
-                    //setListId(json.next_id);
-                    //console.log(json.next_id);
                     setPlayerIndex(index);
-                    console.log(json);
-                    console.log(index);
                     setCameraPosition(index == 0 ? [0, 10, -40] : [0, 10, +40]);
                     setPlayers(json.game.players);
                     setLCommand(index == 0 ? 'left' : 'right');
@@ -78,21 +74,30 @@ export const GameProvider = ({ children }) => {
 
     const join = (gameId, listId) => {
         setIsLoading(true);
-
         setGameId(gameId);
         setListId(listId.filter(id => id !== gameId));
+        setTournamentId(0);
+        setIsStarted(false);
         setScore([0, 0]);
         setBallPosition([0, 0.6, 0]);
         setPlayerOnePosition([0, -1, -20.2]);
         setPlayerTwoPosition([0, -1, +20.2]);
+        setPlayers({});
+        setLCommand('left');
+        setRCommand('right');
+        setScore([0, 0]);
+        setFloorColor('#ffffff');
+        setWallColor('#ffffff');
+        setBallColor('#ffffff');
+        setPaddleColor('#ffffff');
         fetchGameData(gameId);
-
         setIsLoading(false);
     };
 
     const clear = async () => {
         setGameId(0);
         setListId(0);
+        setTournamentId(0);
         setIsStarted(false);
         setPlayerIndex(1);
         setCameraPosition([0, 0, 0]);
@@ -114,6 +119,7 @@ export const GameProvider = ({ children }) => {
             isLoading, setIsLoading,
             gameId, setGameId,
             listId, setListId,
+            tournamentId, setTournamentId,
 
             isStarted, setIsStarted,
 

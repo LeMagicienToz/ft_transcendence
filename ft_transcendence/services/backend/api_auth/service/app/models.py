@@ -4,9 +4,6 @@ import random
 
 class CustomUserModel(models.Model):
 
-    def get_default_visColor():
-        return random.choice(['#16a085', '#27ae60', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#c0392b'])
-
     def get_default_profile_picture_url():
         return f"/images/default{random.choice(['1', '2', '3', '4', '5', '6', '7'])}.jpg"
 
@@ -14,7 +11,7 @@ class CustomUserModel(models.Model):
     profile_picture_url = models.URLField(default=get_default_profile_picture_url)
     intra_id = models.IntegerField(null=True, blank=True)
     suitColor = models.CharField(max_length=7, default='#ffffff')
-    visColor = models.CharField(max_length=7, default=get_default_visColor)
+    visColor = models.CharField(max_length=7, default='#ffffff')
     ringsColor = models.CharField(max_length=7, default='#ffffff')
     bpColor = models.CharField(max_length=7, default='#ffffff')
     twoFA_enabled = models.BooleanField(default=False)

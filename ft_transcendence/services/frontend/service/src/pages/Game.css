@@ -1,29 +1,51 @@
 .page#page-game > section.view {
     height: 100%;
     width: 100%;
-    align-content: center;
     position: absolute;
 }
 
-.page#page-game > section.view > .score {
-    top: 24px;
-    left: 24px;
-    height: 80px;
-    width: 360px;
-    background-color: var(--color-background-d);
-    border-radius: var(--default-radius);
+.page#page-game > section.view > .col.info {
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 368px;
+    padding: 24px;
     position: absolute;
-    z-index: 1;
+    z-index: 2;
 }
 
 @media (max-width: 380px) {
 
-    .page#page-game > section.view > .score {
-        top: 0 !important;
-        left: 0 !important;
+    .page#page-game > section.view > .col.info {
         width: 100% !important;
+        gap: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+.page#page-game > section.view > .col.info > .score {
+    height: 80px;
+    width: 100%;
+    background-color: var(--color-background-d);
+    border-radius: var(--default-radius);
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+@media (max-width: 380px) {
+
+    .page#page-game > section.view > .col.info > .score {
         border-radius: 0 !important;
     }
+}
+
+.page#page-game > section.view > .col.info > .overview {
+    flex: 1;
+    width: 100%;
+    background-color: var(--color-background-d);
+    border-radius: var(--default-radius);
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .page#page-game > section.view > .announce {

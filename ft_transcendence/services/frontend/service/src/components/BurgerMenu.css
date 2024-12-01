@@ -2,7 +2,7 @@
     height: 100%;
     width: 100%;
     max-width: 340px;
-    padding: 24px 0 24px 24px;
+    padding: var(--default-padding) 0 var(--default-padding) var(--default-padding);
     position: relative;
     z-index: 50;
     pointer-events: none;
@@ -52,11 +52,6 @@
     overflow-x: hidden;
 }
 
-.burger > nav.menu.open {
-    display: flex !important;
-    max-width: 100% !important;
-}
-
 @media (max-width: 380px) {
 
     .burger > nav.menu {
@@ -67,6 +62,11 @@
         border-radius: 0 !important;
         position: relative !important;
     }
+}
+
+.burger > nav.menu.open {
+    display: flex !important;
+    max-width: 100% !important;
 }
 
 .burger > nav.menu .col.astronaut-preview {

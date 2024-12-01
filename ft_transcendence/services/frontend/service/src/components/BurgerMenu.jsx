@@ -18,7 +18,7 @@ const BurgerMenu = () => {
 
     return (
         <div className='burger'>
-            <BaseButton onClick={toggleMenu} text={isOpen ? '⛌' : '☰'} className='burger secondary round' >
+            <BaseButton onClick={toggleMenu} className='burger secondary round' >
                 {isOpen ? (
                     <i class="bi bi-x-lg"></i>
                 ) : (

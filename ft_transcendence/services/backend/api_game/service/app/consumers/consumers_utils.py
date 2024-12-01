@@ -17,7 +17,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 140
+	REFRESH_PER_SEC = 150
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -105,7 +105,7 @@ class GameLogic():
 				self.game_data['keys'][player_index]['left'] = False
 				self.game_data['keys'][player_index]['right'] = False
 			#await self.update_player_positions()
-			await self.send_game_state(["keys"], player_index)
+			#await self.send_game_state(["keys"], player_index)
 		elif action == "ping":
 			await self.consumer.send(json.dumps({"action": "pong"}))
 		else:

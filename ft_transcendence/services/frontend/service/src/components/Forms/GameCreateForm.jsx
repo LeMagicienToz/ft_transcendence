@@ -44,8 +44,8 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
             addToast('Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.', 'failure', 10000)
             valid = false;
         }
-        if (!/^[A-Za-z0-9_#-]{5,24}$/.test(form.nickname.value)) {
-            addToast('Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 24 characters long.', 'failure', 10000)
+        if (!/^[A-Za-z0-9_#-]{5,16}$/.test(form.nickname.value)) {
+            addToast('Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.', 'failure', 10000)
             valid = false;
         }
         return valid;

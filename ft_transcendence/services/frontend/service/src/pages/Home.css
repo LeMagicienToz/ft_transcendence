@@ -34,5 +34,6 @@
     .page#page-home > section.view > .games {
         height: 88%;
         margin: auto 0 0 0 !important;
+        border-radius: var(--default-radius) var(--default-radius) 0 0 !important;
     }
 }

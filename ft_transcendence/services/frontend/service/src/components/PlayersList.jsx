@@ -6,7 +6,7 @@ import BaseButton from './Buttons/BaseButton';
 import './PlayersList.css';
 
 const PlayersList = () => {
-    const [isLoading, setisLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
@@ -16,7 +16,7 @@ const PlayersList = () => {
     }, []);
 
     const refresh = async () => {
-        setisLoading(true);
+        setIsLoading(true);
         try {
             const response = await fetch('/api/auth/user/list/', {
             method: 'GET',
@@ -29,7 +29,7 @@ const PlayersList = () => {
                 }
             }
         } catch (error) {}
-        setisLoading(false);
+        setIsLoading(false);
     };
 
     const onChange = (userId, isFriend) => {

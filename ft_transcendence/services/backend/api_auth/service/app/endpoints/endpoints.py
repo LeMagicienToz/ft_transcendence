@@ -96,8 +96,8 @@ def register(request):
 
     if not username or not email or not password or not password2:
         return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
-    if not re.search(r"^[A-Za-z0-9_-]{5,24}$", username):
-        return JsonResponse({'success': False, 'message': 'Username can only contain alphanumeric characters and "_-" symbols, and be between 5 and 24 characters long.'}, status=400)
+    if not re.search(r"^[A-Za-z0-9_-]{5,16}$", username):
+        return JsonResponse({'success': False, 'message': 'Username can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
     if email.endswith('@student.42.fr') or not re.search(r"^[A-Za-z0-9+._-]{3,}@[A-Za-z0-9+._-]{3,}\.[A-Za-z0-9+._-]{2,}$", email):
         return JsonResponse({'success': False, 'message': 'Invalid email address.'}, status=400)
     if not re.search(r"^[A-Za-z\d_@.!?-]{8,24}$", password):

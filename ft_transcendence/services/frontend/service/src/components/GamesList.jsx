@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import GameListCard from './GameListCard';
-import Loader from './Loader';
 import BaseButton from './Buttons/BaseButton';
 import GameCreateWindow from './Windows/GameCreateWindow';
 

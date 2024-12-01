@@ -26,10 +26,10 @@ const AstronautWindow = ({ onClose = () => {}, isOpen = false, title = 'Customiz
                 </div>
                 <div className={`col action`}>
                     <Tabs>
-                        <Tab name='Colors' >
+                        <Tab name='Colors' icon='droplet-half' >
                             <AstronautForm />
                         </Tab>
-                        <Tab name='Avatar' >
+                        <Tab name='Avatar' icon='image' >
                             <AvatarForm />
                         </Tab>
                     </Tabs>
