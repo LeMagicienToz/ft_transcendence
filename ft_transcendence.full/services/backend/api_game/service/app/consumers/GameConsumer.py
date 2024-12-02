@@ -58,6 +58,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         if self.game.tournament_id == 0 and (is_playing_this_game is False):
             await self.close()
             return
+        if self.game.tournament_id != 0 and (is_playing_this_game is False):
+            #await self.close()
+            return
         # pick game_logic
         if (self.pick_game_logic()) is False:
             await self.close()
