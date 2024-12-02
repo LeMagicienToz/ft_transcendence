@@ -31,9 +31,12 @@
     position: absolute;
 }
 
-.gameplay > .controls {
+.gameplay > .controls.row {
     display: none;
+    height: 35%;
+    width: 100%;
     bottom: 0;
+    padding: 24px;
     animation: fadeIn 300ms;
     position: absolute;
     z-index: 1;
@@ -41,7 +44,21 @@
 
 @media (max-width: 460px) {
 
-    .gameplay > .controls  {
-        display: block !important;
+    .gameplay > .controls.controls.row  {
+        display: flex !important;
     }
+}
+
+.gameplay > .controls.row > .col {
+    align-items: center;
+    justify-content: center;
+}
+
+.gameplay > .controls.row > .col {
+    flex: 1;
+}
+
+.gameplay > .controls.row > .col > .button > button {
+    height: 80px;
+    width: 80px;
 }

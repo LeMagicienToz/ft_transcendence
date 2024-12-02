@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { useToast } from '../contexts/ToastContext';
 
 import PlayerCard from './PlayerCard';
 import BaseButton from './Buttons/BaseButton';
@@ -8,6 +10,8 @@ import './PlayersList.css';
 const PlayersList = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [users, setUsers] = useState([]);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();
@@ -27,8 +31,12 @@ const PlayersList = () => {
                 if (json?.success === true) {
                     setUsers(json.users);
                 }
+            } else {
+                addToast('Failed to retrieve player list.', 'failure', 5000);
             }
-        } catch (error) {}
+        } catch (error) {
+            addToast('Failed to retrieve player list.', 'failure', 5000);
+        }
         setIsLoading(false);
     };
 

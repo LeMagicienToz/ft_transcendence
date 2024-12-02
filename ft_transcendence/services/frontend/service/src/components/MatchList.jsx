@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useToast } from '../contexts/ToastContext';
+
 import BaseButton from './Buttons/BaseButton';
 import MatchListCard from './MatchListCard';
 
@@ -8,6 +10,8 @@ import './MatchList.css';
 const MatchList = ({ tournamentId = 0 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [games, setGames] = useState([]);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();
@@ -25,10 +29,14 @@ const MatchList = ({ tournamentId = 0 }) => {
             const json = await response.json();
             if (response.ok) {
                 if (json?.success == true) {
-                    setGames(json?.data.games);
+                    setGames(json?.data?.games || {});
                 }
+            } else {
+                addToast('Failed to retrieve match list.', 'failure', 5000);
             }
-        } catch (error) {}
+        } catch (error) {
+            addToast('Failed to retrieve match list.', 'failure', 5000);
+        }
         setIsLoading(false);
     };
 

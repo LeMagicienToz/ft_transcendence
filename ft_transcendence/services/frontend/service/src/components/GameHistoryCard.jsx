@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useToast } from '../contexts/ToastContext';
+
 import './GameHistoryCard.css';
 
 const GameHistoryCard = ({ game = {} }) => {
@@ -8,6 +10,8 @@ const GameHistoryCard = ({ game = {} }) => {
     const [startDate, setStartDate] = useState('');
     const [startTime, setStartTime] = useState('');
     const [duration, setDuration] = useState('');
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();

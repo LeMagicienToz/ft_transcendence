@@ -1,6 +1,7 @@
 tr.game-history-card {
     min-height: 68px;
     background-color: var(--color-secondary) !important;
+    transition: background-color 300ms;
     cursor: default;
 }
 
@@ -29,7 +30,7 @@ tr.game-history-card > td.elem > .status {
     margin: auto;
     background-color: #505050;
     color: rgba(0, 0, 0, 0.6);
-    font-size: 10px;
+    font-size: 12px;
     border-radius: 50%;
 }
 

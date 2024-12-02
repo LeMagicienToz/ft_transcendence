@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import './GameScore.css';
 
 const GameScore = ({ players = [], score = [0, 0] }) => {
-
-    useEffect(() => {
-    }, []);
-
     return (
         <div className={`game-score row`} >
             <div className={`player one row`} >

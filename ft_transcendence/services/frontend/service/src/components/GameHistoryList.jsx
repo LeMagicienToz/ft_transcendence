@@ -1,16 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { useToast } from '../contexts/ToastContext';
 
 import GameHistoryCard from './GameHistoryCard';
-import Loader from './Loader';
 import BaseButton from './Buttons/BaseButton';
 
 import './GameHistoryList.css';
 
-//import { UserContext } from '../contexts/UserContext' //CHANGE
-
 const GameHistoryList = ({ targetId = 0 }) => {
     const [isLoading, setisLoading] = useState(false);
     const [history, setHistory] = useState([]);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();
@@ -28,8 +29,12 @@ const GameHistoryList = ({ targetId = 0 }) => {
                 if (json?.success == true) {
                     setHistory(json?.games);
                 }
+            } else {
+                addToast('Failed to retrieve game history.', 'failure', 5000);
             }
-        } catch (error) {}
+        } catch (error) {
+            addToast('Failed to retrieve game history.', 'failure', 5000);
+        }
         setisLoading(false);
     };
 

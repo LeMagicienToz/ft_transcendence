@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useToast } from '../contexts/ToastContext';
+
 import GameListCard from './GameListCard';
 import BaseButton from './Buttons/BaseButton';
 import GameCreateWindow from './Windows/GameCreateWindow';
@@ -10,6 +12,8 @@ const GamesList = () => {
     const [isLoading, setisLoading] = useState(false);
     const [createGameWindowState, setCreateGameWindowState] = useState(false);
     const [games, setGames] = useState([]);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();
@@ -29,8 +33,12 @@ const GamesList = () => {
                 if (json?.success == true) {
                     setGames(json?.games);
                 }
+            } else {
+                addToast('Failed to retrieve game list.', 'failure', 5000);
             }
-        } catch (error) {}
+        } catch (error) {
+            addToast('Failed to retrieve game list.', 'failure', 5000);
+        }
         setisLoading(false);
     };
 

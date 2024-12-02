@@ -52,7 +52,7 @@ const Gameplay = () => {
 		socketRef.current = socket;
 
 		socket.onopen = () => {
-			addToast('Connection established.', 'success', 5000);
+			addToast('Connected.', 'success', 5000);
 		};
 
 		const normalize = (value, offset) => value / 9.9 + offset;
@@ -104,10 +104,6 @@ const Gameplay = () => {
 			navigate('/home');
 		};
 
-		socket.onclose = () => {
-			console.log('WebSocket closed');
-		};
-
 		return () => {
 			if (socketRef.current) {
 				socketRef.current.close();
@@ -127,18 +123,22 @@ const Gameplay = () => {
 				<GameScene />
 			</div>
 			<div className="controls row">
-				<BaseButton
-					onTouchStart={() => send(lCommand)}
-					onTouchEnd={() => send('off')}
-					className='secondary round'
-					icon='arrow-left'
-				/>
-				<BaseButton
-					onTouchStart={() => send(rCommand)}
-					onTouchEnd={() => send('off')}
-					className='secondary round'
-					icon='arrow-right'
-				/>
+				<div className="col">
+					<BaseButton
+						onTouchStart={() => send(lCommand)}
+						onTouchEnd={() => send('off')}
+						className='secondary round'
+						icon='arrow-left'
+					/>
+				</div>
+				<div className="col">
+					<BaseButton
+						onTouchStart={() => send(rCommand)}
+						onTouchEnd={() => send('off')}
+						className='secondary round'
+						icon='arrow-right'
+					/>
+				</div>
 			</div>
 		</div>
 	);

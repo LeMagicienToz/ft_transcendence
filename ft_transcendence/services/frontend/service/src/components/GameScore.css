@@ -27,12 +27,13 @@
     width: calc(100% - 64px);
 }
 
-.game-score > .player.two.row {
-    margin-left: auto;
+.game-score > .player.one.row > .info > p {
+    text-align: left;
 }
 
-.game-score > .player.two.row > .info {
-    align-items: end;
+
+.game-score > .player.two.row > .info > p {
+    text-align: right;
 }
 
 .game-score > .player.row > .info > .main {

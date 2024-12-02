@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import Loader from './Loader';
+import { useToast } from '../contexts/ToastContext';
+
 import BaseButton from './Buttons/BaseButton';
 import BarChart from './Charts/BarChart';
 import PieChart from './Charts/PieChart';
 
-import { UserContext } from '../contexts/UserContext' //CHANGE
 
 import './ProfileStats.css';
 
@@ -16,6 +16,8 @@ const ProfileStats = ({ targetId = 0 }) => {
     const [tData, setTData] = useState([]);
     const [mData, setMData] = useState([]);
     const [wData, setWData] = useState([]);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         refresh();
@@ -74,8 +76,12 @@ const ProfileStats = ({ targetId = 0 }) => {
                 if (json?.success == true) {
                     setHistory(json?.games);
                 }
+            } else {
+                addToast('Failed to retrieve statistics.', 'failure', 5000);
             }
-        } catch (error) {}
+        } catch (error) {
+            addToast('Failed to retrieve statistics.', 'failure', 5000);
+        }
         setisLoading(false);
     };
 
