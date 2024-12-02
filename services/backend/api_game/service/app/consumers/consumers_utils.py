@@ -3,7 +3,6 @@ import json
 import asyncio
 from django.utils import timezone
 import random
-import
 
 import logging
 logger = logging.getLogger('myapp')
