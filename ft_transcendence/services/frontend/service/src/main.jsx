@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Navigate, BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import { GameProvider } from './contexts/GameContext';
 import { StatusProvider } from './contexts/StatusContext';
@@ -31,6 +31,7 @@ const App = () => {
                                     <Route path="/home" element={<Home />} />
                                     <Route path="/game" element={<Game />} />
                                 </Route>
+                                <Route path="*" element={<Navigate to="/" />} />
                             </Routes>
                         </Router>
                     </GameProvider>
