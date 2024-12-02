@@ -37,13 +37,20 @@ const Gameplay = () => {
 				if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') send('off');
 			}
 		};
+		
+		const resetKeyPress = () => {
+			currentKeyPressedRef.current = null;
+			send('off');
+		  };
 
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
+		window.addEventListener('blur', resetKeyPress);
 
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
+			window.removeEventListener('blur', resetKeyPress);
 		};
 	}, [lCommand, rCommand]);
 
