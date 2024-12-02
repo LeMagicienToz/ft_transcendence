@@ -159,7 +159,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = environ.get('T_SMTP_HOSTPORT')
 EMAIL_HOST_USER = environ.get('T_SMTP_USERNAME')
 EMAIL_HOST_PASSWORD = environ.get('T_SMTP_PASSWORD')
-DEFAULT_FROM_EMAIL = environ.get('T_SMTP_PASSWORD')
+DEFAULT_FROM_EMAIL = environ.get('T_SMTP_USERNAME')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

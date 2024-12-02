@@ -8,7 +8,7 @@ ARG         CONFIG_USR_USE='tuser'
 ARG         CONFIG_INI_PKG='gettext libpq-dev python3-full python3-dev'
 ARG         CONFIG_INI_DIR='home/tuser/.cache/pip'
 
-EXPOSE      4002
+EXPOSE      4000
 
 #### BUILDING ##################################################
 

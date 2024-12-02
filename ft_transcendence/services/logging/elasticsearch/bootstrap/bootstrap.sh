@@ -18,15 +18,14 @@ then . "/app/bootstrap/functions.sh"
 
         cd "/app/service/bin"
 
+        ./elasticsearch-users useradd t_logstash -r t_logstash -p ${T_ELASTIC_SYSPASS_2}
+        ./elasticsearch-users useradd t_exporter -r t_exporter -p ${T_ELASTIC_SYSPASS_3}
+
         printf "${T_ELASTIC_ROOTPASS}\n${T_ELASTIC_ROOTPASS}\n" | ./elasticsearch-reset-password -bfi -u "elastic" > "/dev/null"
         printf "${T_ELASTIC_SYSPASS_1}\n${T_ELASTIC_SYSPASS_1}\n" | ./elasticsearch-reset-password -bfi -u "kibana_system" > "/dev/null"
 
-
         for user in "apm_system" "beats_system" "kibana" "logstash_system" "remote_monitoring_user";
         do ./elasticsearch-reset-password -abf -u "${user}" > "/dev/null"; done
-
-        ./elasticsearch-users useradd t_logstash -r t_logstash -p ${T_ELASTIC_SYSPASS_2}
-        ./elasticsearch-users useradd t_exporter -r t_exporter -p ${T_ELASTIC_SYSPASS_3}
 
         ./elasticsearch-users useradd ${T_KIBANA_USERNAME} -r t_kibana -p ${T_KIBANA_PASSWORD}
     ) &

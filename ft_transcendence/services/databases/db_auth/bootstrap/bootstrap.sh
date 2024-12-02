@@ -12,10 +12,15 @@ then . "/app/bootstrap/functions.sh"
 
     export PATH="${PATH}:/usr/lib/postgresql/15/bin"
 
-    initdb -D "/app/storage"
-    pg_ctl -D "/app/storage" start
-    psql   -f "/app/config/postgresql.sql"
-    pg_ctl -D "/app/storage" stop
+    if [ -z "$( ls -A '/app/storage' )" ]
+    then
+
+        initdb -D "/app/storage"
+        pg_ctl -D "/app/storage" start
+        psql   -f "/app/config/postgresql.sql"
+        pg_ctl -D "/app/storage" stop
+
+    fi;
 
     rm -f "/app/.init" && echo "true" > "/app/.init"
 fi;
