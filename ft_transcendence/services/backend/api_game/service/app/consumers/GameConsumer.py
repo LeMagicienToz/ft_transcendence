@@ -58,6 +58,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         if self.game.tournament_id == 0 and (is_playing_this_game is False):
             await self.close()
             return
+        if self.game.tournament_id != 0 and (is_playing_this_game is False):
+            #await self.close()
+            return
         # pick game_logic
         if (self.pick_game_logic()) is False:
             await self.close()
@@ -192,8 +195,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                     if tournament.status == 'waiting':
                         tournament.status = 'abandoned'
                         await sync_to_async(tournament.save)()
-                    await sync_to_async(self.game.save)()
-                    await self.game_logic.send_game_state(["status"])
+                await sync_to_async(self.game.save)()
+                await self.game_logic.send_game_state(["status"])
             elif self.game_logic.game_data['status'] == 'playing':
                 if current_player_index == 1:
                     the_other_player_index = '2'
@@ -203,7 +206,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
                 await self.game_logic.send_game_state(["status"])
-
 
     # I receive only text because json is only text
     async def receive(self, text_data):
@@ -282,6 +284,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                     "status": "ping",
                 }
             }))
+            should_ping = self.game_logic.game_data.get('status') == "waiting" or self.game_logic.game_data.get('status') == "ready_to_play" or self.game_logic.game_data.get('status') == "playing"
+            if should_ping == False:
+                break
 
 
     async def setup_regular_ping(self):
