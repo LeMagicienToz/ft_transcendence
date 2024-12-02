@@ -3,6 +3,7 @@ import json
 import asyncio
 from django.utils import timezone
 import random
+import
 
 import logging
 logger = logging.getLogger('myapp')
@@ -189,6 +190,7 @@ class GameLogic():
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
 				await self.send_game_state(["ball_position", "scores", "status"])
+				logger.info('Pause 1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 				await asyncio.sleep(2)
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
@@ -202,6 +204,7 @@ class GameLogic():
 					self.game_data['status'] = "finished"
 				await self.reset_ball_position()
 				await self.send_game_state(["ball_position", "scores", "status"])
+				logger.info('Pause 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 				await asyncio.sleep(2)
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]

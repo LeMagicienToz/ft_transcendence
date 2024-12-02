@@ -337,7 +337,7 @@ class GameUserHistoryView(APIView):
                 ]
             }
             game_details_list.append(game_details)
-        return JsonResponse({'success': True, 'games': game_details_list.order_by('end_time')}, safe=False)
+        return JsonResponse({'success': True, 'games': game_details_list}, safe=False)
 
 class GameDeleteView(APIView):
     """
