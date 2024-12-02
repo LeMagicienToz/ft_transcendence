@@ -10,6 +10,7 @@ import asyncio
 from .consumers_utils import GameLogic
 from urllib.parse import parse_qs
 from django.utils import timezone
+from ..endpoints.endpoints_utils import utils_get_user_info
 
 
 from ..models import GameModel, TournamentModel
@@ -30,7 +31,6 @@ class GameConsumer(AsyncWebsocketConsumer):
     tournament = None
 
     async def connect(self):
-        from ..endpoints.endpoints_utils import utils_get_user_info
         cookies = {}
         headers = dict(self.scope["headers"])
         if b"cookie" in headers:
@@ -42,8 +42,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
 
         token = cookies.get('token')
+        refresh_token = cookies.get('refresh_token')
         token42 = cookies.get('42_access_token')
-        self.user_info = utils_get_user_info(token, token42)
+        self.user_info = utils_get_user_info(token, token42, refresh_token)
 
         # check if user_info is caught
         if self.user_info is None or self.user_info.get('error'):

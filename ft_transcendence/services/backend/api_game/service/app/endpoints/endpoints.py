@@ -55,8 +55,9 @@ class GameCreateView(APIView):
     def post(self, request):
         # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         player1_user_id = ""
         player1_user_name = ""
         if not user_info:
@@ -221,8 +222,9 @@ class GameJoinView(APIView):
     def put(self, request, game_id):
         # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -279,7 +281,7 @@ class GameUserHistoryView(APIView):
         except ValueError:
             return JsonResponse({'success': False, 'message': 'Invalid user_id. Must be an integer.'}, status=400)
         # Filter games where used_id is in
-        games = GameModel.objects.filter(players__user_id=user_id, status='finished')
+        games = GameModel.objects.filter(players__user_id=user_id, status='finished').order_by('-end_time')
         game_details_list = []
         for game in games:
             players = game.players.all()
@@ -335,7 +337,7 @@ class GameUserHistoryView(APIView):
                 ]
             }
             game_details_list.append(game_details)
-        return JsonResponse({'success': True, 'games': game_details_list}, safe=False)
+        return JsonResponse({'success': True, 'games': game_details_list.order_by('end_time')}, safe=False)
 
 class GameDeleteView(APIView):
     """
@@ -351,8 +353,9 @@ class GameDeleteView(APIView):
     def delete(self, request, game_id):
         # get user_id from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         if not user_info or not user_info.get('user_id'):
             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -409,8 +412,9 @@ class TournamentCreateView(APIView):
     def post(self, request):
         # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         player1_user_id = ""
         player1_user_name = ""
         if not user_info:
@@ -510,7 +514,7 @@ class TournamentCreateView(APIView):
             'success': True,
             'message': 'Tournament created',
             'game_id': game_id,
-            'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game_id],
+            'list_id': list(game_list.order_by('id').values_list('id', flat=True)) if game_list else [game.id],
             'tournament': tournament_data,
         }, status=200)
 
@@ -568,8 +572,9 @@ class TournamentJoinView(APIView):
             return JsonResponse({'success': False, 'message': 'Tournament has already started or finished'}, status=400)
         # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
@@ -608,7 +613,7 @@ class TournamentJoinView(APIView):
             'success': True,
             'message': 'Player joined the tournament',
             'game_id': game.id,
-            'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game.id],
+            'list_id': list(game_list.order_by('id').values_list('id', flat=True)) if game_list else [game.id],
             'tournament_id': tournament.id,
             'game_id': tournament_data.get('games')[0].get('id'),
             'player_id': player.user_id,
@@ -630,8 +635,9 @@ class TournamentDeleteView(APIView):
     def delete(self, request, tournament_id):
         # get user_id from authentification app
         token = request.COOKIES.get('token')
+        refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42)
+        user_info = utils_get_user_info(token, token42, refresh_token)
         if not user_info or not user_info.get('user_id'):
             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
         player_user_id = user_info['user_id']
