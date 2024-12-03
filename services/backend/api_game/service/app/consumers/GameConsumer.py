@@ -232,7 +232,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         #if player start moving, and game is not start, start the game
         if (self.game.status == 'waiting'):
             await sync_to_async(self.game.refresh_from_db)()
-        if (self.game.status == "ready_to_play"):
+        if (self.game_logic.game_data['status'] == "ready_to_play"):
             # if player1 moves, it starts the game
             if (self.player.player_index == 1):
                 await self.onchange_start_game({})
@@ -307,8 +307,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                         other_player.score = self.game.score_to_win
                         await database_sync_to_async(other_player.save)()
 
-                
-
     def is_player_1(self):
         return self.player and self.player.player_index == 1
 
@@ -340,11 +338,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game.start_time = timezone.now().isoformat()
         #tell eveyrone to update their game_data.status
         self.game_logic.game_data['status'] = 'playing'
-        #self.game_logic.game_data['start_time'] = self.game.start_time
+        await sync_to_async(self.game.save)()
         await self.game_logic.send_game_state(["status"])
         if (self.is_player_1()):
             logger.info(f"is player 1={self.is_player_1()} loop started")
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
-        else:
-            logger.info(f"is player 1={self.is_player_1()} loop NOT started")            
