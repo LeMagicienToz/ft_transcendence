@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 def utils_get_user_info(token, token42, refresh_token):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
-
     # Use the appropriate token as a cookie
     if not token and not token42 and not refresh_token:
         return JsonResponse({'message': 'No authentication token received'}, status=401)
@@ -19,7 +18,6 @@ def utils_get_user_info(token, token42, refresh_token):
     else:
         cookies['token'] = token
         cookies['refresh_token'] = refresh_token
-
     try:
         response = requests.get(
             'http://auth:' + os.environ.get('T_PORT_INTERN_BACKEND') + '/api/auth/me/',
@@ -32,14 +30,13 @@ def utils_get_user_info(token, token42, refresh_token):
         result.pop('email', None)
         return result
     except requests.exceptions.RequestException as e:
-        # Log the detailed error
         return {
             'message': 'An error occurred while connecting to the authentication service.',
             'details': str(e)
         }
 
 def create_round_robin_matches_old(tournament):
-    # Récupère les informations nécessaires du tournoi
+    # get data to create the tournament
     players = list(tournament.players.all().order_by('user_id'))
     custom_name = "Game in " + tournament.custom_name
     tournament_id = tournament.id
@@ -73,7 +70,7 @@ def create_round_robin_matches_old(tournament):
         return scheduled_matches
 
     if match_type == '1v1':
-        # Mode 1v1 : chaque joueur affronte chaque autre joueur une fois
+        # Mode 1v1 : each player will play against each other players
         matches = [(players[i], players[j]) for i in range(len(players)) for j in range(i + 1, len(players))]
         # Organise les matchs en blocs indépendants
         organized_matches = organize_matches(matches)
@@ -197,7 +194,7 @@ def create_round_robin_matches(tournament):
     games = []
 
     if match_type == '1v1':
-        # Mode 1v1 : everuone plays against everyone
+        # Mode 1v1 : everyone plays against everyone
         for i in range(len(players)):
             for j in range(i + 1, len(players)):
                 game = GameModel(
@@ -216,7 +213,7 @@ def create_round_robin_matches(tournament):
                     status='waiting'
                 )
                 game.save()
-                # Clone les joueurs pour le jeu
+                # Clone the players for the game instance
                 player1 = PlayerModel(
                     user_id=players[i].user_id,
                     user_name=players[i].user_name,
@@ -261,7 +258,7 @@ def create_round_robin_matches(tournament):
                     status='waiting'
                 )
                 game.save()
-                # Clone les joueurs pour le jeu
+                # Clone the players for the game instance
                 team1_player1 = PlayerModel.objects.create(
                     user_id=teams[i][0].user_id,
                     user_name=teams[i][0].user_name,
@@ -296,6 +293,6 @@ def create_round_robin_matches(tournament):
                 )
                 game.players.add(team1_player1, team1_player2, team2_player1, team2_player2)
                 games.append(game)
-    # Ajoute tous les jeux au tournoi
+    # Add the games to the tournament
     tournament.games.set(games)
     tournament.save()
