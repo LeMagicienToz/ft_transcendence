@@ -33,21 +33,22 @@ class GameCreateView(APIView):
     Create a new Game object
     the request must be POST
     body = {
-    'custom_name': type string,
-    'nickname': type string,
-    'match_type': '1v1' or '2v2',
-    'game_type': 'pong',
-    'score_to_win': type int,
-    'tournament_id': type int, 0 if not in a tournament,
-    'ball_speed': type float, (optional)
-    'color_board': type string, (optional)
-    'color_ball': type string, (optional)
-    'color_wall': type string, (optional)
-    'color_paddle': type string, (optional)
+        'custom_name': type string,
+        'nickname': type string,
+        'match_type': '1v1' or '2v2',
+        'game_type': 'pong',
+        'score_to_win': type int,
+        'tournament_id': type int, 0 if not in a tournament,
+        'ball_speed': type float, (optional)
+        'color_board': type string, (optional)
+        'color_ball': type string, (optional)
+        'color_wall': type string, (optional)
+        'color_paddle': type string, (optional)
     }
     cookie = {
-    'token': type string,
-    '42_access_token': type string,
+        'token': type string,
+        'refresh_token': type string,
+        '42_access_token': type string,
     } one token must be valid
     """
     def post(self, request):
@@ -143,11 +144,11 @@ class GameCreateView(APIView):
 
 class ListView(APIView):
     """
-    Return a single 'games' array containing both games and tournaments in a single response.
+    Return a single 'games' array containing both games and tournaments in a single response that are 'waiting'.
     The request must be GET.
     """
     def get(self, request):
-        # Récupération des données des jeux
+        # get game  data
         games = GameModel.objects.filter(tournament_id=0, status='waiting')
         games_data = [
             game.to_array() for game in games
@@ -175,7 +176,7 @@ class ListAllView(APIView):
     The request must be GET.
     """
     def get(self, request):
-        # Récupération des données des jeux
+        # get game data
         games = GameModel.objects.filter(tournament_id=0)
         games_data = [
             game.to_array()
@@ -210,11 +211,12 @@ class GameJoinView(APIView):
     this allow a player to join a game
     the request must be PUT
     body = {
-    'nickname': type string,
+        'nickname': type string,
     }
     cookie = {
-    'token': type string,
-    '42_access_token': type string,
+        'token': type string,
+        'refresh_token': type string,
+        '42_access_token': type string,
     }
     the game_id is in the url
     """
@@ -344,8 +346,9 @@ class GameDeleteView(APIView):
     the request must be DELETE
     body = {}
     cookie = {
-    'token': type string,
-    '42_access_token': type string,
+        'token': type string,
+        'refresh_token': type string,
+        '42_access_token': type string,
     } one token must be valid
     the game_id is in the url
     """
@@ -399,6 +402,7 @@ class TournamentCreateView(APIView):
     }
     cookie = {
         'token': type string,
+        'refresh_token': type string,
         '42_access_token': type string,
     } One of the token must be valid
 
@@ -627,8 +631,9 @@ class TournamentDeleteView(APIView):
     the request must be DELETE
     body = {}
     cookie = {
-    'token': type string,
-    '42_access_token': type string,
+        'token': type string,
+        'refresh_token': type string,
+        '42_access_token': type string,
     } one token must be valid
     the tournament_id is in the url
     """
@@ -653,6 +658,7 @@ class TournamentDeleteView(APIView):
         tournament.delete()
         return JsonResponse({'success': True, 'message': 'Tournament deleted successfully'}, status=200)
 
+# TODO remove before push
 class TournamentDeleteAllView(APIView):
     """
     Delete all tournaments
@@ -662,4 +668,3 @@ class TournamentDeleteAllView(APIView):
     def delete(self, request):
         TournamentModel.objects.all().delete()
         return JsonResponse({'success': True, 'message': 'All tournaments deleted successfully'}, status=200)
-
