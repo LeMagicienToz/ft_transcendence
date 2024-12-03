@@ -20,7 +20,7 @@ const GameListCard = ({ game = {} }) => {
                 </td>
                 <td className='elem' >
                     <p className={`main`} >{game?.custom_name || 'N/A'}</p>
-                    <p className={`sub`} >{game?.players[0].nickname || 'N/A'}</p>
+                    <p className={`sub`} >{game?.creator || 'N/A'}</p>
                 </td>
                 <td className='elem type' >
                     <p className={`main`} >{(game?.type === 'game' ? 'Normal' : 'Tournament') || 'N/A'}</p>

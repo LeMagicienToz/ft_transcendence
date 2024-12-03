@@ -28,8 +28,6 @@ def status(request):
 
 ################################################################
 
-
-
 class GameCreateView(APIView):
     """
     Create a new Game object
@@ -124,6 +122,7 @@ class GameCreateView(APIView):
         try:
             game = GameModel.objects.create(
                 custom_name=custom_name,
+                creator=nickname,
                 match_type=match_type,
                 game_type=game_type,
                 score_to_win=score_to_win,
@@ -469,6 +468,7 @@ class TournamentCreateView(APIView):
         # create tournament
         tournament = TournamentModel.objects.create(
             custom_name=custom_name,
+            creator=nickname,
             match_type=tourn_match_type,
             game_type=tourn_game_type,
             score_to_win=score_to_win,
@@ -514,11 +514,11 @@ class TournamentCreateView(APIView):
             'success': True,
             'message': 'Tournament created',
             'game_id': game_id,
-            'list_id': list(game_list.order_by('id').values_list('id', flat=True)) if game_list else [game.id],
+            'list_id': list(game_list.order_by('id').values_list('id', flat=True)) if game_list else [game_id],
             'tournament': tournament_data,
         }, status=200)
 
-# TODO remove fefore push
+# TODO remove before push
 class TournamentListView(APIView):
     """
     Return the list of the tournaments

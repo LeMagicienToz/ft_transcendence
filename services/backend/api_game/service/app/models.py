@@ -5,7 +5,7 @@ class PlayerModel(models.Model):
     user_id = models.IntegerField(default=0)
     user_name = models.CharField(max_length=30)
     score = models.IntegerField(default=0)
-    nickname = models.CharField(max_length=30)
+    nickname = models.CharField(max_length=16)
     player_index = models.IntegerField(default=0)
     user_info = models.JSONField(default=dict, blank=True)
 
@@ -22,6 +22,7 @@ class PlayerModel(models.Model):
 class GameModel(models.Model):
 
     custom_name = models.CharField(max_length=30, default="custom_name")
+    creator = models.CharField(max_length=16, default="...")
     score_to_win = models.IntegerField(default=3)
     players = models.ManyToManyField(PlayerModel, related_name="games")
     player_count = models.IntegerField(default = 0)
@@ -55,6 +56,7 @@ class GameModel(models.Model):
         return {
             'id': self.id,
             'custom_name': self.custom_name,
+            "creator": self.creator,
             'status': self.status,
             'game_type': self.game_type,
             'match_type': self.match_type,
@@ -131,6 +133,7 @@ class GameModel(models.Model):
 class TournamentModel(models.Model):
 
     custom_name = models.CharField(max_length=30, default="custom_name")
+    creator = models.CharField(max_length=16, default="...")
     score_to_win = models.IntegerField(default=3)
     player_count = models.IntegerField(default = 0)
     players = models.ManyToManyField(PlayerModel, related_name="tournaments")
@@ -175,6 +178,7 @@ class TournamentModel(models.Model):
         tournament_data = {
             "id": self.id,
             "custom_name": self.custom_name,
+            "creator": self.creator,
             "match_type": self.match_type,
             "game_type": self.game_type,
             "player_count": self.player_count,

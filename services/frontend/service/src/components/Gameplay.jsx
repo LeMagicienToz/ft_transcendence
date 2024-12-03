@@ -19,7 +19,9 @@ const Gameplay = () => {
 	const navigate = useNavigate();
 
 	const send = (direction) => {
+		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
 			socketRef.current.send(`{"action": "move", "direction": "${direction}"}`);
+		}
 	};
 
 	useEffect(() => {
@@ -37,22 +39,22 @@ const Gameplay = () => {
 				if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') send('off');
 			}
 		};
-		
-		const resetKeyPress = () => {
+
+		/*const resetKeyPress = () => {
 			currentKeyPressedRef.current = null;
 			send('off');
-		  };
+		  };*/
 
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
-		window.addEventListener('blur', resetKeyPress);
+		//window.addEventListener('blur', resetKeyPress);
 
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
-			window.removeEventListener('blur', resetKeyPress);
+			//window.removeEventListener('blur', resetKeyPress);
 		};
-	}, [lCommand, rCommand]);
+	}, [lCommand, rCommand, window.onfocus]);
 
 	useEffect(() => {
 		const socket = new WebSocket(`/wss/game/${gameId}/`);
@@ -88,8 +90,8 @@ const Gameplay = () => {
 					break;
 				case 'finished':
 					socket.close();
-					setIsStarted(false);
 					if (listId && listId.length > 0) {
+						setIsStarted(false);
 						join(listId[0], listId)
 					} else {
 						clear();
@@ -98,7 +100,6 @@ const Gameplay = () => {
 					break;
 				case 'abandoned':
 					socket.close();
-					setIsStarted(false);
 					clear();
 					addToast('The game was abandoned by a player.', 'failure', 5000);
 					navigate('/home');
@@ -107,6 +108,7 @@ const Gameplay = () => {
 		};
 
 		socket.onerror = (error) => {
+			clear();
 			addToast('Connection lost.', 'failure', 5000);
 			navigate('/home');
 		};

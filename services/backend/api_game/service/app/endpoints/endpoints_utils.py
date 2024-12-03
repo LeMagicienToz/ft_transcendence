@@ -184,6 +184,7 @@ def create_round_robin_matches(tournament):
     # get info to create tournament
     players = list(tournament.players.all())
     custom_name = "Game in " + tournament.custom_name
+    creator = tournament.creator
     tournament_id = tournament.id
     score_to_win = tournament.score_to_win
     match_type = tournament.match_type
@@ -201,6 +202,7 @@ def create_round_robin_matches(tournament):
             for j in range(i + 1, len(players)):
                 game = GameModel(
                     custom_name=custom_name,
+                    creator=creator,
                     match_type=match_type,
                     game_type=game_type,
                     score_to_win=score_to_win,
