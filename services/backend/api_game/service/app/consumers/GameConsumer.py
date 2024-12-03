@@ -55,6 +55,15 @@ class GameConsumer(AsyncWebsocketConsumer):
         if await self.get_game() is False:
             await self.close()
             return
+        
+        if self.game.status == 'finished':
+            await self.send(text_data=json.dumps({
+                    "game_data": {
+                        "status": "finished",
+                    }
+                }))
+            return
+
         is_playing_this_game = await sync_to_async(self.is_player_in_game)()
         # check if the player is in the game, if he is in tournament he can spectate
         if self.game.tournament_id == 0 and (is_playing_this_game is False):
@@ -67,6 +76,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         if (self.pick_game_logic()) is False:
             await self.close()
             return
+
+        #if self.game.status == 'finished':
+        #   self.game_logic.game_data['status'] = 'finished'
+        #    await self.game_logic.send_game_state(["status"])
+        #    await self.close()
+        #    return
+
         #await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
         if is_playing_this_game and self.player.player_index == 0:
@@ -189,6 +205,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
+                logger.info("ABANDONNED STATUS ON")
                 self.game.status = 'abandoned'
                 self.game_logic.game_data['status'] = 'abandoned'
                 #takes the tournament from id
@@ -254,9 +271,11 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     def present(self, data):
+    
         new_data = data.copy()
         del new_data["keys"]
         return new_data
+
 
     async def finish_game(self):
         self.game.status = "finished"
@@ -274,17 +293,18 @@ class GameConsumer(AsyncWebsocketConsumer):
                 tournament.status = "finished"
                 tournament.end_time = timezone.now().isoformat()
                 await sync_to_async(tournament.save)()
-            else:
+            elif self.game_data['status'] != 'finished':
                 games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
-                not_finished_games = sync_to_async(games.exclude)(status='finished')
+                not_finished_games = await sync_to_async(games.exclude)(status='finished')
 
-                for game in not_finished_games:
-                    logger.info(f"game: {game}")
+                for game in await database_sync_to_async(list)(not_finished_games):
                     game.status = 'finished'
                     await database_sync_to_async(game.save)()
-                    other_player = sync_to_async(game.players.exclude)(user_id=self.player.user_id).first()
+                    other_player = await database_sync_to_async(
+                        lambda: game.players.exclude(user_id=self.player.user_id).first()
+                    )()
                     if other_player:
-                        other_player.score = self.score_to_win
+                        other_player.score = self.game.score_to_win
                         await database_sync_to_async(other_player.save)()
 
                 
@@ -294,13 +314,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def regular_ping(self):
         while True:
-            await asyncio.sleep(20)
-            if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
-                await self.send(text_data=json.dumps({
-                    "game_data": {
-                        "status": "finished",
-                    }
-                }))
+            await asyncio.sleep(30)
+            #if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
+            #    await self.send(text_data=json.dumps({
+            #        "game_data": {
+            #            "status": "finished",
+            #        }
+            #    }))
             await self.send(text_data=json.dumps({
                 "game_data": {
                     "status": "ping",

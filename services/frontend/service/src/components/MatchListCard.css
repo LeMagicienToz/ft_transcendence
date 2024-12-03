@@ -17,6 +17,7 @@
     border-left: 4px solid var(--color-primary);
 }
 
+.match-list-card.col.abandoned,
 .match-list-card.col.finished {
     opacity: 0.8;
     border-left: 4px solid var(--color-success);
