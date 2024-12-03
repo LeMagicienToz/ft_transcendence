@@ -258,7 +258,6 @@ class GameJoinView(APIView):
             player_index=0,
             user_info=user_info,
         )
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if game.tournament_id > 0:
             tournament = TournamentModel.objects.filter(id=game.tournament_id)
@@ -509,7 +508,6 @@ class TournamentCreateView(APIView):
             tournament.players.add(player)
         create_round_robin_matches(tournament)
         tournament_data = tournament.to_array()
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if tournament:
             game_list = tournament.games.filter(players__user_id=player1_user_id, status='waiting')
@@ -608,7 +606,6 @@ class TournamentJoinView(APIView):
             tournament.start_time = timezone.now()
             tournament.save()
         game = tournament.games.filter(status='waiting', players__user_id=player_user_id).first()
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         game_list = None
         if tournament:
             game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting')
@@ -623,7 +620,6 @@ class TournamentJoinView(APIView):
             'player_id': player.user_id,
             'tournament': tournament_data
         }, status=200)
-        #return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id}, status=200)
 
 class TournamentDeleteView(APIView):
     """
