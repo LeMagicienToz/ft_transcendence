@@ -11,6 +11,7 @@ from .consumers_utils import GameLogic
 from urllib.parse import parse_qs
 from django.utils import timezone
 from ..endpoints.endpoints_utils import utils_get_user_info
+from channels.db import database_sync_to_async
 
 
 from ..models import GameModel, TournamentModel
@@ -273,6 +274,20 @@ class GameConsumer(AsyncWebsocketConsumer):
                 tournament.status = "finished"
                 tournament.end_time = timezone.now().isoformat()
                 await sync_to_async(tournament.save)()
+            else:
+                games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
+                not_finished_games = sync_to_async(games.exclude)(status='finished')
+
+                for game in not_finished_games:
+                    logger.info(f"game: {game}")
+                    game.status = 'finished'
+                    await database_sync_to_async(game.save)()
+                    other_player = sync_to_async(game.players.exclude)(user_id=self.player.user_id).first()
+                    if other_player:
+                        other_player.score = self.score_to_win
+                        await database_sync_to_async(other_player.save)()
+
+                
 
     def is_player_1(self):
         return self.player and self.player.player_index == 1
@@ -280,12 +295,18 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def regular_ping(self):
         while True:
             await asyncio.sleep(20)
+            if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
+                await self.send(text_data=json.dumps({
+                    "game_data": {
+                        "status": "finished",
+                    }
+                }))
             await self.send(text_data=json.dumps({
                 "game_data": {
                     "status": "ping",
                 }
             }))
-            should_ping = self.game_logic.game_data.get('status') == "waiting" or self.game_logic.game_data.get('status') == "ready_to_play" or self.game_logic.game_data.get('status') == "playing"
+            should_ping = self.game_logic.game_data.get('status') == "waiting" or self.game_logic.game_data.get('status') == "ready_to_play"
             if should_ping == False:
                 break
 

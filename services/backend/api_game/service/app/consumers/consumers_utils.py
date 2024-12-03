@@ -217,4 +217,3 @@ class GameLogic():
 		]
 		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
 		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
-		logger.info(f"RESET ball speed x={self.BALL_SPEED_X}, y={self.BALL_SPEED_Y}")

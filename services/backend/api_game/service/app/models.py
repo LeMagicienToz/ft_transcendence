@@ -206,7 +206,7 @@ class TournamentModel(models.Model):
         return len(players_that_not_with_placeholder_username)
 
     def get_placeholder_user_id(self, idx):
-        return self.id * 10000000 + idx
+        return self.id * 100000 + idx
 
     def get_placeholder_user_name(self, idx):
         return f"__placeholder_{idx}"
