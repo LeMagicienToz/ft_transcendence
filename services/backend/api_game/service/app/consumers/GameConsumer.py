@@ -55,14 +55,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         if await self.get_game() is False:
             await self.close()
             return
-        
-        if self.game.status == 'finished':
-            await self.send(text_data=json.dumps({
-                    "game_data": {
-                        "status": "finished",
-                    }
-                }))
-            return
 
         is_playing_this_game = await sync_to_async(self.is_player_in_game)()
         # check if the player is in the game, if he is in tournament he can spectate
@@ -222,7 +214,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 else:
                     the_other_player_index = '1'
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
-                self.game_logic.game_data['status'] = "finished"
+                #self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
                 await self.game_logic.send_game_state(["status"])
 
@@ -293,7 +285,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 tournament.status = "finished"
                 tournament.end_time = timezone.now().isoformat()
                 await sync_to_async(tournament.save)()
-            elif self.game_data['status'] != 'finished':
+            elif self.game_logic.game_data['status'] != 'finished':
+                logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
                 not_finished_games = await sync_to_async(games.exclude)(status='finished')
 
@@ -306,19 +299,28 @@ class GameConsumer(AsyncWebsocketConsumer):
                     if other_player:
                         other_player.score = self.game.score_to_win
                         await database_sync_to_async(other_player.save)()
+                    await self.channel_layer.group_send(f"game_{game.id}",
+                        {
+                            "type": "noop",
+                            "message": {"game_data": {"status": "finished"}}
+                        })
+        self.game_logic.game_data['status'] = 'finished'
+
+    async def noop(self, event):
+        pass
 
     def is_player_1(self):
         return self.player and self.player.player_index == 1
 
     async def regular_ping(self):
         while True:
-            await asyncio.sleep(30)
-            #if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
-            #    await self.send(text_data=json.dumps({
-            #        "game_data": {
-            #            "status": "finished",
-            #        }
-            #    }))
+            await asyncio.sleep(5)
+            if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
+                await self.send(text_data=json.dumps({
+                    "game_data": {
+                        "status": "finished",
+                    }
+                }))
             await self.send(text_data=json.dumps({
                 "game_data": {
                     "status": "ping",

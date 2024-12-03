@@ -14,6 +14,7 @@ const MatchList = ({ tournamentId = 0 }) => {
     const { addToast } = useToast();
 
     useEffect(() => {
+        if (tournamentId == 0) return;
         refresh();
         const interval = setInterval(refresh, 5000);
         return () => clearInterval(interval);
