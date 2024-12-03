@@ -182,6 +182,8 @@ class GameLogic():
 		self.game_data["ball_position"] = [ball_x, ball_y]
 		if ball_x <= 0:
 			if self.is_ball_touched_by_player_left():
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.01
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.01
 				return
 			else:
 				self.game_data["scores"]['2'] += 1
@@ -194,6 +196,8 @@ class GameLogic():
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player_right():
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.01
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.01
 				return
 			else:
 				self.game_data["scores"]['1'] += 1
@@ -213,3 +217,4 @@ class GameLogic():
 		]
 		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
 		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
+		logger.info(f"RESET ball speed x={self.BALL_SPEED_X}, y={self.BALL_SPEED_Y}")

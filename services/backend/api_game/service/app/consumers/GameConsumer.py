@@ -218,15 +218,15 @@ class GameConsumer(AsyncWebsocketConsumer):
             # if player1 moves, it starts the game
             if (self.player.player_index == 1):
                 await self.onchange_start_game({})
-            # send a msg to everyone but the player who moved to tell game has atrted
-            # if it's not the player 1 who moved, he'll start the game when receiving the msg
-            await self.channel_layer.group_send(
-                f"game_{self.game.id}",  # group name from the consumer
-                {
-                    "type": "onchange_start_game",  # the custom type we'll handle in the consumer
-                    "message": "start"
-                }
-            )
+            else:
+                # send a msg to player 1 for him to start
+                await self.channel_layer.group_send(
+                    f"game_{self.game.id}",
+                    {
+                        "type": "onchange_start_game",
+                        "message": "start"
+                    }
+                )
 
     async def game_onchange(self, event):
         #update self.game_logic.game_data
@@ -302,5 +302,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         #self.game_logic.game_data['start_time'] = self.game.start_time
         await self.game_logic.send_game_state(["status"])
         if (self.is_player_1()):
+            logger.info(f"is player 1={self.is_player_1()} loop started")
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
+        else:
+            logger.info(f"is player 1={self.is_player_1()} loop NOT started")            
