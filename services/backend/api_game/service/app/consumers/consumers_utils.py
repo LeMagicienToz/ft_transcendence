@@ -4,6 +4,8 @@ import asyncio
 from django.utils import timezone
 import random
 
+random.seed(42)
+
 import logging
 logger = logging.getLogger('myapp')
 
@@ -209,3 +211,5 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
