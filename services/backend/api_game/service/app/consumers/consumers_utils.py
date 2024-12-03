@@ -146,8 +146,7 @@ class GameLogic():
 
 	async def start_game_loop(self):
 		while self.game.status == "playing":
-			await asyncio.sleep(1)
-			logger.info("loooop!!!!!!!!!")
+			await asyncio.sleep(1 / self.REFRESH_PER_SEC)
 			await self.update_player_positions()
 			await self.update_ball_position()
 			await self.send_game_state(["ball_position", "player_positions"])

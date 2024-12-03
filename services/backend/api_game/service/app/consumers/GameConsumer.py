@@ -323,8 +323,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         #self.game_logic.game_data['start_time'] = self.game.start_time
         await self.game_logic.send_game_state(["status"])
         if (self.is_player_1()):
-            logger.info("IN PLAYER 1111111111111111111111111111111111")
+            logger.info(f"is player 1={self.is_player_1()} loop started")
             asyncio.create_task(self.game_logic.start_game_loop())
             await sync_to_async(self.game.save)()
         else:
-            logger.info("NO PLAYER 2222222222222222222222222222222222222222222222222222222222")
+            logger.info(f"is player 1={self.is_player_1()} loop NOT started")
