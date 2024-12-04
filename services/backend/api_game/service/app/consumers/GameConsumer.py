@@ -196,6 +196,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             current_player_index = self.player.player_index
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
+            logger.info(f"{self.game_logic.game_data['status']}")
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
                 logger.info("ABANDONNED STATUS ON")
                 self.game.status = 'abandoned'
@@ -286,7 +287,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 tournament.end_time = timezone.now().isoformat()
                 await sync_to_async(tournament.save)()
             elif self.game_logic.game_data['status'] != 'finished':
-                logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
                 not_finished_games = await sync_to_async(games.exclude)(status='finished')
 

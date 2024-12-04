@@ -11,6 +11,8 @@ import GameScene from '../scenes/GameScene';
 import './Gameplay.css';
 
 const Gameplay = () => {
+	const [hasFocus, setHasFocus] = useState(true);  
+
 	const { addToast } = useToast();
 	const { gameId, listId, isStarted, setIsStarted, setBallPosition, setPlayerOnePosition, setPlayerTwoPosition, lCommand, rCommand, setScore, update, join, clear } = useContext(GameContext);
 
@@ -40,21 +42,27 @@ const Gameplay = () => {
 			}
 		};
 
-		/*const resetKeyPress = () => {
+		const handleBlur = () => {
+			setHasFocus(false);
 			currentKeyPressedRef.current = null;
-			send('off');
-		  };*/
+		};
 
+		const handleFocus = () => {
+			setHasFocus(true);
+		};
+
+		window.addEventListener('focus', handleFocus);
+    	window.addEventListener('blur', handleBlur);
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
-		//window.addEventListener('blur', resetKeyPress);
 
 		return () => {
+			window.removeEventListener('blur', handleBlur);
+			window.removeEventListener('focus', handleFocus);
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
-			//window.removeEventListener('blur', resetKeyPress);
 		};
-	}, [lCommand, rCommand, window.onfocus]);
+	}, [lCommand, rCommand, hasFocus]);
 
 	useEffect(() => {
 		const socket = new WebSocket(`/wss/game/${gameId}/`);
