@@ -137,13 +137,16 @@ class GameLogic():
 			"player_index": player_index,
 			"game_data": self.game_data
 		})
-		await self.consumer.channel_layer.group_send(
-			self.consumer.room_group_name, {
-				"type": "game_onchange",
-				"message": message
-			}
-		)
-
+		try:
+			await self.consumer.channel_layer.group_send(
+				self.consumer.room_group_name, {
+					"type": "game_onchange",
+					"message": message
+				}
+			)
+		except Exception as e:
+			logger.error(f"Error while sending message to group {self.consumer.room_group_name}: {str(e)}")
+			
 	async def start_game_loop(self):
 		while self.game.status == "playing":
 			await asyncio.sleep(1 / self.REFRESH_PER_SEC)
