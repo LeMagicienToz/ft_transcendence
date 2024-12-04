@@ -145,7 +145,7 @@ class GameLogic():
 				}
 			)
 		except Exception as e:
-			logger.error(f"Error while sending message to group {self.consumer.room_group_name}: {str(e)}")
+			logger.error("Error while sending message to group_send")
 			
 	async def start_game_loop(self):
 		while self.game.status == "playing":
