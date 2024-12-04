@@ -1,5 +1,3 @@
-/!\ Test Alt+Tab
-
 Uncomment docker-compose.yml
 Uncomment logger in django settings.py
 Uncomment nginx.conf

@@ -288,7 +288,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 tournament.end_time = timezone.now().isoformat()
                 await sync_to_async(tournament.save)()
             elif self.game_logic.game_data['status'] != 'finished':
-                logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
                 not_finished_games = await sync_to_async(games.exclude)(status='finished')
 
