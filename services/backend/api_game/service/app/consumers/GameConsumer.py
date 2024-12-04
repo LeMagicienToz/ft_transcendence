@@ -196,6 +196,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             current_player_index = self.player.player_index
             # when we have game_logic we know we have player look "connect()"
             # await sync_to_async(self.unassign_player_index)()
+            logger.info(f"player={self.player}, self.game_logic.game_data['status']={self.game_logic.game_data['status']}")
+            #if self.game.status != 'playing' and self.game.status != 'finished':
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
                 logger.info("ABANDONNED STATUS ON")
                 self.game.status = 'abandoned'
@@ -263,7 +265,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     def present(self, data):
-    
+
         new_data = data.copy()
         del new_data["keys"]
         return new_data
@@ -292,6 +294,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
                 for game in await database_sync_to_async(list)(not_finished_games):
                     game.status = 'finished'
+                    self.game_logic.game_data["start_time"] = timezone.now().isoformat()
+                    self.game.start_time = self.game_logic.game_data["start_time"]
+                    self.game_logic.game_data["end_time"] = self.game_logic.game_data["start_time"]
+                    self.game.end_time = self.game_logic.game_data["end_time"]
                     await database_sync_to_async(game.save)()
                     other_player = await database_sync_to_async(
                         lambda: game.players.exclude(user_id=self.player.user_id).first()
@@ -299,15 +305,21 @@ class GameConsumer(AsyncWebsocketConsumer):
                     if other_player:
                         other_player.score = self.game.score_to_win
                         await database_sync_to_async(other_player.save)()
-                    await self.channel_layer.group_send(f"game_{game.id}",
-                        {
-                            "type": "noop",
-                            "message": {"game_data": {"status": "finished"}}
-                        })
+                    #this will not work, even we know the game group id, the current_layer can't just send to the group
+                    #await self.channel_layer.group_send(f"game_{game.id}",
+                    #    {
+                    #        "type": "game_onchange",
+                    #        "message": json.dumps({
+                    #            "game_data": self.game_logic.game_data,
+                    #            "fields": ["status"]
+		            #        })
+                    #    }
+                    #)
         self.game_logic.game_data['status'] = 'finished'
 
-    async def noop(self, event):
-        pass
+
+    #async def noop(self, event):
+    #    pass
 
     def is_player_1(self):
         return self.player and self.player.player_index == 1
