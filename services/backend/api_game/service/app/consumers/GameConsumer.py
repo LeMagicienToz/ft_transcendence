@@ -199,15 +199,19 @@ class GameConsumer(AsyncWebsocketConsumer):
             logger.info(f"player={self.player}, self.game_logic.game_data['status']={self.game_logic.game_data['status']}")
             #if self.game.status != 'playing' and self.game.status != 'finished':
             if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished':
-                logger.info("ABANDONNED STATUS ON")
-                self.game.status = 'abandoned'
-                self.game_logic.game_data['status'] = 'abandoned'
+                if self.game.tournament_id == 0:
+                    logger.info("ABANDONNED STATUS ON")
+                    self.game.status = 'abandoned'
+                    self.game_logic.game_data['status'] = 'abandoned'
                 #takes the tournament from id
                 if self.game.tournament_id != 0:
                     tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
                     if tournament.status == 'waiting':
                         tournament.status = 'abandoned'
                         await sync_to_async(tournament.save)()
+                    else:
+                        self.game.status = 'finished'
+                        self.game_logic.game_data['status'] = 'finished'
                 await sync_to_async(self.game.save)()
                 await self.game_logic.send_game_state(["status"])
             elif self.game_logic.game_data['status'] == 'playing':
