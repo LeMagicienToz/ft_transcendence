@@ -73,7 +73,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         #   self.game_logic.game_data['status'] = 'finished'
             await self.game_logic.send_game_state(["status"])
         #    await self.close()
-            return
+            #return
 
         #await self.game_logic.on_connect()
         #assign the index of player, \game has 2 or 4 players, player 1 is the first one...
@@ -215,12 +215,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
         except:
             logger.info("%%%debut disconnect after self.game.refresh_from_db() %%%  erreur de data !!!!!")
-
         if self.game.tournament_id == 0 and (self.game_logic.game_data['status'] == 'waiting' or self.game_logic.game_data['status'] == 'ready_to_play'):
             logger.info("ABANDONNED STATUS ON")
             self.game.status = 'abandoned'
             self.game_logic.game_data['status'] = 'abandoned'
-
         if hasattr(self, 'game_logic') and self.game_logic and self.player and self.game.status != "finished":
             logger.info("ici")
             current_player_index = self.player.player_index
@@ -319,8 +317,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         if self.game_logic.game_data['status'] == "finished":
             if self.is_player_1():
                 await self.finish_game()
-        if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
-            await self.close()
+        #if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
+            #await self.close()
 
     def present(self, data):
         new_data = data.copy()
