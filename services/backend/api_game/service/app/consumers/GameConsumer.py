@@ -201,8 +201,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 f"game.status={self.game.status}"
             )
         except:
-            logger.info("%%%debut disconnect before self.game.refresh_from_db() %%%  erreur de data !!!!!")
-        logger.info(f"#### debut disconnect before refresh #### self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
+            logger.info("%%%debut disconnectre self.game.refresh_from_db() %%%  erreur de data !!!!!")
+        logger.info(f"#### debut disconnect before refre befosh #### self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
         await sync_to_async(self.game.refresh_from_db)()
         logger.info(f"#### debut disconnect after #### self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
         try:
@@ -263,6 +263,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 else:
                     the_other_player_index = '1'
                 self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
+                await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
+                await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
                 logger.info("make the other player win")
                 logger.info(f"current_player_index={current_player_index}, the_other_player_index={the_other_player_index}")
                 logger.info(f"Updated scores: {self.game_logic.game_data['scores']}")
@@ -271,6 +273,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 #self.game_logic.game_data['status'] = "finished"
                 await self.finish_game()
                 await self.game_logic.send_game_state(["status"])
+        logger.info(f"???? very end of disconnect ???? self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
+
 
     # I receive only text because json is only text
     async def receive(self, text_data):
@@ -314,9 +318,10 @@ class GameConsumer(AsyncWebsocketConsumer):
                 #logger.info(f"game_onchange game_data={self.present(self.game_logic.game_data)}")
             except:
                 logger.info("try to send to a close protocol")
-        if self.game_logic.game_data['status'] == "finished":
-            if self.is_player_1():
-                await self.finish_game()
+        #if self.game_logic.game_data['status'] == "finished" and self.game.tournament_id == 0:
+            #if self.is_player_1():
+                #logger.info("BOOOOOOOOOOOOOOOOOOOMMMMMMMMMMMMMMMMMMMMMMMMMMMM ======================================")
+                #await self.finish_game()
         #if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
             #await self.close()
 
