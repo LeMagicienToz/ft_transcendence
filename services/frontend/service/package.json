@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "vite build"
+    "build": "VITE_API_42_PUBLIC_KEY=${T_API_42_PUBLICKEY} vite build"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.2",

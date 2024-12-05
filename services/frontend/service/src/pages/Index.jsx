@@ -12,7 +12,7 @@ const Index = () => {
     const [loginWindowState, setLoginWindowState] = useState(false);
 
     const authorizeURL = new URL("https://api.intra.42.fr/oauth/authorize");
-	authorizeURL.searchParams.append("client_id", "u-s4t2ud-0fb37f903a509ffef7fef8a465a0d364fd68770a44139adc8a756ee25376f128")
+	authorizeURL.searchParams.append("client_id", `${import.meta.env.VITE_API_42_PUBLIC_KEY}`)
 	authorizeURL.searchParams.append("redirect_uri", `https://${window.location.host}/api/auth/callback/42/`)
 	authorizeURL.searchParams.append("response_type", "code")
 
