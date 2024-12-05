@@ -202,7 +202,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
         except:
             logger.info("%%%debut disconnect before self.game.refresh_from_db() %%%  erreur de data !!!!!")
+        logger.info(f"#### debut disconnect before refresh #### self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
         await sync_to_async(self.game.refresh_from_db)()
+        logger.info(f"#### debut disconnect after #### self.player.user_id={self.player.user_id}, self.player.score={self.player.score}")
         try:
             logger.info(
                 f"%%%debut disconnect after self.game.refresh_from_db() %%%   "
@@ -213,7 +215,14 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
         except:
             logger.info("%%%debut disconnect after self.game.refresh_from_db() %%%  erreur de data !!!!!")
+
+        if self.game.tournament_id == 0 and (self.game_logic.game_data['status'] == 'waiting' or self.game_logic.game_data['status'] == 'ready_to_play'):
+            logger.info("ABANDONNED STATUS ON")
+            self.game.status = 'abandoned'
+            self.game_logic.game_data['status'] = 'abandoned'
+
         if hasattr(self, 'game_logic') and self.game_logic and self.player and self.game.status != "finished":
+            logger.info("ici")
             current_player_index = self.player.player_index
             logger.info(f" debut de disconnect +++++++ current_player_index={current_player_index}")
             # when we have game_logic we know we have player look "connect()"
@@ -247,6 +256,10 @@ class GameConsumer(AsyncWebsocketConsumer):
                 await sync_to_async(self.game.save)()
                 await self.game_logic.send_game_state(["status"])
             elif self.game_logic.game_data['status'] == 'playing' or self.game_logic.game_data['status'] == 'waiting' or self.game_logic.game_data['status'] == 'ready_to_play':
+                if self.game.tournament_id == 0 and (self.game_logic.game_data['status'] == 'waiting' or self.game_logic.game_data['status'] == 'ready_to_play'):
+                    logger.info("ABANDONNED STATUS ON")
+                    self.game.status = 'abandoned'
+                    self.game_logic.game_data['status'] = 'abandoned'
                 if current_player_index == 1:
                     the_other_player_index = '2'
                 else:
@@ -255,7 +268,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 logger.info("make the other player win")
                 logger.info(f"current_player_index={current_player_index}, the_other_player_index={the_other_player_index}")
                 logger.info(f"Updated scores: {self.game_logic.game_data['scores']}")
-                
                 if self.game.status == 'waiting':
                     self.game.status = 'finished'
                 #self.game_logic.game_data['status'] = "finished"
@@ -320,9 +332,10 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_logic.game_data["end_time"] = timezone.now().isoformat()
         self.game.end_time = self.game_logic.game_data["end_time"]
         logger.info(f"@@@@@@ debut de finish game @@@@@ self.game_logic.game_data['scores']['1']={self.game_logic.game_data['scores']['1']}, self.game_logic.game_data['scores']['2']={self.game_logic.game_data['scores']['2']}")
-        await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
-        await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-        await sync_to_async(self.game.save)()
+        if self.game_logic.game_data['scores']['1'] != 0 and self.game_logic.game_data['scores']['2'] != 0:
+            await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
+            await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
+            await sync_to_async(self.game.save)()
         if self.game.tournament_id != 0:
             logger.info("&&&&finish_game&&&&  in tounament")
             tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
@@ -357,20 +370,13 @@ class GameConsumer(AsyncWebsocketConsumer):
                     logger.info(f"self.player.user_id={self.player.user_id}, other player = {other_player.user_id if other_player else 'None'}")
                     if other_player:
                         other_player.score = self.game.score_to_win
+                        await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
+                        await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
                         logger.info(f"#### end of finish game #### self.player.user_id={self.player.user_id}, "
                             f"his score={self.player.score if self.player else 'None'}, "
                             f"other_player_score={other_player.score}")
                         await database_sync_to_async(other_player.save)()
-                    #this will not work, even we know the game group id, the current_layer can't just send to the group
-                    #await self.channel_layer.group_send(f"game_{game.id}",
-                    #    {
-                    #        "type": "game_onchange",
-                    #        "message": json.dumps({
-                    #            "game_data": self.game_logic.game_data,
-                    #            "fields": ["status"]
-		            #        })
-                    #    }
-                    #)
+                        await sync_to_async(self.game.save)()
 
         self.game_logic.game_data['status'] = 'finished'
 
@@ -384,12 +390,15 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def regular_ping(self):
         while True:
             await asyncio.sleep(5)
-            if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
-                await self.send(text_data=json.dumps({
-                    "game_data": {
-                        "status": "finished",
-                    }
-                }))
+            try:
+                if (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status == 'finished':
+                    await self.send(text_data=json.dumps({
+                        "game_data": {
+                            "status": "finished",
+                        }
+                    }))
+            except:
+                pass
             await self.send(text_data=json.dumps({
                 "game_data": {
                     "status": "ping",
