@@ -6,7 +6,7 @@ ARG         CONFIG_USR_ADD='tuser:200:200'
 ARG         CONFIG_USR_USE='tuser'
 
 ARG         CONFIG_INI_PKG='gettext libpq-dev python3-full python3-dev'
-ARG         CONFIG_INI_DIR='home/tuser/.cache/pip'
+ARG         CONFIG_INI_DIR='home/tuser/.cache/pip app/service/media'
 
 EXPOSE      4000
 
