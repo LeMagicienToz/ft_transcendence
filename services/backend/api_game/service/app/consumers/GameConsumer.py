@@ -355,11 +355,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				#logger.info(f"game_onchange game_data={self.present(self.game_logic.game_data)}")
 			except:
 				logger.info("try to send to a close protocol")
-		#if self.game_logic.game_data['status'] == "finished":
-		#	if self.is_player_1():
-		#		await self.finish_game()
-		#if self.game_logic.game_data['status'] == "finished" or self.game_logic.game_data['status'] == "abandoned":
-		#	await self.close()
 
 	def present(self, data):
 		new_data = data.copy()
@@ -419,10 +414,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		self.game_logic.game_data['status'] = 'finished'
 
-
-	#async def noop(self, event):
-	#    pass
-
 	def is_player_1(self):
 		return self.player and self.player.player_index == 1
 
@@ -440,7 +431,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				pass
 			if self.game_logic.game_data.get('status') != "waiting" and self.game_logic.game_data.get('status') != "ready_to_play":
 				break
-
 
 	async def setup_regular_ping(self):
 		asyncio.create_task(self.regular_ping())
