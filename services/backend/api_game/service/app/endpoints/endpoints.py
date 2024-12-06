@@ -16,6 +16,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import requests
 import os
+import re
 
 from .endpoints_utils import *
 from ..models import GameModel, PlayerModel, TournamentModel
@@ -52,29 +53,30 @@ class GameCreateView(APIView):
     } one token must be valid
     """
     def post(self, request):
-        # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
         user_info = utils_get_user_info(token, token42, refresh_token)
-        player1_user_id = ""
-        player1_user_name = ""
+
         if not user_info:
-            return JsonResponse({'success': False,'message': 'Failed to get user info'}, status=400)
+            return JsonResponse({'success': False,'message': 'Failed to fetch user info.'}, status=400)
         try:
             player1_user_id = user_info.get('user_id')
             player1_user_name = user_info.get('username')
-        except KeyError as e:
-            return JsonResponse({'success': False,'message': f'Missing key in user_info: {str(e)}'}, status=400)
-        except Exception as e:
-            return JsonResponse({'success': False,'message': f'An unexpected error occurred: {str(e)}'}, status=500)
+        except:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
+        if not player1_user_id or not player1_user_name:
+            return JsonResponse({'success': False,'message': 'Player information is required'}, status=400)
 
         custom_name = request.data.get('custom_name')
         nickname = request.data.get('nickname', player1_user_name)
-        # Data validation
-        if not player1_user_id or not player1_user_name:
-            return JsonResponse({'success': False,'message': 'Player information is required'}, status=400)
-        # create Player
+
+        if not re.search(r"^[A-Za-z0-9 _.+'\"$#@)(\][)-]{4,24}$", custom_name):
+            return JsonResponse({'success': False, 'message': 'Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.'}, status=400)
+        if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
+            return JsonResponse({'success': False, 'message': 'Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
+   
         player1 = PlayerModel.objects.create(
             user_id=player1_user_id,
             user_name=player1_user_name,
@@ -83,43 +85,43 @@ class GameCreateView(APIView):
             player_index=0,
             user_info=user_info,
         )
-        # get game type (1 vs 1 or 2 vs 2)
+
         match_type = request.data.get('match_type')
-        if match_type not in ['1v1']:
-            return JsonResponse({'success': False,'message': 'Invalid match type'}, status=400)
-        if match_type == '1v1':
-            player_count = 2
-        elif match_type == '2v2':
-            player_count = 4
-        # get game name (pong or snake)
+        if not match_type or match_type not in ['1v1']:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         game_type = request.data.get('game_type')
-        if game_type not in ['pong']:
-            return JsonResponse({'success': False,'message': 'Invalid game type'}, status=400)
-        # Get score to win
+        if not game_type or game_type not in ['pong']:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
+        def clamp(value, min_value, max_value):
+            return max(min_value, min(value, max_value))
+
         try:
-            score_to_win = int(request.data.get('score_to_win', 3))
-        except (ValueError, TypeError):
+            score_to_win = clamp(int(request.data.get('score_to_win', 3)), 3, 15)
+        except:
             score_to_win = 3
-        # get tournament id and check if it's valid
         try:
             tourn_id = int(request.data.get('tournament_id', 0))
             tourn = TournamentModel.objects.get(id=tourn_id) if tourn_id > 0 else None
             tourn_id = tourn.id if tourn else 0
         except (ValueError, TypeError, TournamentModel.DoesNotExist):
             tourn_id = 0
-        # Get game customization parameters
+
+        color_board = request.data.get('color_board', '#000000')
+        color_ball = request.data.get('color_ball', '#e48d2d')
+        color_wall = request.data.get('color_wall', '#e48d2d')
+        color_paddle = request.data.get('color_paddle', '#ffffff')
+
+        for color in color_board, color_ball, color_wall, color_paddle:
+            if not re.search(r"^#[A-Fa-f0-9]{6}$", color):
+                return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         try:
-            ball_speed = float(request.data.get('ball_speed', 1.0))
-            color_board = request.data.get('color_board', '#000000')
-            color_ball = request.data.get('color_ball', '#e48d2d')
-            color_wall = request.data.get('color_wall', '#e48d2d')
-            color_paddle = request.data.get('color_paddle', '#ffffff')
-        except ValueError as e:
-            return JsonResponse({'error': f'Invalid value for customization parameter: {str(e)}'}, status=400)
-        # Validate customization parameters
-        if not (0.5 <= ball_speed <= 2.5):
-            return JsonResponse({'error': 'Ball speed must be between 0.5 and 2.5'}, status=400)
-        # Game init with pLayer 1
+            ball_speed = clamp(float(request.data.get('ball_speed', 1.0)), 0.5, 2.5)
+        except:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         try:
             game = GameModel.objects.create(
                 custom_name=custom_name,
@@ -127,7 +129,7 @@ class GameCreateView(APIView):
                 match_type=match_type,
                 game_type=game_type,
                 score_to_win=score_to_win,
-                player_count=player_count,
+                player_count=2,
                 tournament_id=tourn_id,
                 ball_speed=ball_speed,
                 color_board=color_board,
@@ -138,8 +140,8 @@ class GameCreateView(APIView):
                 status='waiting',
             )
             game.players.add(player1)
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': 'Error creating game: {}'.format(str(e))}, status=500)
+        except Exception:
+            return JsonResponse({'success': False, 'message': 'Failed to create game.'}, status=400)
         return JsonResponse({'success': True, 'message': 'Game created', 'game_id': game.id, 'list_id': [game.id]}, status=200)
 
 class ListView(APIView):
@@ -148,7 +150,6 @@ class ListView(APIView):
     The request must be GET.
     """
     def get(self, request):
-        # get game  data
         games = GameModel.objects.filter(tournament_id=0, status='waiting')
         games_data = [
             game.to_array() for game in games
@@ -176,7 +177,6 @@ class ListAllView(APIView):
     The request must be GET.
     """
     def get(self, request):
-        # get game data
         games = GameModel.objects.filter(tournament_id=0)
         games_data = [
             game.to_array()
@@ -221,35 +221,36 @@ class GameJoinView(APIView):
     the game_id is in the url
     """
     def put(self, request, game_id):
-        # get user_id and user_name from authentification app
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
         user_info = utils_get_user_info(token, token42, refresh_token)
+
         if not user_info:
-            return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
+            return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
+
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
-        # read the JSON file from the request
+
+        if not player_user_id or not player_user_name:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         data = request.data
         nickname = data.get('nickname', player_user_name)
-        # Player info validation
-        if not player_user_id or not player_user_name:
-            return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # get game from id
+
+        if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+        
         game = get_object_or_404(GameModel, id=game_id)
-        # Check if player allready in game
+
         if game.players.filter(user_id=player_user_id).exists():
-            return JsonResponse({'success': False, 'message': 'Player has already joined the game'}, status=400)
-        # check if game is full
-        if game.match_type == '1v1' and game.players.count() >= 2:
-            return JsonResponse({'success': False, 'message': 'Game is already full'}, status=400)
-        elif game.match_type == '2v2' and game.players.count() >= 4:
-            return JsonResponse({'success': False, 'message': 'Game is already full'}, status=400)
-        # Game must be waiting
+            return JsonResponse({'success': False, 'message': 'You can\'t join the game twice.'}, status=400)
+        if game.players.count() >= 2:
+            return JsonResponse({'success': False, 'message': 'Game is full.'}, status=400)
+
         if game.status != 'waiting':
-            return JsonResponse({'success': False, 'message': 'Game has already started or finished or is full'}, status=400)
-        # create Player
+            return JsonResponse({'success': False, 'message': 'Game has already started.'}, status=400)
+
         player = PlayerModel.objects.create(
             user_id=player_user_id,
             user_name=player_user_name,
@@ -263,7 +264,6 @@ class GameJoinView(APIView):
             tournament = TournamentModel.objects.filter(id=game.tournament_id)
             if tournament:
                 game_list = tournament.games.filter(players__user_id=player_user_id, status='waiting').exclude(id=game.id)
-        # Assign new player
         game.players.add(player)
         game.save()
         return JsonResponse({'success': True, 'message': 'Player joined', 'game_id': game.id, 'list_id': list(game_list.values_list('id', flat=True)) if game_list else [game_id]}, status=200)
@@ -279,35 +279,22 @@ class GameUserHistoryView(APIView):
         try:
             user_id = int(user_id)
         except ValueError:
-            return JsonResponse({'success': False, 'message': 'Invalid user_id. Must be an integer.'}, status=400)
-        # Filter games where used_id is in
+            return JsonResponse({'success': False, 'message': 'Invalid user id.'}, status=400)
+
         games = GameModel.objects.filter(players__user_id=user_id, status='finished').order_by('-end_time')
         game_details_list = []
         for game in games:
             players = game.players.all()
             has_won = False
-            # Determine if the user won based on the match type
-            if game.match_type == '1v1':
-                user_score = None
-                opponent_score = None
-                for player in players:
-                    if player.user_id == user_id:
-                        user_score = player.score
-                    else:
-                        opponent_score = player.score
-                if user_score is not None and opponent_score is not None:
-                    has_won = user_score >= opponent_score
-            elif game.match_type == '2v2':
-                user_score = None
-                highest_opponent_score = None
-                for player in players:
-                    if player.user_id == user_id:
-                        user_score = player.score
-                    else:
-                        if highest_opponent_score is None or player.score > highest_opponent_score:
-                            highest_opponent_score = player.score
-                if user_score is not None and highest_opponent_score is not None:
-                    has_won = user_score >= (highest_opponent_score or 0)
+            user_score = None
+            opponent_score = None
+            for player in players:
+                if player.user_id == user_id:
+                    user_score = player.score
+                else:
+                    opponent_score = player.score
+            if user_score is not None and opponent_score is not None:
+                has_won = user_score >= opponent_score
             # Build the game details
             game_details = {
                 'id': game.id,
@@ -339,6 +326,7 @@ class GameUserHistoryView(APIView):
             game_details_list.append(game_details)
         return JsonResponse({'success': True, 'games': game_details_list}, safe=False)
 
+# TODO remove before push
 class GameDeleteView(APIView):
     """
     Delete a game
@@ -372,6 +360,7 @@ class GameDeleteView(APIView):
         game.delete()
         return JsonResponse({'success': True, 'message': 'Game deleted successfully'}, status=200)
 
+# TODO remove before push
 class GameDeleteAllView(APIView):
     """
     Delete all games
@@ -417,58 +406,60 @@ class TournamentCreateView(APIView):
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
         user_info = utils_get_user_info(token, token42, refresh_token)
-        player1_user_id = ""
-        player1_user_name = ""
+
         if not user_info:
-            return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
+            return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
         try:
             player1_user_id = user_info.get('user_id')
             player1_user_name = user_info.get('username')
-        except KeyError as e:
-            return JsonResponse({'success': False, 'message': f'Missing key in user_info: {str(e)}'}, status=400)
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': f'An unexpected error occurred: {str(e)}'}, status=500)
-        custom_name = request.data.get('custom_name')
-        nickname = request.data.get('nickname', player1_user_name)
-        # Data validation
+        except:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         if not player1_user_id or not player1_user_name:
             return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # get game type (1 vs 1 or 2 vs 2)
+
+        custom_name = request.data.get('custom_name')
+        nickname = request.data.get('nickname', player1_user_name)
+
+        if not re.search(r"^[A-Za-z0-9 _.+'\"$#@)(\][)-]{4,24}$", custom_name):
+            return JsonResponse({'success': False, 'message': 'Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.'}, status=400)
+        if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
+            return JsonResponse({'success': False, 'message': 'Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
+   
         tourn_match_type = request.data.get('match_type')
         if tourn_match_type not in ['1v1']:
-            return JsonResponse({'success': False, 'message': 'Invalid match type'}, status=400)
-        # get game type (pong or snake)
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
         tourn_game_type = request.data.get('game_type')
-        if not tourn_game_type:
-            tourn_game_type = 'pong'
-        elif tourn_game_type not in ['pong']:
-            return JsonResponse({'success': False, 'message': 'Invalid game type'}, status=400)
-        # Get score to win
+        if not tourn_game_type or tourn_game_type not in ['pong']:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
+        def clamp(value, min_value, max_value):
+            return max(min_value, min(value, max_value))
+
         try:
-            score_to_win = int(request.data.get('score_to_win', 3))
-        except (ValueError, TypeError):
+            score_to_win = clamp(int(request.data.get('score_to_win', 3)), 3, 15)
+        except:
             score_to_win = 3
-        # Get the number of players
+
         try:
-            player_count = int(request.data.get('player_count'))
-            if player_count <= 1:
-                raise ValueError
-            if tourn_match_type == '2v2' and (player_count <= 3 or player_count % 2 != 0):
-                raise ValueError
+            player_count = clamp(int(request.data.get('player_count')), 3, 10)
         except (ValueError, TypeError):
-            return JsonResponse({'success': False, 'message': 'Invalid number of players'}, status=400)
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
+        color_board = request.data.get('color_board', '#000000')
+        color_ball = request.data.get('color_ball', '#e48d2d')
+        color_wall = request.data.get('color_wall', '#e48d2d')
+        color_paddle = request.data.get('color_paddle', '#ffffff')
+
+        for color in color_board, color_ball, color_wall, color_paddle:
+            if not re.search(r"^#[A-Fa-f0-9]{6}$", color):
+                return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         try:
-            ball_speed = float(request.data.get('ball_speed', 1.0))
-            color_board = request.data.get('color_board', '#000000')
-            color_ball = request.data.get('color_ball', '#e48d2d')
-            color_wall = request.data.get('color_wall', '#e48d2d')
-            color_paddle = request.data.get('color_paddle', '#ffffff')
-        except ValueError as e:
-            return JsonResponse({'success': False, 'message': f'Invalid value for customization parameter: {str(e)}'}, status=400)
-        # Validate customization parameters
-        if not (0.5 <= ball_speed <= 2.5):
-            return JsonResponse({'success': False, 'message': 'Ball speed must be between 0.5 and 2.5'}, status=400)
-        # create tournament
+            ball_speed = clamp(float(request.data.get('ball_speed', 1.0)), 0.5, 2.5)
+        except:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         tournament = TournamentModel.objects.create(
             custom_name=custom_name,
             creator=nickname,
@@ -563,33 +554,37 @@ class TournamentJoinView(APIView):
     'tournament_id' is in the url.
     """
     def put(self, request, tournament_id):
-        # get tournament
         tournament = get_object_or_404(TournamentModel, id=tournament_id)
-        # check if tournament is full
         joined_players_count = tournament.get_joined_players_count() # need to find the number of players that are not iwth placeholders
+
         if joined_players_count >= tournament.player_count:
-            return JsonResponse({'success': False, 'message': 'Tournament is already full'}, status=400)
-        # tournament must be waiting
+            return JsonResponse({'success': False, 'message': 'Tournament is full.'}, status=400)
+
         if tournament.status != 'waiting':
-            return JsonResponse({'success': False, 'message': 'Tournament has already started or finished'}, status=400)
-        # get user_id and user_name from authentification app
+            return JsonResponse({'success': False, 'message': 'Tournament has already started.'}, status=400)
+
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
         user_info = utils_get_user_info(token, token42, refresh_token)
+
         if not user_info:
-            return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
+            return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
+    
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
-        # read the JSON file from the request
+
+        if not player_user_id or not player_user_name:
+            return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+
         data = request.data
         nickname = data.get('nickname', player_user_name)
-        # check the player info
-        if not player_user_id or not player_user_name:
-            return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # Check if player allready in tournament
+
+        if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
+            return JsonResponse({'success': False, 'message': 'Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
+
         if tournament.players.filter(user_id=player_user_id).exists():
-            return JsonResponse({'success': False, 'message': 'Player has already joined the tournament'}, status=400)
+            return JsonResponse({'success': False, 'message': 'You can\'t join the tournament twice.'}, status=400)
         placeholder_player_user_id = tournament.get_placeholder_user_id(joined_players_count)
         players_with_placeholder_user_id = PlayerModel.objects.filter(user_id=placeholder_player_user_id)
         for player in players_with_placeholder_user_id:
@@ -599,10 +594,8 @@ class TournamentJoinView(APIView):
             player.user_info = user_info
             player.save()
         joined_players_count += 1
-        # Check if the number of players matches the required player_count
         if joined_players_count == tournament.player_count:
-            # Change tournament status to playing
-            tournament.status = 'Tournament_full'
+            tournament.status = 'tournament_full'
             tournament.start_time = timezone.now()
             tournament.save()
         game = tournament.games.filter(status='waiting', players__user_id=player_user_id).first()
@@ -621,6 +614,7 @@ class TournamentJoinView(APIView):
             'tournament': tournament_data
         }, status=200)
 
+# TODO remove before push
 class TournamentDeleteView(APIView):
     """
     Delete a tournament

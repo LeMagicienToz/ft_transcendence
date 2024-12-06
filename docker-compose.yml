@@ -67,6 +67,8 @@ services:
   #        condition: service_healthy
       redis:
           condition: service_healthy
+    volumes:
+      - api_auth:/app/service/media
     networks:
       - backend
       - caching
@@ -89,6 +91,8 @@ services:
   #        condition: service_healthy
       redis:
           condition: service_healthy
+    volumes:
+      - api_game:/app/service/media
     networks:
       - backend
       - caching
@@ -328,6 +332,11 @@ services:
 ### VOLUMES ####################################################
 
 volumes:
+
+  ## > BACKEND < #################
+
+  api_auth:
+  api_game:
 
   ## > DATABASES < ###############
 
