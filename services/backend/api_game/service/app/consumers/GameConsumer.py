@@ -446,6 +446,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if (self.is_player_1()):
 			logger.info(f"is player 1={self.is_player_1()} loop started")
 			asyncio.create_task(self.game_logic.start_game_loop())
+			self.game.start_time = timezone.now().isoformat()
 			await sync_to_async(self.game.save)()
 		else:
 			self.game.start_time = timezone.now().isoformat()
