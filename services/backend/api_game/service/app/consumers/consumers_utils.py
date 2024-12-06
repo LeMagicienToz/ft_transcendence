@@ -187,31 +187,33 @@ class GameLogic():
 		self.game_data["ball_position"] = [ball_x, ball_y]
 		if ball_x <= 0:
 			if self.is_ball_touched_by_player_left():
-				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.02
-				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.02
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.04
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.04
 				return
 			else:
 				self.game_data["scores"]['2'] += 1
 				if self.game_data["scores"]['2'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
+					await asyncio.sleep(1)
 				await self.reset_ball_position()
 				await self.send_game_state(["ball_position", "scores", "status"])
-				await asyncio.sleep(2)
+				await asyncio.sleep(1)
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player_right():
-				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.02
-				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.02
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.04
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.04
 				return
 			else:
 				self.game_data["scores"]['1'] += 1
 				if self.game_data["scores"]['1'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
+					await asyncio.sleep(1)
 				await self.reset_ball_position()
 				await self.send_game_state(["ball_position", "scores", "status"])
-				await asyncio.sleep(2)
+				await asyncio.sleep(1)
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]
 
