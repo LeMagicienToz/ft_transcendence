@@ -201,12 +201,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data['status'] = 'abandoned'
 					self.game.status = 'abandoned'
 					await self.game_logic.send_game_state(["status"])
+					self.game.start_time = timezone.now().isoformat()
+					self.game.end_time = self.game.start_time
 					await sync_to_async(self.game.save)()
 				elif self.game_logic.game_data['status'] == "finished":
 					self.game.status = 'finished'
 					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
 					await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
+					self.game.end_time = timezone.now().isoformat()
 					await sync_to_async(self.game.save)()
 				elif self.game_logic.game_data['status'] == 'playing':
 					self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
@@ -216,6 +219,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data['status'] = 'abandoned'
 					await self.game_logic.send_game_state(["status"])
 					self.game_logic.game_data['status'] = 'finished'
+					self.game.end_time = timezone.now().isoformat()
 					await sync_to_async(self.game.save)()
 				else:
 					pass
@@ -226,6 +230,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 					games = await sync_to_async(list)(tournament.games.all())  # Ensure it's an iterable
 					for game in games:
 						game.status = 'abandoned'
+						self.game.end_time = timezone.now().isoformat()
 						await sync_to_async(game.save)()
 					if tournament.status == 'waiting':
 						tournament.status = 'abandoned'
@@ -237,6 +242,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
 					await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
+					self.game.end_time = timezone.now().isoformat()
 					await sync_to_async(self.game.save)()
 				else:
 					pass
@@ -260,7 +266,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				# 	await sync_to_async(self.game.save)()
 				# else:
 				# 	logger.info(" 2 second player trigger")
-				
+
 
 
 			# if self.game_logic.game_data['status'] != 'playing' and self.game_logic.game_data['status'] != 'finished' and self.game_logic.game_data['status'] != 'waiting' and self.game_logic.game_data['status'] != 'ready_to_play':
