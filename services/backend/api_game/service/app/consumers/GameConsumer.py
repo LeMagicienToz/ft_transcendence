@@ -218,7 +218,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.save)()
 				else:
-					logger.info(" 1 second player trigger")
+                    pass
 			else: ###		TOURNOIS
 				if  self.game_logic.game_data['status'] not in ['finished', 'abandoned']:
 					tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
@@ -231,7 +231,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 						tournament.status = 'abandoned'
 						await sync_to_async(tournament.save)()
 					else:
-						logger.info(" 2 second player trigger")
+                        pass
 				elif self.game_logic.game_data['status'] == "finished":
 					self.game.status = 'finished'
 					self.game_logic.game_data['status'] = 'finished'
