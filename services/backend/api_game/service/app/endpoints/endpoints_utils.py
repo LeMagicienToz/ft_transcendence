@@ -179,7 +179,8 @@ def create_round_robin_matches_old(tournament):
 
 def create_round_robin_matches(tournament):
     # get info to create tournament
-    players = list(tournament.players.all())
+    #players = list(tournament.players.all())
+    players = list(tournament.players.all().order_by('user_id'))
     custom_name = "Game in " + tournament.custom_name
     creator = tournament.creator
     tournament_id = tournament.id
