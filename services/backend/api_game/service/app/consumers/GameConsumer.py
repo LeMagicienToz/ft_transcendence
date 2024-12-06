@@ -218,8 +218,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.save)()
 				else:
-                    pass
-			else: ###		TOURNOIS
+					pass
+			else:
 				if  self.game_logic.game_data['status'] not in ['finished', 'abandoned']:
 					tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
 					self.game_logic.game_data['status'] = 'abandoned'
@@ -231,7 +231,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 						tournament.status = 'abandoned'
 						await sync_to_async(tournament.save)()
 					else:
-                        pass
+						pass
 				elif self.game_logic.game_data['status'] == "finished":
 					self.game.status = 'finished'
 					self.game_logic.game_data['status'] = 'finished'
@@ -240,17 +240,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 					await sync_to_async(self.game.save)()
 				else:
 					pass
-						
-						
-					# elif self.game_logic.game_data['status'] == 'waiting':
-					# 	self.game_logic.game_data['status'] = 'finished'
-					# 	self.game.status = 'finished'
-					# 	await sync_to_async(game.save)()
-				
-
-
-
-
 
 				###################### ABANDONNED ##################
 				# if  self.game_logic.game_data['status'] not in ['finished', 'abandoned']:
