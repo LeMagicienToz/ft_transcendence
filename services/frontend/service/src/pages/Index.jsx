@@ -22,7 +22,7 @@ const Index = () => {
             <section className={`view`}>
                 <LoginWindow onClose={() => setLoginWindowState(false)} isOpen={loginWindowState} />
                 <div className={`wrapper`}>
-                    <Typewriter text='ft_transendence' />
+                    <Typewriter text='ft_transcendence' />
                     <nav>
                         <BaseButton onClick={() => setLoginWindowState(true)} text='JOIN THE GAME' className='space' />
                         <LinkButton route={authorizeURL} text='LOGIN WITH 42' className='space' />
