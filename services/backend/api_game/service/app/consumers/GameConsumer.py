@@ -215,11 +215,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
 					await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
 					await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-					self.game.status = 'finished'
 					self.game_logic.game_data['status'] = 'abandoned'
 					await self.game_logic.send_game_state(["status"])
-					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.refresh_from_db)()
+					self.game_logic.game_data['status'] = 'finished'
+					self.game.status = 'finished'
 					self.game.end_time = timezone.now().isoformat()
 					await sync_to_async(self.game.save)()
 				else:
@@ -252,7 +252,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		if (self.game.status == 'waiting' or self.game.status == 'ready_to_play'):
 			await sync_to_async(self.game.refresh_from_db)()
-		logger.info(f"receive=> status={self.game.status}")
 		await self.game_logic.on_receiving_data(text_data)
 		#if player start moving, and game is not start, start the game
 		if (self.game_logic.game_data['status'] == "ready_to_play"):
