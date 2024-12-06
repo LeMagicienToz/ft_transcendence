@@ -126,30 +126,30 @@ REST_FRAMEWORK = {
 
 # Logging
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'global': {
-#             'class': 'logging.handlers.SysLogHandler',
-#             'address': ('logstash', int(environ.get('T_PORT_INTERN_LOGGING_3'))),
-#             'formatter': 'log.global',
-#         },
-#     },
-#     'loggers': {
-#         'daphne': {
-#             'handlers': ['global'],
-#             'level': 'INFO',
-#             'propagate': False,
-#         }
-#     },
-#    'formatters': {
-#        'log.global': {
-#            'format': '%(asctime)s, backend: "' + environ.get('T_SELF_NAME') + '", level: "%(levelname)s", message: "%(message)s", file: "%(filename)s", function: "%(funcName)s", line: "%(lineno)s"',
-#            'datefmt': '%Y/%m/%d %H:%M:%S',
-#        }
-#    },
-#}
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'global': {
+            'class': 'logging.handlers.SysLogHandler',
+            'address': ('logstash', int(environ.get('T_PORT_INTERN_LOGGING_3'))),
+            'formatter': 'log.global',
+        },
+    },
+    'loggers': {
+        'daphne': {
+            'handlers': ['global'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    },
+   'formatters': {
+       'log.global': {
+           'format': '%(asctime)s, backend: "' + environ.get('T_SELF_NAME') + '", level: "%(levelname)s", message: "%(message)s", file: "%(filename)s", function: "%(funcName)s", line: "%(lineno)s"',
+           'datefmt': '%Y/%m/%d %H:%M:%S',
+       }
+   },
+}
 
 # Smtp
 

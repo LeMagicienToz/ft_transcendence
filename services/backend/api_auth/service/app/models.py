@@ -14,7 +14,7 @@ class CustomUserModel(models.Model):
     visColor = models.CharField(max_length=7, default='#ffffff')
     ringsColor = models.CharField(max_length=7, default='#ffffff')
     bpColor = models.CharField(max_length=7, default='#ffffff')
-    twoFA_enabled = models.BooleanField(default=False)
+    twoFA_enabled = models.BooleanField(default=True)
     friends_list = models.ManyToManyField("self", blank=True)
     flatness = models.FloatField(default=2.8)
     horizontalPosition = models.FloatField(default=7.5)
