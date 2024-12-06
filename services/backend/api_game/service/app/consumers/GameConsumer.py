@@ -215,11 +215,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 					self.game_logic.game_data["scores"][the_other_player_index] = self.game.score_to_win
 					await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
 					await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-					self.game.status = 'finished'
 					self.game_logic.game_data['status'] = 'abandoned'
 					await self.game_logic.send_game_state(["status"])
-					self.game_logic.game_data['status'] = 'finished'
 					await sync_to_async(self.game.refresh_from_db)()
+					self.game_logic.game_data['status'] = 'finished'
+					self.game.status = 'finished'
 					self.game.end_time = timezone.now().isoformat()
 					await sync_to_async(self.game.save)()
 				else:
@@ -252,7 +252,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		if (self.game.status == 'waiting' or self.game.status == 'ready_to_play'):
 			await sync_to_async(self.game.refresh_from_db)()
-		logger.info(f"receive=> status={self.game.status}")
 		await self.game_logic.on_receiving_data(text_data)
 		#if player start moving, and game is not start, start the game
 		if (self.game_logic.game_data['status'] == "ready_to_play"):
@@ -296,59 +295,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		new_data = data.copy()
 		del new_data["keys"]
 		return new_data
-
-	# async def finish_game(self):
-	# 	self.game.status = "finished"
-	# 	self.game_logic.game_data["end_time"] = timezone.now().isoformat()
-	# 	self.game.end_time = self.game_logic.game_data["end_time"]
-	# 	logger.info(f"@@@@@@ debut de finish game @@@@@ self.game_logic.game_data['scores']['1']={self.game_logic.game_data['scores']['1']}, self.game_logic.game_data['scores']['2']={self.game_logic.game_data['scores']['2']}")
-	# 	if self.game_logic.game_data['scores']['1'] != 0 and self.game_logic.game_data['scores']['2'] != 0:
-	# 		await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
-	# 		await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-	# 		await sync_to_async(self.game.save)()
-	# 	if self.game.tournament_id != 0:
-	# 		logger.info("&&&&finish_game&&&&  in tounament")
-	# 		tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
-	# 		finished_games = await sync_to_async(tournament.games.filter)(status='finished')
-	# 		tournament_count = await sync_to_async(tournament.games.count)()
-	# 		finished_count = await sync_to_async(finished_games.count)()
-	# 		logger.info(f"finished_count={finished_count} tournament_count={tournament_count}")
-	# 		logger.info(f"self.game_logic.game_data['status']={self.game_logic.game_data['status']}")
-	# 		if finished_count == tournament_count:
-	# 			tournament.status = "finished"
-	# 			tournament.end_time = timezone.now().isoformat()
-	# 			await sync_to_async(tournament.save)()
-	# 		elif self.game_logic.game_data['status'] != 'finished':
-	# 			logger.info("-------------------------------------------------------finish-------- self.game_logic.game_data['status'] != 'finished':-------------------------------------")
-	# 			games = await database_sync_to_async(tournament.games.filter)(players__user_id=self.player.user_id)
-	# 			not_finished_games = await sync_to_async(games.exclude)(status='finished')
-	# 			count = await sync_to_async(not_finished_games.count)()
-	# 			logger.info(f'Number of not finished games: {count}')
-
-	# 			for game in await database_sync_to_async(list)(not_finished_games):
-	# 				logger.info(f'set the status to finished: game.status={game.status}')
-	# 				game.status = 'finished'
-	# 				#logger.info(f'the status self.game_logic.game_data['status']={self.game_logic.game_data['status']}')
-	# 				self.game_logic.game_data["start_time"] = timezone.now().isoformat()
-	# 				self.game.start_time = self.game_logic.game_data["start_time"]
-	# 				self.game_logic.game_data["end_time"] = self.game_logic.game_data["start_time"]
-	# 				self.game.end_time = self.game_logic.game_data["end_time"]
-	# 				await database_sync_to_async(game.save)()
-	# 				other_player = await database_sync_to_async(
-	# 					lambda: game.players.exclude(user_id=self.player.user_id).first()
-	# 				)()
-	# 				logger.info(f"self.player.user_id={self.player.user_id}, other player = {other_player.user_id if other_player else 'None'}")
-	# 				if other_player:
-	# 					other_player.score = self.game.score_to_win
-	# 					await sync_to_async(self.game.update_player_one_score)(self.game_logic.game_data["scores"]['1'])
-	# 					await sync_to_async(self.game.update_player_two_score)(self.game_logic.game_data["scores"]['2'])
-	# 					logger.info(f"#### end of finish game #### self.player.user_id={self.player.user_id}, "
-	# 						f"his score={self.player.score if self.player else 'None'}, "
-	# 						f"other_player_score={other_player.score}")
-	# 					await database_sync_to_async(other_player.save)()
-	# 					await sync_to_async(self.game.save)()
-
-	# 	self.game_logic.game_data['status'] = 'finished'
 
 	def is_player_1(self):
 		return self.player and self.player.player_index == 1
