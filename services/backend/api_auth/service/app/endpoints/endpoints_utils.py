@@ -44,6 +44,8 @@ def utils_get_user(token, refresh_token, token42):
             pass
         except jwt.InvalidTokenError:
             return None
+        except User.DoesNotExist:
+            return None
 
     if refresh_token:
         try:
