@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
+import { UserContext } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
 
 import BaseForm from './BaseForm';
@@ -11,6 +12,7 @@ import './TwoFactorUpdateForm.css'
 
 const TwoFactorUpdateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled = false }) => {
 
+    const { hasTwoFa, setHasTwoFa } = useContext(UserContext);
     const { addToast } = useToast();
 
     const handleValidation = (form) => {
@@ -41,10 +43,12 @@ const TwoFactorUpdateForm = ({ onSuccess = () => {}, onFailure = () => {}, disab
             disabled={disabled}
         >
             <SelectInput
+                onChange={(event) => {setHasTwoFa(event.target.value == 'True' ? true : false);}}
                 id='twoFA_enabled'
                 name='twoFA_enabled'
                 label='Enable 2FA'
                 options={[{label: 'Enabled', value: 'True'}, {label: 'Disabled', value: 'False'}]}
+                value={hasTwoFa ? 'True' : 'False'}
             />
             <BaseButton text='Update 2FA' className='primary' />
         </BaseForm>

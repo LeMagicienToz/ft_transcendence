@@ -208,7 +208,7 @@ def callback42(request):
         response.set_cookie('42_access_token', access_token, httponly=True, secure='True', samesite='Strict', max_age=expires_in_seconds)
         r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', value='True', ex=expires_in_seconds)
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
-        r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id)
+        r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id) # planet friendly <3
         return response
     return JsonResponse({'success': False, 'message': 'Authentication failed.'}, status=400)
 
@@ -280,7 +280,8 @@ def me(request):
     visColor = user.custom_user.visColor
     ringsColor = user.custom_user.ringsColor
     bpColor = user.custom_user.bpColor
-    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'email': email, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor}, status=200)
+    twoFA_enabled = user.custom_user.twoFA_enabled
+    return JsonResponse({'success': True, 'user_id': user.id, 'username': username, 'email': email, 'profile_picture_url': profile_picture_url, 'flatness': flatness, 'horizontalPosition': horizontalPosition, 'verticalPosition': verticalPosition, 'suitColor': suitColor, 'visColor': visColor, 'ringsColor': ringsColor, 'bpColor': bpColor, 'twofa_enabled': twoFA_enabled}, status=200)
 
 ## > ME: UPDATE AVATAR < #######
 

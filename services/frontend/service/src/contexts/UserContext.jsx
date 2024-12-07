@@ -6,6 +6,7 @@ export const UserProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [isLogged, setIsLogged] = useState(false);
+    const [hasTwoFa, setHasTwoFa] = useState(true);
 
     const [userId, setUserId] = useState(0);
     const [username, setUsername] = useState('');
@@ -36,6 +37,7 @@ export const UserProvider = ({ children }) => {
                 const json = await response.json();
                 if (json?.success == true) {
                     setIsLogged(true);
+                    setHasTwoFa(json.twofa_enabled);
                     setUserId(json.user_id);
                     setUsername(json.username);
                     setEmail(json.email);
@@ -64,6 +66,7 @@ export const UserProvider = ({ children }) => {
     const logout = async () => {
         setIsLoading(true);
         setIsLogged(false);
+        setHasTwoFa(true);
         setUserId(0);
         setUsername('');
         setEmail('');
@@ -86,6 +89,7 @@ export const UserProvider = ({ children }) => {
         <UserContext.Provider value={{
             isLoading, setIsLoading,
             isLogged, setIsLogged,
+            hasTwoFa, setHasTwoFa,
             userId, setUserId,
             username, setUsername,
             email, setEmail,
