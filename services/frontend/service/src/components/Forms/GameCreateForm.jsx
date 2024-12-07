@@ -93,7 +93,7 @@ const GameCreateForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled =
                 <Tab name='Customization' icon='sliders2' >
                     <div className={`row`} >
                         <SliderInput id='score_to_win' name='score_to_win' label='Score' value={5} min={3} max={15} step={1} />
-                        <SliderInput id='ball_speed' name='ball_speed' label='Ball speed' value={1} min={0.5} max={2.5} step={0.25} />
+                        <SliderInput id='ball_speed' name='ball_speed' label='Speed' value={1} min={0.5} max={2.5} step={0.25} />
                     </div>
                     <div className={`row`} >
                         <ColorInput id='color_board' name='color_board' label='Board' value='#000000' />
