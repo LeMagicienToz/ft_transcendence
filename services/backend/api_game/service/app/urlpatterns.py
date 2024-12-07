@@ -6,11 +6,6 @@ from .endpoints.endpoints import (
 	TournamentCreateView, TournamentDetailView, TournamentJoinView
 )
 
-# TODO remove this
-from .endpoints.endpoints import (
-    GameDeleteAllView, TournamentDeleteAllView, ListAllView
-)
-
 urlpatterns = [
     path('status/',                         endpoints.status, name='status'),
 
