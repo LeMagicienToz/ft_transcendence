@@ -19,6 +19,7 @@ urlpatterns = [
     path('me/update/colors/',               endpoints.me_update_colors, name='me_update_colors'),
     path('me/update/info/',                 endpoints.me_update_info, name='me_update_info'),
     path('me/update/password/',             endpoints.me_update_password, name='me_update_password'),
+    path('me/update/twoFA/',                endpoints.me_update_twoFA_status, name='me_update_twoFA_status'),
 
     path('user/<int:user_id>/',             endpoints.user, name='user_details'),
     path('user/list/',                      endpoints.user_list, name='user_list'),

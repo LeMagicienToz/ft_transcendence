@@ -171,28 +171,28 @@ class ListView(APIView):
         return JsonResponse(response_data, safe=False)
 
 # TODO remove before push
-class ListAllView(APIView):
-    """
-    Return a single 'games' array containing both games and tournaments in a single response.
-    The request must be GET.
-    """
-    def get(self, request):
-        games = GameModel.objects.filter(tournament_id=0)
-        games_data = [
-            game.to_array()
-            for game in games
-        ]
-        tournaments = TournamentModel.objects.all()
-        tournaments_data = [
-            tournament.to_array()
-            for tournament in tournaments
-        ]
-        combined_data = games_data + tournaments_data
-        response_data = {
-            'success': True,
-            'games': combined_data
-        }
-        return JsonResponse(response_data, safe=False)
+# class ListAllView(APIView):
+#     """
+#     Return a single 'games' array containing both games and tournaments in a single response.
+#     The request must be GET.
+#     """
+#     def get(self, request):
+#         games = GameModel.objects.filter(tournament_id=0)
+#         games_data = [
+#             game.to_array()
+#             for game in games
+#         ]
+#         tournaments = TournamentModel.objects.all()
+#         tournaments_data = [
+#             tournament.to_array()
+#             for tournament in tournaments
+#         ]
+#         combined_data = games_data + tournaments_data
+#         response_data = {
+#             'success': True,
+#             'games': combined_data
+#         }
+#         return JsonResponse(response_data, safe=False)
 
 class GameDetailView(APIView):
     """
@@ -327,49 +327,49 @@ class GameUserHistoryView(APIView):
         return JsonResponse({'success': True, 'games': game_details_list}, safe=False)
 
 # TODO remove before push
-class GameDeleteView(APIView):
-    """
-    Delete a game
-    the request must be DELETE
-    body = {}
-    cookie = {
-        'token': type string,
-        'refresh_token': type string,
-        '42_access_token': type string,
-    } one token must be valid
-    the game_id is in the url
-    """
-    def delete(self, request, game_id):
-        # get user_id from authentification app
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
-        if not user_info or not user_info.get('user_id'):
-            return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
-        player_user_id = user_info['user_id']
-        # Player info validation
-        if not player_user_id:
-            return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # get game from id
-        game = get_object_or_404(GameModel, id=game_id)
-        # check if the request comes from the creator
-        player_is_creator = (game.players.all()[0].user_id == player_user_id)
-        if player_is_creator == False:
-            return JsonResponse({'success': False, 'message': 'Only creator can delete the game'}, status=400)
-        game.delete()
-        return JsonResponse({'success': True, 'message': 'Game deleted successfully'}, status=200)
+# class GameDeleteView(APIView):
+#     """
+#     Delete a game
+#     the request must be DELETE
+#     body = {}
+#     cookie = {
+#         'token': type string,
+#         'refresh_token': type string,
+#         '42_access_token': type string,
+#     } one token must be valid
+#     the game_id is in the url
+#     """
+#     def delete(self, request, game_id):
+#         # get user_id from authentification app
+#         token = request.COOKIES.get('token')
+#         refresh_token = request.COOKIES.get('refresh_token')
+#         token42 = request.COOKIES.get('42_access_token')
+#         user_info = utils_get_user_info(token, token42, refresh_token)
+#         if not user_info or not user_info.get('user_id'):
+#             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
+#         player_user_id = user_info['user_id']
+#         # Player info validation
+#         if not player_user_id:
+#             return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
+#         # get game from id
+#         game = get_object_or_404(GameModel, id=game_id)
+#         # check if the request comes from the creator
+#         player_is_creator = (game.players.all()[0].user_id == player_user_id)
+#         if player_is_creator == False:
+#             return JsonResponse({'success': False, 'message': 'Only creator can delete the game'}, status=400)
+#         game.delete()
+#         return JsonResponse({'success': True, 'message': 'Game deleted successfully'}, status=200)
 
 # TODO remove before push
-class GameDeleteAllView(APIView):
-    """
-    Delete all games
-    the request must be DELETE
-    body = {}
-    """
-    def delete(self, request):
-        GameModel.objects.all().delete()
-        return JsonResponse({'success': True, 'message': 'All games deleted successfully'}, status=200)
+# class GameDeleteAllView(APIView):
+#     """
+#     Delete all games
+#     the request must be DELETE
+#     body = {}
+#     """
+#     def delete(self, request):
+#         GameModel.objects.all().delete()
+#         return JsonResponse({'success': True, 'message': 'All games deleted successfully'}, status=200)
 
 class TournamentCreateView(APIView):
     """
@@ -512,19 +512,19 @@ class TournamentCreateView(APIView):
         }, status=200)
 
 # TODO remove before push
-class TournamentListView(APIView):
-    """
-    Return the list of the tournaments
-    the request must be GET and look like
-    body = {}
-    """
-    def get(self, request):
-        tournaments = TournamentModel.objects.all()
-        tournament_list = []
-        for tournament in tournaments:
-            tournament_data = tournament.to_array()
-            tournament_list.append(tournament_data)
-        return JsonResponse({'success': True, 'data': tournament_list}, status=200)
+# class TournamentListView(APIView):
+#     """
+#     Return the list of the tournaments
+#     the request must be GET and look like
+#     body = {}
+#     """
+#     def get(self, request):
+#         tournaments = TournamentModel.objects.all()
+#         tournament_list = []
+#         for tournament in tournaments:
+#             tournament_data = tournament.to_array()
+#             tournament_list.append(tournament_data)
+#         return JsonResponse({'success': True, 'data': tournament_list}, status=200)
 
 class TournamentDetailView(APIView):
     """
@@ -615,46 +615,46 @@ class TournamentJoinView(APIView):
         }, status=200)
 
 # TODO remove before push
-class TournamentDeleteView(APIView):
-    """
-    Delete a tournament
-    the request must be DELETE
-    body = {}
-    cookie = {
-        'token': type string,
-        'refresh_token': type string,
-        '42_access_token': type string,
-    } one token must be valid
-    the tournament_id is in the url
-    """
-    def delete(self, request, tournament_id):
-        # get user_id from authentification app
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
-        if not user_info or not user_info.get('user_id'):
-            return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
-        player_user_id = user_info['user_id']
-        # Player info validation
-        if not player_user_id:
-            return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
-        # get tournament from id
-        tournament = get_object_or_404(TournamentModel, id=tournament_id)
-        # check if the request comes from the creator
-        player_is_creator = (tournament.players.all()[0].user_id == player_user_id)
-        if player_is_creator == False:
-            return JsonResponse({'success': False, 'message': 'Only creator can delete the game'}, status=400)
-        tournament.delete()
-        return JsonResponse({'success': True, 'message': 'Tournament deleted successfully'}, status=200)
+# class TournamentDeleteView(APIView):
+#     """
+#     Delete a tournament
+#     the request must be DELETE
+#     body = {}
+#     cookie = {
+#         'token': type string,
+#         'refresh_token': type string,
+#         '42_access_token': type string,
+#     } one token must be valid
+#     the tournament_id is in the url
+#     """
+#     def delete(self, request, tournament_id):
+#         # get user_id from authentification app
+#         token = request.COOKIES.get('token')
+#         refresh_token = request.COOKIES.get('refresh_token')
+#         token42 = request.COOKIES.get('42_access_token')
+#         user_info = utils_get_user_info(token, token42, refresh_token)
+#         if not user_info or not user_info.get('user_id'):
+#             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
+#         player_user_id = user_info['user_id']
+#         # Player info validation
+#         if not player_user_id:
+#             return JsonResponse({'success': False, 'message': 'Player information is required'}, status=400)
+#         # get tournament from id
+#         tournament = get_object_or_404(TournamentModel, id=tournament_id)
+#         # check if the request comes from the creator
+#         player_is_creator = (tournament.players.all()[0].user_id == player_user_id)
+#         if player_is_creator == False:
+#             return JsonResponse({'success': False, 'message': 'Only creator can delete the game'}, status=400)
+#         tournament.delete()
+#         return JsonResponse({'success': True, 'message': 'Tournament deleted successfully'}, status=200)
 
-# TODO remove before push
-class TournamentDeleteAllView(APIView):
-    """
-    Delete all tournaments
-    the request must be DELETE
-    body = {}
-    """
-    def delete(self, request):
-        TournamentModel.objects.all().delete()
-        return JsonResponse({'success': True, 'message': 'All tournaments deleted successfully'}, status=200)
+# # TODO remove before push
+# class TournamentDeleteAllView(APIView):
+#     """
+#     Delete all tournaments
+#     the request must be DELETE
+#     body = {}
+#     """
+#     def delete(self, request):
+#         TournamentModel.objects.all().delete()
+#         return JsonResponse({'success': True, 'message': 'All tournaments deleted successfully'}, status=200)

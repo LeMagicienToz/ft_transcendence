@@ -106,7 +106,7 @@ def twoFA_status_check(view_func):
         custom_user = CustomUserModel.objects.get(user=user)
         if custom_user.twoFA_enabled == False:
             return view_func(request, *args, **kwargs)
-        twoFA_verified = r.get(f'user_{user.id}_twoFA_verified')
+        twoFA_verified = r.get(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}') or r.get(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
         if custom_user.twoFA_enabled and twoFA_verified and twoFA_verified.decode() == 'True':
             return view_func(request, *args, **kwargs)
         return JsonResponse({'success': False, 'message': '2FA non verifié'}, status=401)
