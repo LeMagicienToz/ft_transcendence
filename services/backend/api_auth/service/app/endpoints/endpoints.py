@@ -208,7 +208,7 @@ def callback42(request):
         if user.custom_user.twoFA_enabled:
             utils_send_twoFA_code(user)
         response = redirect('/home')
-        response.set_cookie('42_access_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=expires_in_seconds)
+        response.set_cookie('42_access_token', access_token, httponly=True, secure='True', samesite='Strict', max_age=expires_in_seconds)
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id)
         return response
@@ -246,11 +246,7 @@ def twofa_validation(request):
     twoFA_code = twofa_0 + twofa_1 + twofa_2 + twofa_3 + twofa_4 + twofa_5
 
     if redis_code.decode('utf-8') == twoFA_code:
-        if user.custom_user.intra_id:
-            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', ex=60 * 60 * 24)
-        else:
-            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', ex=60 * 60 * 24 * 7)
-            
+        r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', 'True', ex=60 * 60 * 24) 
         return JsonResponse({'success': True}, status=200)
     return JsonResponse({'success': False, 'message': 'The verification code is invalid.'}, status=400)
 
@@ -413,6 +409,30 @@ def me_update_password(request):
     user.custom_user.save()
     user.save()
     return JsonResponse({'success': True}, status=200)
+
+@request_from_42_or_regular_user
+@require_POST
+@twoFA_status_check
+def update_twoFA_status(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
+    
+    twoFA_enalbed = data.get('twoFA_enabled')
+    if twoFA_enalbed == None:
+        return JsonResponse({'success': False, 'message': 'twoFA_enabled value is missing.'}, status=400)
+    user = request.user
+    user.custom_user.twoFA_enabled = twoFA_enalbed
+    user.custom_user.save()
+    if twoFA_enalbed:
+        if request.COOKIES.get("refresh_token"):
+            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', 'True', ex=60 * 60 * 24)
+    elif not twoFA_enalbed:
+        if request.COOKIES.get("refresh_token"):
+            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', 'False', ex=60 * 60 * 24)
+
+        
 
 ## > USER < ####################
 
