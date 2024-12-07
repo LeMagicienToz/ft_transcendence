@@ -1,10 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 
 import { useToast } from '../../contexts/ToastContext';
 
 import BaseForm from './BaseForm';
 import BaseButton from '../Buttons/BaseButton';
 import PasswordInput from '../Inputs/PasswordInput';
+import SelectInput from '../Inputs/SelectInput';
 
 import './SecurityForm.css'
 
@@ -45,7 +46,7 @@ const SecurityForm = ({ onSuccess = () => {}, onFailure = () => {}, disabled = f
         >
             <PasswordInput id='password' name='password' label='Password' placeholder='••••••••' strength={true} />
             <PasswordInput id='password2' name='password2' label='Confirm password' placeholder='••••••••' />
-            <BaseButton text='Update' className='primary' />
+            <BaseButton text='Change password' className='primary' />
         </BaseForm>
     );
 }

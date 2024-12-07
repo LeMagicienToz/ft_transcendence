@@ -42,7 +42,7 @@
     z-index: 1;
 }
 
-@media (max-width: 460px) {
+@media (pointer: coarse) {
 
     .gameplay > .controls.controls.row  {
         display: flex !important;

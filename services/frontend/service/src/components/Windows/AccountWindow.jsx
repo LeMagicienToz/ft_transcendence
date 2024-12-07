@@ -4,6 +4,7 @@ import BaseWindow from './BaseWindow';
 import DeleteAccoutButton from '../Buttons/DeleteAccoutButton';
 import SecurityForm from '../Forms/SecurityForm';
 import ProfileForm from '../Forms/ProfileForm';
+import TwoFactorUpdateForm from '../Forms/TwoFactorUpdateForm';
 import Tab from '../Tabs/Tab';
 import Tabs from '../Tabs/Tabs';
 
@@ -24,9 +25,14 @@ const AccountWindow = ({ onClose = () => {}, isOpen = false, title = 'Account', 
                 <Tab name='Profile' icon='person-fill' >
                     <ProfileForm />
                 </Tab>
-                <Tab name='Security' icon='shield-shaded' >
+                <Tab name='Password' icon='shield-lock-fill' >
                     <div className='col' >
                         <SecurityForm />
+                    </div>
+                </Tab>
+                <Tab name='Security' icon='shield-shaded' >
+                    <div className='col' >
+                        <TwoFactorUpdateForm />
                         <DeleteAccoutButton />
                     </div>
                 </Tab>

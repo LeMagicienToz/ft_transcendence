@@ -81,7 +81,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			# check the status of the game
 			await sync_to_async(self.assign_player_index)()
 		await self.listen()
-		await self.setup_regular_ping()
+		asyncio.create_task(self.regular_ping())
 		if self.game.tournament_id != 0:
 			self.tournament = await sync_to_async(TournamentModel.objects.get)(id=self.game.tournament_id)
 			await self.listen_to_tournament_group()
@@ -288,7 +288,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.send(text_data=json.dumps({
 					'game_data': self.present(self.game_logic.game_data)
 				}))
-				#logger.info(f"game_onchange game_data={self.present(self.game_logic.game_data)}")
 			except:
 				logger.info("try to send to a close protocol")
 
@@ -305,30 +304,19 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await asyncio.sleep(5)
 			try:
 				status = (await database_sync_to_async(GameModel.objects.get)(id=self.game_id)).status
-				await self.send(text_data=json.dumps({
-					"game_data": {
-						"status": status,
-					}
-				}))
+				await self.send(text_data=json.dumps({"game_data": {"status": status}}))
 			except:
 				pass
-			if self.game_logic.game_data.get('status') != "waiting" and self.game_logic.game_data.get('status') != "ready_to_play":
+			if self.game_logic.game_data.get('status') not in ['waiting', 'ready_to_play', 'playing']:
 				break
 
-	async def setup_regular_ping(self):
-		asyncio.create_task(self.regular_ping())
-
 	async def onchange_start_game(self, event):
-		#game has started
 		self.game.status = 'playing'
 		self.game.start_time = timezone.now().isoformat()
 		await sync_to_async(self.game.save)()
-		#tell eveyrone to update their game_data.status
 		self.game_logic.game_data['status'] = 'playing'
 		await self.game_logic.send_game_state(["status"])
-		logger.info(f"setup start time={self.game.start_time},  self.game_logic.game_data['status']={self.game_logic.game_data['status']} ========================================================")
 		if (self.is_player_1()):
-			logger.info(f"is player 1={self.is_player_1()} loop started")
 			asyncio.create_task(self.game_logic.start_game_loop())
 			await sync_to_async(self.game.save)()
 		else:
