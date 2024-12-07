@@ -39,8 +39,6 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
         )
         await self.accept()
         await self.update_user_status('online')
-    #    await self.notify_friends('online')
-    #    await self.get_friends_status()
 
     async def disconnect(self, close_code):
        if hasattr(self, "user"):
@@ -50,7 +48,6 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
                     self.channel_name
             )
             await self.update_user_status('offline')
-    #        await self.notify_friends('offline')
 
     async def receive(self, text_data):
         pass
@@ -63,41 +60,7 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
         if self.user and hasattr(self.user, 'id'):
             r.set(f'user_{self.user.id}_status', status)
 
-    #async def notify_friends(self, status):
-    #    friends = await self.get_friends_list()
-    #    for friend in friends:
-    #        await self.channel_layer.group_send(
-    #            f'user_{friend.id}',
-    #            {
-    #                'type': 'send_user_status_update',
-    #                'user_id': self.user.id,
-    #                'status': status,
-    #            }
-    #        )
-
-    #async def send_user_status_update(self, event):
-    #    await self.send(text_data=json.dumps({
-    #        'user_id': event['user_id'],
-    #        'status': event['status'],
-    #    }))
-
-    #async def get_friends_status(self):
-    #    friends = await self.get_friends_list()
-    #    for friend in friends:
-    #        status = await self.get_user_status(friend.id)
-    #        await self.send(text_data=json.dumps({
-    #            'user_id': friend.id,
-    #            'status': status,
-    #        }))
-
-    #@sync_to_async
-    #def get_user_status(self, user_id):
-    #    status = r.get(f'user_{user_id}_status')
-    #    return status.decode() if status else 'offline'
-
-    #@sync_to_async
-    #def get_friends_list(self):
-    #    return list(self.user.custom_user.friends_list.all())
+    
 
     @staticmethod
     @sync_to_async
