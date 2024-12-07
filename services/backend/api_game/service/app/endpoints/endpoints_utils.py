@@ -28,6 +28,7 @@ def utils_get_user_info(token, token42, refresh_token):
         if (result.get('success') != True):
             return None
         result.pop('email', None)
+        result.pop('twofa_enabled', None)
         return result
     except requests.exceptions.RequestException as e:
         return {
