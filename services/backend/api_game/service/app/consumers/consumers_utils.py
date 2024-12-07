@@ -192,6 +192,9 @@ class GameLogic():
 				return
 			else:
 				self.game_data["scores"]['2'] += 1
+				await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
+				await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
+				await sync_to_async(self.game.save)()
 				if self.game_data["scores"]['2'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
@@ -207,6 +210,9 @@ class GameLogic():
 				return
 			else:
 				self.game_data["scores"]['1'] += 1
+				await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
+				await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
+				await sync_to_async(self.game.save)()
 				if self.game_data["scores"]['1'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"

@@ -45,6 +45,8 @@
     font-weight: bold;
 }
 
+.match-list-card.col.ready_to_play > .player > .score,
+.match-list-card.col.playing > .player > .score,
 .match-list-card.col.finished > .player > .score {
     display: block;
 }
