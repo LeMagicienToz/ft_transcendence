@@ -113,7 +113,6 @@ def register(request):
     user = User.objects.create_user(username=username, email=email, password=password)
     custom_user = CustomUserModel(user=user)
     custom_user.intra_id = None
-    custom_user.twoFA_enabled = True
     custom_user.save()
     user.save()
 
