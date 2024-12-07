@@ -195,12 +195,13 @@ class GameLogic():
 				await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
 				await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
 				await sync_to_async(self.game.save)()
+				await self.send_game_state(["scores"])
 				if self.game_data["scores"]['2'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 					await asyncio.sleep(1)
 				await self.reset_ball_position()
-				await self.send_game_state(["ball_position", "scores", "status"])
+				await self.send_game_state(["ball_position", "status"])
 				await asyncio.sleep(1)
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
@@ -213,12 +214,13 @@ class GameLogic():
 				await sync_to_async(self.game.update_player_one_score)(self.game_data["scores"]['1'])
 				await sync_to_async(self.game.update_player_two_score)(self.game_data["scores"]['2'])
 				await sync_to_async(self.game.save)()
+				await self.send_game_state(["scores"])
 				if self.game_data["scores"]['1'] >= self.game.score_to_win:
 					self.game.status = "finished"
 					self.game_data['status'] = "finished"
 					await asyncio.sleep(1)
 				await self.reset_ball_position()
-				await self.send_game_state(["ball_position", "scores", "status"])
+				await self.send_game_state(["ball_position", "status"])
 				await asyncio.sleep(1)
 				return
 		self.game_data["ball_position"] = [ball_x, ball_y]
