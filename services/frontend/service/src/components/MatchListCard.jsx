@@ -11,9 +11,11 @@ const MatchListCard = ({ game = {} }) => {
                 <div className="avatar" style={{backgroundImage: `url("${game.players[0]?.user_info?.profile_picture_url}")` }} ></div>
                 <p>{game.players[0]?.nickname}</p>
                 <p className="score end" >
-                    <div className="badge" >
-                        <i class="bi bi-trophy-fill"></i>
-                    </div>
+                    {game.status == 'finished' && game.players[0]?.score > game.players[1]?.score ? (
+                        <div className="badge" >
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                    ) : null}
                     {game.players[0]?.score}
                 </p>
             </div>
