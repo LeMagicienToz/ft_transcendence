@@ -72,7 +72,8 @@ def logout(request):
     r.delete(f'user_{user.id}_refresh_token')
     r.delete(f'user_{user.custom_user.intra_id}_42_access_token')
     r.delete(f'user_{user.id}_twoFA_code')
-    r.delete(f'user_{user.id}_twoFA_verified')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
     response = JsonResponse({'success': True}, status=200)
     response.delete_cookie('42_access_token')
     response.delete_cookie('token')
@@ -112,6 +113,7 @@ def register(request):
     user = User.objects.create_user(username=username, email=email, password=password)
     custom_user = CustomUserModel(user=user)
     custom_user.intra_id = None
+    custom_user.twoFA_enabled = True
     custom_user.save()
     user.save()
 
@@ -142,7 +144,8 @@ def delete(request):
     r.delete(f'user_{user.id}_refresh_token')
     r.delete(f'user_{user.custom_user.intra_id}_42_access_token')
     r.delete(f'user_{user.id}_twoFA_code')
-    r.delete(f'user_{user.id}_twoFA_verified')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
     response = JsonResponse({'success': True}, status=200)
     response.delete_cookie('42_access_token')
     response.delete_cookie('token')
@@ -194,7 +197,7 @@ def callback42(request):
             custom_user = CustomUserModel(user=user)
             custom_user.intra_id = intra_id
             custom_user.profile_picture_url = image_url
-            custom_user.twoFA_enabled = False
+            custom_user.twoFA_enabled = True
         else:
             custom_user = CustomUserModel.objects.get(user=user)
             custom_user.intra_id = intra_id
@@ -243,7 +246,11 @@ def twofa_validation(request):
     twoFA_code = twofa_0 + twofa_1 + twofa_2 + twofa_3 + twofa_4 + twofa_5
 
     if redis_code.decode('utf-8') == twoFA_code:
-        r.set(f'user_{user.id}_twoFA_verified', 'True')
+        if user.custom_user.intra_id:
+            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', ex=60 * 60 * 24)
+        else:
+            r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', ex=60 * 60 * 24 * 7)
+            
         return JsonResponse({'success': True}, status=200)
     return JsonResponse({'success': False, 'message': 'The verification code is invalid.'}, status=400)
 
