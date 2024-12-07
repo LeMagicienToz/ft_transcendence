@@ -16,7 +16,7 @@ const TwoFactorUpdateForm = ({ onSuccess = () => {}, onFailure = () => {}, disab
     const handleValidation = (form) => {
         let valid = true;
 
-        if (!/^(true|false)$/.test(form.TwoFA_enabled.value)) {
+        if (!/^(True|False)$/.test(form.twoFA_enabled.value)) {
             addToast('An error has occured.', 'failure', 10000)
             valid = false;
         }

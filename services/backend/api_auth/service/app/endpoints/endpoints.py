@@ -197,7 +197,6 @@ def callback42(request):
             custom_user = CustomUserModel(user=user)
             custom_user.intra_id = intra_id
             custom_user.profile_picture_url = image_url
-            custom_user.twoFA_enabled = True
         else:
             custom_user = CustomUserModel.objects.get(user=user)
             custom_user.intra_id = intra_id
@@ -205,10 +204,9 @@ def callback42(request):
         user.save()
         custom_user.save()
 
-        if user.custom_user.twoFA_enabled:
-            utils_send_twoFA_code(user)
         response = redirect('/home')
         response.set_cookie('42_access_token', access_token, httponly=True, secure='True', samesite='Strict', max_age=expires_in_seconds)
+        r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', value='True', ex=expires_in_seconds)
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id)
         return response
@@ -419,18 +417,21 @@ def me_update_twoFA_status(request):
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
     
-    twoFA_enalbed = data.get('twoFA_enabled')
-    if twoFA_enalbed == None:
+    twoFA_enabled = data.get('twoFA_enabled')
+    if twoFA_enabled == None:
         return JsonResponse({'success': False, 'message': 'twoFA_enabled value is missing.'}, status=400)
     user = request.user
-    user.custom_user.twoFA_enabled = twoFA_enalbed
+
+    user.custom_user.twoFA_enabled = twoFA_enabled == 'True'
     user.custom_user.save()
-    if twoFA_enalbed:
+    if twoFA_enabled:
         if request.COOKIES.get("refresh_token"):
             r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', 'True', ex=60 * 60 * 24)
-    elif not twoFA_enalbed:
+    elif not twoFA_enabled:
         if request.COOKIES.get("refresh_token"):
             r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}', 'False', ex=60 * 60 * 24)
+    return JsonResponse({'success': True, 'message': 'twoFa updated'}, status=200)
+    
 
         
 
