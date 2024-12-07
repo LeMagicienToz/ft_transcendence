@@ -413,7 +413,7 @@ def me_update_password(request):
 @request_from_42_or_regular_user
 @require_POST
 @twoFA_status_check
-def update_twoFA_status(request):
+def me_update_twoFA_status(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:

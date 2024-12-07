@@ -35,14 +35,14 @@ const TwoFactorUpdateForm = ({ onSuccess = () => {}, onFailure = () => {}, disab
             handleValidation={handleValidation}
             onSuccess={(json) => {handleSuccess(json); onSuccess(json)}}
             onFailure={(json) => {handleFailure(json); onFailure(json)}}
-            target='/api/auth/me/update_twofa_status/'
+            target='/api/auth/me/update/twoFA/'
             type='json'
             headers={{'Content-Type': 'application/json'}}
             disabled={disabled}
         >
             <SelectInput
                 id='twoFA_enabled'
-                name='TwoFA_enabled'
+                name='twoFA_enabled'
                 label='Enable 2FA'
                 options={[{label: 'Enabled', value: 'True'}, {label: 'Disabled', value: 'False'}]}
             />
