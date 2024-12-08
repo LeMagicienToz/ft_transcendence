@@ -54,79 +54,102 @@ def jwt_required(view_func):
 
     return _wrapped_view
 
+
+def handle_42_refresh_token(refresh_token):
+    # intra_id = r.get(f'42_refresh_token{refresh_token}')
+    # if intra_id:
+    #     intra_id = intra_id.decode()
+    # else
+    token_data = {
+        'grant_type': 'refresh_token',
+        'client_id': os.getenv('T_API_42_PUBLICKEY'),
+        'client_secret': os.getenv('T_API_42_SECRETKEY'),
+        'refresh_token': refresh_token
+        }
+    response = requests.post(url=os.getenv('T_API_42_URL_TOKN'), data=token_data)
+    if response.status_code != 200:
+        response = JsonResponse({'success': False, 'message': 'Refresh token 42 invalid.'}, status=400), None, None, None, None
+    token_data = response.json()
+    expires_in_seconds = token_data.get('expires_in_seconds')
+    access_token = token_data.get('access_token')
+    refresh_token = token_data.get('refresh_token')
+    if access_token is None or refresh_token is None:
+        response = JsonResponse({'success': False, 'message': 'Access token 42 or refresh token 42 missing.'}, status=400), None, None, None, None
+        
+    headers = {'Authorization': f'Bearer {access_token}'}
+    user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
+    user_data = user_info_response.json()
+    intra_id = user_data.get('id')
+    r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
+    r.set(f'42_refresh_token{refresh_token}', intra_id, ex=60*60*24*7)
+    
+    r.set(f'user{intra_id}_42_access_token', access_token, ex=expires_in_seconds)
+    r.set(f'user{intra_id}_42_refresh_token', refresh_token, ex=60*60*24*7)
+    return None, intra_id, access_token, refresh_token, expires_in_seconds
+
+
+def handle_42_access_token(access_token):
+    intra_ = r.get(f'42_access_token{access_token}')
+    if intra_id:
+        intra_id = intra_id.decode()
+    else:
+        headers = {'Authorization': f'Bearer {access_token}'}
+        response = requests.get(url=os.getenv('T_API_42_URL_INFO'), headers=headers)
+        token_data = response.json()
+        expires_in_seconds = token_data.get('expires_in_seconds')
+        if expires_in_seconds is None or expires_in_seconds <= 0 or response.status_code != 200:
+            return JsonResponse({'success': False, 'message': 'Access token 42 expired.'}, status=400), None
+        user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
+        user_data = user_info_response.json()
+        intra_id = user_data.get('id')
+        r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
+    return None, intra_id
+    
+
 def jwt_42_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         access_token = request.COOKIES.get('42_access_token')
         refresh_token = request.COOKIES.get('42_refresh_token')
 
         if refresh_token and not access_token:
-            # intra_id = r.get(f'42_refresh_token{refresh_token}')
-            # if intra_id:
-            #     intra_id = intra_id.decode()
-            # else:
+            response, intra_id, access_token, refresh_token, expires_in_seconds = handle_42_refresh_token(refresh_token)
+            if response is not None:
+                return response
+            else:
+                user = User.objects.filter(custom_user__intra_id=intra_id).first()
+                if not user:
+                    return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
 
-            token_data = {
-                'grant_type': 'refresh_token',
-                'client_id': os.getenv('T_API_42_PUBLICKEY'),
-                'client_secret': os.getenv('T_API_42_SECRETKEY'),
-                'refresh_token': refresh_token
-                }
-            response = requests.post(url=os.getenv('T_API_42_URL_TOKN'), data=token_data)
-            if response.status_code != 200:
-                return JsonResponse({'success': False, 'message': 'Invalid refresh token 42.'}, status=400)
-            token_data = response.json()
-            expires_in_seconds = token_data.get('expires_in_seconds')
-            access_token = token_data.get('access_token')
-            if access_token is None:
-                return JsonResponse({'success': False, 'message': 'Access token 42 missing.'}, status=400)
-                
-            headers = {'Authorization': f'Bearer {access_token}'}
-            user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
-            user_data = user_info_response.json()
-            intra_id = user_data.get('id')
-            r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
-                
-
-            user = User.objects.filter(custom_user__intra_id=intra_id).first()
-            if not user:
-                return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
-            
-            redis_42_refresh_token = r.get(f'user{user.custom_user.intra_id}_42_refresh_token')
-            if redis_42_refresh_token and redis_42_refresh_token.decode() != refresh_token:
-                return JsonResponse({'success': False, 'message': 'Refresh token 42 revoked.'}, status=401)
-            request.user = user
-            response = view_func(request, *args, **kwargs)
-            response.set_cookie('42_access_token', access_token, max_age=expires_in_seconds, httponly=True, secure=True, samesite='Strict')
-            return response
+                redis_42_refresh_token = r.get(f'user{user.custom_user.intra_id}_42_refresh_token')
+                if redis_42_refresh_token and redis_42_refresh_token.decode() != refresh_token:
+                    return JsonResponse({'success': False, 'message': 'Refresh token 42 revoked.'}, status=401)
+                request.user = user
+                response = view_func(request, *args, **kwargs)
+                response.set_cookie('42_refresh_token', refresh_token, max_age=60*60*24*7, httponly=True, secure=True, samesite='Strict')
+                response.set_cookie('42_access_token', access_token, max_age=expires_in_seconds, httponly=True, secure=True, samesite='Strict')
+                return response
         
         elif access_token:
-            intra_id = r.get(f'42_access_token{access_token}')
-            if intra_id:
-                intra_id = intra_id.decode()
+            response, intra_id = handle_42_access_token(access_token)
+            if response is not None and not refresh_token:
+                return response
             else:
-                headers = {'Authorization': f'Bearer {access_token}'}
-                response = requests.get(url=os.getenv('T_API_42_URL_INFO'), headers=headers)
-                token_data = response.json()
-                expires_in_seconds = token_data.get('expires_in_seconds')
+                user = User.objects.filter(custom_user__intra_id=intra_id).first()
 
-                if expires_in_seconds is None or expires_in_seconds <= 0:
-                    return JsonResponse({'success': False, 'message': 'Access token 42 expired.'}, status=400)
+                if not user:
+                    response, intra_id, access_token, refresh_token, expires_in_seconds = handle_42_refresh_token(refresh_token)
+                    if response is not None:
+                        return response
+                    else:
+                        user = User.objects.filter(custom_user__intra_id=intra_id).first()
+                        if not user:
+                            return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
 
-                user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
-                user_data = user_info_response.json()
-                intra_id = user_data.get('id')
-                r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
-
-            user = User.objects.filter(custom_user__intra_id=intra_id).first()
-
-            if not user:
-                return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
-
-            redis_42_access_token = r.get(f'user{user.custom_user.intra_id}_42_access_token')
-            if redis_42_access_token and redis_42_access_token.decode() != access_token:
-                return JsonResponse({'success': False, 'message': 'Access token 42 revoked.'}, status=401)
-            request.user = user
-            return view_func(request, *args, **kwargs)
+                redis_42_access_token = r.get(f'user{user.custom_user.intra_id}_42_access_token')
+                if redis_42_access_token and redis_42_access_token.decode() != access_token:
+                    return JsonResponse({'success': False, 'message': 'Access token 42 revoked.'}, status=401)
+                request.user = user
+                return view_func(request, *args, **kwargs)
         else:
             return JsonResponse({'success': False, 'message': 'Access token 42 missing.'}, status=400)
 

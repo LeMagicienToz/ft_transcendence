@@ -56,6 +56,8 @@ def login(request):
 
         if user.custom_user.twoFA_enabled:
             utils_send_twoFA_code(user)
+        response.delete_cookie('42_access_token')
+        response.delete_cookie('42_refresh_token')
         return response
     else:
         return JsonResponse({'success': False, 'message': 'Invalid username or password.'}, status=400)
@@ -133,6 +135,8 @@ def register(request):
 
     if user.custom_user.twoFA_enabled:
             utils_send_twoFA_code(user)
+    response.delete_cookie('42_access_token')
+    response.delete_cookie('42_refresh_token')
     return response
 
 ## > DELETE < ##################
@@ -225,6 +229,9 @@ def callback42(request):
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id) # planet friendly <3
         r.setex(f'user_{user.custom_user.intra_id}_42_refresh_token', 60 * 60 * 24 * 7, refresh_token)
         r.setex(f'42_refresh_token_{refresh_token}', 60 * 60 * 24 * 7, intra_id)
+
+        response.delete_cookie('token')
+        response.delete_cookie('refresh_token')
         return response
     return JsonResponse({'success': False, 'message': 'Authentication failed.'}, status=400)
 
