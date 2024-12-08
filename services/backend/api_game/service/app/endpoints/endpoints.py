@@ -53,10 +53,7 @@ class GameCreateView(APIView):
     } one token must be valid
     """
     def post(self, request):
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        user_info = utils_get_user_info(request.COOKIES)
 
         if not user_info:
             return JsonResponse({'success': False,'message': 'Failed to fetch user info.'}, status=400)
@@ -76,7 +73,7 @@ class GameCreateView(APIView):
             return JsonResponse({'success': False, 'message': 'Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.'}, status=400)
         if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
             return JsonResponse({'success': False, 'message': 'Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
-   
+
         player1 = PlayerModel.objects.create(
             user_id=player1_user_id,
             user_name=player1_user_name,
@@ -221,10 +218,7 @@ class GameJoinView(APIView):
     the game_id is in the url
     """
     def put(self, request, game_id):
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        user_info = utils_get_user_info(request.COOKIES)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
@@ -240,7 +234,7 @@ class GameJoinView(APIView):
 
         if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
             return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
-        
+
         game = get_object_or_404(GameModel, id=game_id)
 
         if game.players.filter(user_id=player_user_id).exists():
@@ -341,10 +335,7 @@ class GameUserHistoryView(APIView):
 #     """
 #     def delete(self, request, game_id):
 #         # get user_id from authentification app
-#         token = request.COOKIES.get('token')
-#         refresh_token = request.COOKIES.get('refresh_token')
-#         token42 = request.COOKIES.get('42_access_token')
-#         user_info = utils_get_user_info(token, token42, refresh_token)
+#         user_info = utils_get_user_info(request.COOKIES)
 #         if not user_info or not user_info.get('user_id'):
 #             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
 #         player_user_id = user_info['user_id']
@@ -402,10 +393,7 @@ class TournamentCreateView(APIView):
     """
     def post(self, request):
         # get user_id and user_name from authentification app
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        user_info = utils_get_user_info(request.COOKIES)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
@@ -425,7 +413,7 @@ class TournamentCreateView(APIView):
             return JsonResponse({'success': False, 'message': 'Room name can only contain alphanumeric characters and "_-.+\'()[]"" symbols, and be between 5 and 24 characters long.'}, status=400)
         if not re.search(r"^[A-Za-z0-9_#-]{5,16}$", nickname):
             return JsonResponse({'success': False, 'message': 'Nickname can only contain alphanumeric characters and "_-" symbols, and be between 5 and 16 characters long.'}, status=400)
-   
+
         tourn_match_type = request.data.get('match_type')
         if tourn_match_type not in ['1v1']:
             return JsonResponse({'success': False, 'message': 'An error has occurred.'}, status=400)
@@ -563,14 +551,11 @@ class TournamentJoinView(APIView):
         if tournament.status != 'waiting':
             return JsonResponse({'success': False, 'message': 'Tournament has already started.'}, status=400)
 
-        token = request.COOKIES.get('token')
-        refresh_token = request.COOKIES.get('refresh_token')
-        token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        user_info = utils_get_user_info(request.COOKIES)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
-    
+
         player_user_id = user_info['user_id']
         player_user_name = user_info['username']
 
@@ -629,10 +614,7 @@ class TournamentJoinView(APIView):
 #     """
 #     def delete(self, request, tournament_id):
 #         # get user_id from authentification app
-#         token = request.COOKIES.get('token')
-#         refresh_token = request.COOKIES.get('refresh_token')
-#         token42 = request.COOKIES.get('42_access_token')
-#         user_info = utils_get_user_info(token, token42, refresh_token)
+#         user_info = utils_get_user_info(request.COOKIES)
 #         if not user_info or not user_info.get('user_id'):
 #             return JsonResponse({'success': False, 'message': 'Failed to get user info'}, status=400)
 #         player_user_id = user_info['user_id']
