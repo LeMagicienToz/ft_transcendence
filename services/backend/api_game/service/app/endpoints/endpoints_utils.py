@@ -7,14 +7,15 @@ from django.utils import timezone
 import logging
 logger = logging.getLogger(__name__)
 
-def utils_get_user_info(token, token42, refresh_token):
+def utils_get_user_info(token, token42, refresh_token, refresh_token42):
     headers = {'Content-Type': 'application/json'}
     cookies = {}
     # Use the appropriate token as a cookie
     if not token and not token42 and not refresh_token:
         return JsonResponse({'message': 'No authentication token received'}, status=401)
-    if token42:
+    if token42 and refresh_token42:
         cookies['42_access_token'] = token42
+        cookies['42_refresh_token'] = refresh_token42
     else:
         cookies['token'] = token
         cookies['refresh_token'] = refresh_token

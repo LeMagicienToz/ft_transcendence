@@ -71,6 +71,10 @@ def logout(request):
     r.delete(f'user_{user.id}_token')
     r.delete(f'user_{user.id}_refresh_token')
     r.delete(f'user_{user.custom_user.intra_id}_42_access_token')
+    r.delete(f'user_{user.custom_user.intra_id}_42_refresh_token')
+    r.delete(f'42_refresh_token_{request.COOKIES.get("42_refresh_token")}')
+    r.delete(f'42_access_token_{request.COOKIES.get("42_access_token")}')
+    
     r.delete(f'user_{user.id}_twoFA_code')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
@@ -78,6 +82,7 @@ def logout(request):
     response.delete_cookie('42_access_token')
     response.delete_cookie('token')
     response.delete_cookie('refresh_token')
+    response.delete_cookie('42_refresh_token')
     return response
 
 ## > REGISTER < ################
@@ -142,6 +147,10 @@ def delete(request):
     r.delete(f'user_{user.id}_token')
     r.delete(f'user_{user.id}_refresh_token')
     r.delete(f'user_{user.custom_user.intra_id}_42_access_token')
+    r.delete(f'user_{user.custom_user.intra_id}_42_refresh_token')
+    r.delete(f'42_refresh_token_{request.COOKIES.get("42_refresh_token")}')
+    r.delete(f'42_access_token_{request.COOKIES.get("42_access_token")}')
+
     r.delete(f'user_{user.id}_twoFA_code')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
@@ -149,6 +158,7 @@ def delete(request):
     response.delete_cookie('42_access_token')
     response.delete_cookie('token')
     response.delete_cookie('refresh_token')
+    response.delete_cookie('42_refresh_token')
     return response
 
 ### 42 #########################################################
@@ -171,6 +181,7 @@ def callback42(request):
     token_json = token_response.json()
     access_token = token_json.get('access_token')
     expires_in_seconds = token_json.get('expires_in')
+    refresh_token = token_json.get('refresh_token')
 
     if access_token:
         headers = {'Authorization': f'Bearer {access_token}'}
@@ -205,9 +216,12 @@ def callback42(request):
 
         response = redirect('/home')
         response.set_cookie('42_access_token', access_token, httponly=True, secure='True', samesite='Strict', max_age=expires_in_seconds)
+        response.set_cookie('42_refresh_token', refresh_token, httponly=True, secure='True', samesite='Strict', max_age=60 * 60 * 24 * 7)
         r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', value='True', ex=expires_in_seconds)
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id) # planet friendly <3
+        r.setex(f'user_{user.custom_user.intra_id}_42_refresh_token', 60 * 60 * 24 * 7, refresh_token)
+        r.setex(f'42_refresh_token_{refresh_token}', 60 * 60 * 24 * 7, intra_id)
         return response
     return JsonResponse({'success': False, 'message': 'Authentication failed.'}, status=400)
 
