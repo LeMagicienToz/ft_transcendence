@@ -60,26 +60,31 @@ def jwt_42_required(view_func):
         refresh_token = request.COOKIES.get('42_refresh_token')
 
         if refresh_token and not access_token:
-            intra_id = r.get(f'42_refresh_token{refresh_token}')
-            if intra_id:
-                intra_id = intra_id.decode()
-            else:
-                token_data = {
-                    'grant_type': 'refresh_token',
-                    'client_id': os.getenv('T_API_42_PUBLICKEY'),
-                    'client_secret': os.getenv('T_API_42_SECRETKEY'),
-                    'refresh_token': refresh_token
-                    }
-                response = requests.post(url=os.getenv('T_API_42_URL_TOKN'), data=token_data)
-                token_data = response.json()
-                expires_in_seconds = token_data.get('expires_in_seconds')
-                access_token = token_data.get('access_token')
+            # intra_id = r.get(f'42_refresh_token{refresh_token}')
+            # if intra_id:
+            #     intra_id = intra_id.decode()
+            # else:
+
+            token_data = {
+                'grant_type': 'refresh_token',
+                'client_id': os.getenv('T_API_42_PUBLICKEY'),
+                'client_secret': os.getenv('T_API_42_SECRETKEY'),
+                'refresh_token': refresh_token
+                }
+            response = requests.post(url=os.getenv('T_API_42_URL_TOKN'), data=token_data)
+            if response.status_code != 200:
+                return JsonResponse({'success': False, 'message': 'Invalid refresh token 42.'}, status=400)
+            token_data = response.json()
+            expires_in_seconds = token_data.get('expires_in_seconds')
+            access_token = token_data.get('access_token')
+            if access_token is None:
+                return JsonResponse({'success': False, 'message': 'Access token 42 missing.'}, status=400)
                 
-                headers = {'Authorization': f'Bearer {access_token}'}
-                user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
-                user_data = user_info_response.json()
-                intra_id = user_data.get('id')
-                r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
+            headers = {'Authorization': f'Bearer {access_token}'}
+            user_info_response = requests.get(url=os.getenv('T_API_42_URL_USER'), headers=headers)
+            user_data = user_info_response.json()
+            intra_id = user_data.get('id')
+            r.set(f'42_access_token{access_token}', intra_id, ex=expires_in_seconds)
                 
 
             user = User.objects.filter(custom_user__intra_id=intra_id).first()
@@ -93,6 +98,7 @@ def jwt_42_required(view_func):
             response = view_func(request, *args, **kwargs)
             response.set_cookie('42_access_token', access_token, max_age=expires_in_seconds, httponly=True, secure=True, samesite='Strict')
             return response
+        
         elif access_token:
             intra_id = r.get(f'42_access_token{access_token}')
             if intra_id:
