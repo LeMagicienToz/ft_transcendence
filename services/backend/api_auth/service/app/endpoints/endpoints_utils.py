@@ -27,7 +27,7 @@ def utils_upload_file(file, new_name):
         for chunk in file.chunks():
             destination.write(chunk)
 
-def utils_get_user(token, refresh_token, token42):
+def utils_get_user(token, refresh_token, token42, refresh_token42):
     if token:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
@@ -60,6 +60,37 @@ def utils_get_user(token, refresh_token, token42):
             else:
                 return None
         except jwt.ExpiredSignatureError:
+            return None
+        
+    if refresh_token42 and not token42:
+        try:
+            token_data = {
+                'grant_type': 'refresh_token',
+                'client_id': os.getenv('T_API_42_PUBLICKEY'),
+                'client_secret': os.getenv('T_API_42_SECRETKEY'),
+                'refresh_token': refresh_token
+                }
+            response = requests.post(url=os.getenv('T_API_42_URL_TOKN'), data=token_data)
+            if response.status_code != 200:
+                return None
+            token_data = response.json()
+            expires_in_seconds = token_data.get('expires_in_seconds')
+            token42 = token_data.get('access_token')
+            if token42 is None:
+                return None
+            headers = {'Authorization': f'Bearer {token42}'}
+            user_info_response = requests.get(url=os.getenv('T_API_42_URL_INFO'), headers=headers)
+            user_data = user_info_response.json()
+            intra_id = user_data.get('id')
+            r.set(f'42_access_token{token42}', intra_id, expires_in_seconds)
+            user = User.objects.filter(custom_user__intra_id=intra_id).first()
+            if not user:
+                return None
+            redis_42_refresh_token = r.get(f'user_{user.custom_user.intra_id}_42_refresh_token')
+            if redis_42_refresh_token and redis_42_refresh_token.decode() != refresh_token42:
+                return None
+            return user
+        except requests.RequestException:
             return None
 
     if token42:

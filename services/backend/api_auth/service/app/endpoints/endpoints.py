@@ -77,6 +77,7 @@ def logout(request):
     
     r.delete(f'user_{user.id}_twoFA_code')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_refresh_token")}')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
     response = JsonResponse({'success': True}, status=200)
     response.delete_cookie('42_access_token')
@@ -153,6 +154,7 @@ def delete(request):
 
     r.delete(f'user_{user.id}_twoFA_code')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}')
+    r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_refresh_token")}')
     r.delete(f'user_{user.id}_twoFA_verified{request.COOKIES.get("refresh_token")}')
     response = JsonResponse({'success': True}, status=200)
     response.delete_cookie('42_access_token')
@@ -218,6 +220,7 @@ def callback42(request):
         response.set_cookie('42_access_token', access_token, httponly=True, secure='True', samesite='Strict', max_age=expires_in_seconds)
         response.set_cookie('42_refresh_token', refresh_token, httponly=True, secure='True', samesite='Strict', max_age=60 * 60 * 24 * 7)
         r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_access_token")}', value='True', ex=expires_in_seconds)
+        r.set(f'user_{user.id}_twoFA_verified{request.COOKIES.get("42_refresh_token")}', value='True', ex=60 * 60 * 24 * 7)
         r.setex(f'user_{user.custom_user.intra_id}_42_access_token', expires_in_seconds, access_token)
         r.setex(f'42_access_token_{access_token}', expires_in_seconds, intra_id) # planet friendly <3
         r.setex(f'user_{user.custom_user.intra_id}_42_refresh_token', 60 * 60 * 24 * 7, refresh_token)

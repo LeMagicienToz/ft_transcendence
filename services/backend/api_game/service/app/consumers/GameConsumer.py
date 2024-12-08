@@ -45,7 +45,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 		token = cookies.get('token')
 		refresh_token = cookies.get('refresh_token')
 		token42 = cookies.get('42_access_token')
-		self.user_info = utils_get_user_info(token, token42, refresh_token)
+		refresh_token42 = cookies.get('42_refresh_token')
+		self.user_info = utils_get_user_info(token, token42, refresh_token, refresh_token42)
 
 		# check if user_info is caught
 		if self.user_info is None or self.user_info.get('error'):

@@ -5,3 +5,8 @@
 + Enable 2FA in auth model
 Add all contacts email in .env
 changer redirect URI depuis api42 avec le nouveau nom de server et dans le code
+
+verifier les TODO dans le code
+
+delete game/tournois delete views
+

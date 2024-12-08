@@ -56,7 +56,8 @@ class GameCreateView(APIView):
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        refresh_token42 = request.COOKIES.get('42_refresh_token')
+        user_info = utils_get_user_info(token, token42, refresh_token, refresh_token42)
 
         if not user_info:
             return JsonResponse({'success': False,'message': 'Failed to fetch user info.'}, status=400)
@@ -224,7 +225,8 @@ class GameJoinView(APIView):
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        refresh_token42 = request.COOKIES.get('42_refresh_token')
+        user_info = utils_get_user_info(token, token42, refresh_token, refresh_token42)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
@@ -405,7 +407,8 @@ class TournamentCreateView(APIView):
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        refresh_token42 = request.COOKIES.get('42_refresh_token')
+        user_info = utils_get_user_info(token, token42, refresh_token, refresh_token42)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)
@@ -566,7 +569,8 @@ class TournamentJoinView(APIView):
         token = request.COOKIES.get('token')
         refresh_token = request.COOKIES.get('refresh_token')
         token42 = request.COOKIES.get('42_access_token')
-        user_info = utils_get_user_info(token, token42, refresh_token)
+        refresh_token42 = request.COOKIES.get('42_refresh_token')
+        user_info = utils_get_user_info(token, token42, refresh_token, refresh_token42)
 
         if not user_info:
             return JsonResponse({'success': False, 'message': 'Failed to fetch user info.'}, status=400)

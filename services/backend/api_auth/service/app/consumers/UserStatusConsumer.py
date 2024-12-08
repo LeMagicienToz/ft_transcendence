@@ -27,7 +27,8 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
         token = cookies.get('token')
         refresh_token = cookies.get('refresh_token')
         token42 = cookies.get('42_access_token')
-        self.user = await self.sync_utils_get_user(token, refresh_token, token42)
+        refresh_token42 = cookies.get('42_refresh_token')
+        self.user = await self.sync_utils_get_user(token, refresh_token, token42, refresh_token42)
 
         if self.user is None:
             await self.close()
