@@ -65,5 +65,5 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
 
     @staticmethod
     @sync_to_async
-    def sync_utils_get_user(token, refresh_token, token42):
-        return utils_get_user(token, refresh_token, token42)
+    def sync_utils_get_user(token, refresh_token, token42, refresh_token42):
+        return utils_get_user(token, refresh_token, token42, refresh_token42)
