@@ -19,7 +19,7 @@ class GameLogic():
 	# Ball dimensions
 	BALL_SIZE = 10
 	# Speed control by how many times the game refreshes per second
-	REFRESH_PER_SEC = 60
+	REFRESH_PER_SEC = 100
 	# Initial positions
 	bx = (SCREEN_X - BALL_SIZE + 1) // 2 # ball position
 	by = (SCREEN_Y - BALL_SIZE + 1) // 2
@@ -43,9 +43,9 @@ class GameLogic():
 		self.consumer = consumer
 		self.game = consumer.game
 		# Paddle and ball speed
-		self.PADDLE_SPEED = 2 * (100 / self.REFRESH_PER_SEC)
-		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
-		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
+		self.PADDLE_SPEED = 2 * (100 / self.REFRESH_PER_SEC) * self.game.ball_speed
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.4
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.4
 		# Initialize positions and scores based on match type
 		self.game_data = {
 			"game_id": self.game.id,
@@ -187,8 +187,8 @@ class GameLogic():
 		self.game_data["ball_position"] = [ball_x, ball_y]
 		if ball_x <= 0:
 			if self.is_ball_touched_by_player_left():
-				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.04
-				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.04
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.03
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.03 * random.choice([0.97, 1.03])
 				return
 			else:
 				self.game_data["scores"]['2'] += 1
@@ -206,8 +206,8 @@ class GameLogic():
 				return
 		elif ball_x + self.BALL_SIZE - 1 >= self.SCREEN_X:
 			if self.is_ball_touched_by_player_right():
-				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.04
-				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.04
+				self.BALL_SPEED_X = self.BALL_SPEED_X * 1.03
+				self.BALL_SPEED_Y = self.BALL_SPEED_Y * 1.03 * random.choice([0.97, 1.03])
 				return
 			else:
 				self.game_data["scores"]['1'] += 1
@@ -230,5 +230,5 @@ class GameLogic():
 			self.INITIAL_POSITIONS["ball"]["x"],
 			self.INITIAL_POSITIONS["ball"]["y"]
 		]
-		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
-		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.2
+		self.BALL_SPEED_X = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.4
+		self.BALL_SPEED_Y = random.choice([1.0, -1.0]) * self.game.ball_speed * (100 / self.REFRESH_PER_SEC) * 1.4
